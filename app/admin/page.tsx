@@ -1,86 +1,130 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
-import { BarChart3, Check, Image as ImageIcon, LayoutDashboard, LogOut, Save, Settings, TextCursorInput } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { useEffect, useState } from 'react'
+import { LayoutDashboard, LogOut, Menu, X } from 'lucide-react'
 
-type SiteContent = {
-  id: string
-  section: string
-  content: Record<string, string>
-  sort_order: number
-  is_published: boolean
-  updated_at: string
-}
+const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
+const SUPABASE_KEY = 'sb_publishable_acJOTZ5reUCVCpJ_vK36ZA_q2bEIhoo'
+const ADMIN_EMAIL = 'info@renovactiva.com'
+const ADMIN_PASSWORD = 'Barcelona2026'
 
-const emptyContent = { eyebrow: '', title: '', description: '', cta: '' }
-
-export const dynamic = 'force-dynamic'
-
-export default function AdminPage() {
-  const supabase = useMemo(() => createClient(), [])
+export default function AdminDashboard() {
   const [user, setUser] = useState<{ email?: string } | null>(null)
-  const [rows, setRows] = useState<SiteContent[]>([])
-  const [selected, setSelected] = useState<SiteContent | null>(null)
-  const [form, setForm] = useState<Record<string, string>>(emptyContent)
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState({ totalSections: 0 })
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [notice, setNotice] = useState('')
-
-  async function loadContent() {
-    const { data, error: contentError } = await supabase.from('site_content').select('id, section, content, sort_order, is_published, updated_at').order('sort_order')
-    if (contentError) setError('No se pudo cargar el contenido.')
-    else setRows((data ?? []) as SiteContent[])
-  }
 
   useEffect(() => {
-    let active = true
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (!active) return
-      setUser(data.user ? { email: data.user.email } : null)
-      if (data.user) await loadContent()
-      setLoading(false)
-    })
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ? { email: session.user.email } : null)
-    })
-    return () => { active = false; listener.subscription.unsubscribe() }
-  }, [supabase])
-
-  function selectRow(row: SiteContent) {
-    setSelected(row)
-    setForm({ ...emptyContent, ...row.content })
-    setNotice('')
-    setError('')
-  }
-
-  async function signIn(event: React.FormEvent) {
-    event.preventDefault()
-    setLoading(true); setError('')
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
-    if (authError) setError('Correo o contraseña no válidos.')
-    else await loadContent()
+    const savedAuth = localStorage.getItem('adminAuth')
+    if (savedAuth === 'true') {
+      setUser({ email: ADMIN_EMAIL })
+      loadStats()
+    }
     setLoading(false)
+  }, [])
+
+  async function loadStats() {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content?select=section`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      })
+      if (!res.ok) throw new Error('Error al cargar')
+      const data = await res.json()
+      setStats({ totalSections: data.length })
+    } catch (err) {
+      console.error('Error:', err)
+    }
   }
 
-  async function saveContent(event: React.FormEvent) {
-    event.preventDefault()
-    if (!selected) return
-    setSaving(true); setError(''); setNotice('')
-    const { error: saveError } = await supabase.from('site_content').update({ content: form, updated_at: new Date().toISOString() }).eq('id', selected.id)
-    if (saveError) setError('No se pudo guardar. Comprueba que tu usuario sea administrador.')
-    else { setRows((current) => current.map((row) => row.id === selected.id ? { ...row, content: form, updated_at: new Date().toISOString() } : row)); setNotice('Cambios guardados correctamente.') }
-    setSaving(false)
+  async function signIn(e: React.FormEvent) {
+    e.preventDefault()
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      localStorage.setItem('adminAuth', 'true')
+      setUser({ email: ADMIN_EMAIL })
+      loadStats()
+    } else {
+      setError('Credenciales incorrectas')
+    }
   }
 
-  async function signOut() { await supabase.auth.signOut(); setUser(null); setRows([]); setSelected(null) }
+  function signOut() {
+    localStorage.removeItem('adminAuth')
+    setUser(null)
+  }
 
-  if (loading) return <main className="flex min-h-screen items-center justify-center bg-[#11110f] text-[#d7bd77] text-xs uppercase tracking-[.2em]">Cargando panel</main>
-  if (!user) return <main className="flex min-h-screen items-center justify-center bg-[#11110f] px-6 text-[#f3f0e9]"><form onSubmit={signIn} className="w-full max-w-md border border-white/10 bg-[#0b0b0a] p-8"><Link href="/" className="font-serif text-lg tracking-[.22em] text-[#d7bd77]">RENOVATIVA</Link><p className="mt-2 text-[9px] uppercase tracking-[.2em] text-white/40">Panel de administración</p><h1 className="mt-12 font-serif text-3xl">Acceso privado</h1><div className="mt-8 flex flex-col gap-4"><label className="text-xs uppercase tracking-[.14em] text-white/50">Correo<input className="mt-2 w-full border border-white/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-[#d7bd77]" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label><label className="text-xs uppercase tracking-[.14em] text-white/50">Contraseña<input className="mt-2 w-full border border-white/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-[#d7bd77]" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label></div>{error && <p className="mt-4 text-sm text-[#d7bd77]">{error}</p>}<button className="mt-8 w-full bg-[#d7bd77] px-4 py-3 text-[10px] uppercase tracking-[.18em] text-[#15140f]" disabled={loading}>Entrar al panel</button></form></main>
+  if (loading) return <div className="min-h-screen bg-[#11110f] flex items-center justify-center text-white/50">Cargando...</div>
 
-  return <main className="min-h-screen bg-[#11110f] text-[#f3f0e9]"><aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-white/10 bg-[#0b0b0a] p-7 md:block"><Link href="/" className="font-serif text-lg tracking-[.22em] text-[#d7bd77]">RENOVATIVA</Link><p className="mt-1 text-[9px] uppercase tracking-[.2em] text-white/30">Panel de administración</p><nav className="mt-16 flex flex-col gap-2 text-sm text-white/45"><span className="flex items-center gap-3 bg-[#d7bd77] px-4 py-3 text-[#15140f]"><LayoutDashboard className="size-4" /> Resumen</span><span className="flex items-center gap-3 px-4 py-3"><ImageIcon className="size-4" /> Contenido visual</span><span className="flex items-center gap-3 px-4 py-3"><TextCursorInput className="size-4" /> Textos y SEO</span><span className="flex items-center gap-3 px-4 py-3"><Settings className="size-4" /> Configuración</span></nav><button onClick={signOut} className="absolute bottom-8 left-7 flex items-center gap-3 text-xs text-white/40"><LogOut className="size-4" /> Cerrar sesión</button></aside><section className="md:ml-64"><header className="flex items-center justify-between border-b border-white/10 px-6 py-6 lg:px-10"><div><p className="eyebrow">{user.email}</p><h1 className="font-serif text-3xl">Resumen del sitio</h1></div><Link href="/" className="border border-white/15 px-4 py-2 text-[10px] uppercase tracking-[.18em] text-white/60">Ver sitio</Link></header><div className="p-6 lg:p-10"><div className="grid gap-4 sm:grid-cols-3"><div className="admin-stat"><p>Bloques editables</p><strong>{rows.length}</strong><span>Conectados a Supabase</span></div><div className="admin-stat"><p>Publicados</p><strong>{rows.filter((row) => row.is_published).length}</strong><span>Visibles en el sitio</span></div><div className="admin-stat"><p>Estado</p><strong className="text-2xl">Activo</strong><span>Sesión protegida</span></div></div><div className="mt-12 grid gap-8 lg:grid-cols-[.8fr_1.2fr]"><div><p className="eyebrow">Gestión de contenido</p><h2 className="font-serif text-3xl">Bloques del sitio</h2><div className="mt-6 flex flex-col gap-3">{rows.map((row) => <button key={row.id} onClick={() => selectRow(row)} className={`flex items-center justify-between border p-4 text-left transition-colors ${selected?.id === row.id ? 'border-[#d7bd77] bg-[#d7bd77]/10' : 'border-white/10 bg-white/[.02] hover:border-white/30'}`}><span><span className="block text-sm capitalize">{row.section}</span><span className="mt-1 block text-xs text-white/40">{row.is_published ? 'Publicado' : 'Borrador'}</span></span><BarChart3 className="size-4 text-[#d7bd77]" /></button>)}</div></div><div className="border border-white/10 bg-white/[.02] p-6 lg:p-8">{selected ? <form onSubmit={saveContent}><div className="flex items-start justify-between"><div><p className="eyebrow">Editando {selected.section}</p><h2 className="font-serif text-2xl">Contenido</h2></div><span className="text-[#d7bd77]"><Check className="size-5" /></span></div><div className="mt-8 flex flex-col gap-5">{Object.keys(form).map((key) => <label key={key} className="text-xs uppercase tracking-[.14em] text-white/50">{key}<textarea className="mt-2 min-h-20 w-full resize-y border border-white/15 bg-transparent px-4 py-3 text-sm normal-case tracking-normal text-white outline-none focus:border-[#d7bd77]" value={form[key] ?? ''} onChange={(event) => setForm((current) => ({ ...current, [key]: event.target.value }))} /> </label>)}</div>{error && <p className="mt-4 text-sm text-[#d7bd77]">{error}</p>}{notice && <p className="mt-4 text-sm text-[#d7bd77]">{notice}</p>}<button disabled={saving} className="mt-8 flex items-center gap-2 bg-[#d7bd77] px-5 py-3 text-[10px] uppercase tracking-[.18em] text-[#15140f]"><Save className="size-4" />{saving ? 'Guardando' : 'Guardar cambios'}</button></form> : <div className="flex min-h-72 items-center justify-center text-center text-white/40"><p>Selecciona un bloque para editar el contenido conectado.</p></div>}</div></div></div></section></main>
+  if (!user) {
+    return (
+      <main className="min-h-screen bg-[#11110f] flex items-center justify-center px-4">
+        <form onSubmit={signIn} className="w-full max-w-md border border-white/10 bg-[#0b0b0a] p-8 rounded-xl">
+          <h1 className="font-serif text-2xl text-[#d7bd77]">RENOVACTIVA</h1>
+          <p className="text-white/40 text-sm mt-1">Panel de administración</p>
+          <div className="mt-8 space-y-4">
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Correo" className="w-full bg-transparent border border-white/15 px-4 py-3 text-white rounded-lg focus:border-[#d7bd77] outline-none" required />
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full bg-transparent border border-white/15 px-4 py-3 text-white rounded-lg focus:border-[#d7bd77] outline-none" required />
+            {error && <p className="text-red-400 text-sm">{error}</p>}
+            <button className="w-full bg-[#d7bd77] py-3 text-[#11110f] font-medium rounded-lg hover:bg-white transition-colors">Entrar</button>
+          </div>
+        </form>
+      </main>
+    )
+  }
+
+  return (
+    <main className="min-h-screen bg-[#11110f] text-[#f3f0e9]">
+      <button onClick={() => setSidebarOpen(!sidebarOpen)} className="fixed top-4 left-4 z-50 md:hidden bg-[#0b0b0a] border border-white/10 rounded-lg p-2 text-white/70">
+        {sidebarOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+      </button>
+
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-white/10 bg-[#0b0b0a] p-6 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+        <Link href="/" className="font-serif text-lg text-[#d7bd77]">RENOVACTIVA</Link>
+        <p className="text-[9px] uppercase tracking-[.2em] text-white/30 mt-1">Panel de administración</p>
+        <nav className="mt-8 space-y-1">
+          <Link href="/admin" className="flex items-center gap-3 bg-[#d7bd77] px-4 py-3 text-[#15140f] rounded-lg">
+            <LayoutDashboard className="size-4" /> Dashboard
+          </Link>
+        </nav>
+        <button onClick={signOut} className="absolute bottom-6 left-6 flex items-center gap-3 text-xs text-white/40 hover:text-white transition-colors">
+          <LogOut className="size-4" /> Cerrar sesión
+        </button>
+      </aside>
+
+      {sidebarOpen && <div className="fixed inset-0 z-30 bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)} />}
+
+      <section className="md:ml-64 min-h-screen">
+        <header className="border-b border-white/10 px-6 py-4 lg:px-10">
+          <div className="flex items-center justify-between ml-12 md:ml-0">
+            <div>
+              <p className="text-[10px] uppercase tracking-[.2em] text-white/40">{user.email}</p>
+              <h1 className="font-serif text-2xl">Dashboard</h1>
+            </div>
+            <Link href="/" className="border border-white/15 px-4 py-2 text-[10px] uppercase tracking-[.18em] text-white/60 hover:bg-white/5 transition-colors rounded">
+              Ver sitio
+            </Link>
+          </div>
+        </header>
+        <div className="p-6 lg:p-10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="border border-white/10 bg-white/[.02] p-6 rounded-xl">
+              <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Secciones</p>
+              <strong className="block mt-2 font-serif text-4xl text-[#d7bd77]">{stats.totalSections}</strong>
+            </div>
+            <div className="border border-white/10 bg-white/[.02] p-6 rounded-xl">
+              <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Estado</p>
+              <strong className="block mt-2 font-serif text-2xl text-green-400">Activo</strong>
+            </div>
+            <div className="border border-white/10 bg-white/[.02] p-6 rounded-xl">
+              <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Admin</p>
+              <strong className="block mt-2 font-serif text-2xl text-[#d7bd77]">Conectado</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  )
 }
