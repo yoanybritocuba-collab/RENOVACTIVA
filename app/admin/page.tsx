@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, LogOut, Menu, X } from 'lucide-react'
+import { LayoutDashboard, LogOut, Menu, X, Eye, EyeOff } from 'lucide-react'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_acJOTZ5reUCVCpJ_vK36ZA_q2bEIhoo'
@@ -17,7 +17,9 @@ export default function AdminDashboard() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
+  // 🔒 Cierre automático al cerrar pestaña
   useEffect(() => {
     const savedAuth = localStorage.getItem('adminAuth')
     if (savedAuth === 'true') {
@@ -25,6 +27,13 @@ export default function AdminDashboard() {
       loadStats()
     }
     setLoading(false)
+
+    // Si cierras la pestaña, se borra la sesión
+    const handleBeforeUnload = () => {
+      localStorage.removeItem('adminAuth')
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [])
 
   async function loadStats() {
@@ -65,11 +74,49 @@ export default function AdminDashboard() {
           <h1 className="font-serif text-2xl text-[#d7bd77]">RENOVACTIVA</h1>
           <p className="text-white/40 text-sm mt-1">Panel de administración</p>
           <div className="mt-8 space-y-4">
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Correo" className="w-full bg-transparent border border-white/15 px-4 py-3 text-white rounded-lg focus:border-[#d7bd77] outline-none" required />
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full bg-transparent border border-white/15 px-4 py-3 text-white rounded-lg focus:border-[#d7bd77] outline-none" required />
+            {/* Correo (visible) */}
+            <div>
+              <label className="block text-white/50 text-sm mb-1">Correo</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="info@renovactiva.com"
+                className="w-full bg-transparent border border-white/15 px-4 py-3 text-white rounded-lg focus:border-[#d7bd77] outline-none"
+                required
+              />
+            </div>
+
+            {/* Contraseña (oculta con ojito) */}
+            <div>
+              <label className="block text-white/50 text-sm mb-1">Contraseña</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full bg-transparent border border-white/15 px-4 py-3 text-white rounded-lg focus:border-[#d7bd77] outline-none pr-12"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                </button>
+              </div>
+            </div>
+
             {error && <p className="text-red-400 text-sm">{error}</p>}
-            <button className="w-full bg-[#d7bd77] py-3 text-[#11110f] font-medium rounded-lg hover:bg-white transition-colors">Entrar</button>
+            <button className="w-full bg-[#d7bd77] py-3 text-[#11110f] font-medium rounded-lg hover:bg-white transition-colors">
+              Entrar
+            </button>
           </div>
+          <p className="mt-4 text-center text-white/30 text-xs">
+            info@renovactiva.com / Barcelona2026
+          </p>
         </form>
       </main>
     )
