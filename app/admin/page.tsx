@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, Menu, X, Eye, EyeOff, ExternalLink } from 'lucide-react'
+import { LayoutDashboard, Menu, X, Eye, EyeOff, ExternalLink, LogOut } from 'lucide-react'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_acJOTZ5reUCVCpJ_vK36ZA_q2bEIhoo'
@@ -57,6 +57,11 @@ export default function AdminDashboard() {
     window.location.href = '/'
   }
 
+  function cerrarSesion() {
+    localStorage.removeItem('adminAuth')
+    setUser(null)
+  }
+
   if (loading) return <div className="min-h-screen bg-[#11110f] flex items-center justify-center text-white/50">Cargando...</div>
 
   if (!user) {
@@ -66,7 +71,6 @@ export default function AdminDashboard() {
           <h1 className="font-serif text-2xl text-[#d7bd77]">RENOVACTIVA</h1>
           <p className="text-white/40 text-sm mt-1">Panel de administración</p>
 
-          {/* Botón "Ir a la web" en el login */}
           <button
             type="button"
             onClick={goToWeb}
@@ -137,13 +141,20 @@ export default function AdminDashboard() {
           </Link>
         </nav>
 
-        <div className="absolute bottom-6 left-6 right-6">
+        <div className="absolute bottom-6 left-6 right-6 flex flex-col gap-3">
           <button
             onClick={goToWeb}
             className="flex items-center justify-center gap-2 w-full bg-[#d7bd77]/20 border border-[#d7bd77]/40 px-4 py-2.5 text-[#d7bd77] rounded-lg hover:bg-[#d7bd77] hover:text-[#11110f] transition-colors text-sm font-medium"
           >
             <ExternalLink className="size-4" />
             Ir a la web
+          </button>
+          <button
+            onClick={cerrarSesion}
+            className="flex items-center justify-center gap-2 w-full bg-red-500/10 border border-red-500/30 px-4 py-2.5 text-red-400 rounded-lg hover:bg-red-500 hover:text-white transition-colors text-sm font-medium"
+          >
+            <LogOut className="size-4" />
+            Cerrar sesión
           </button>
         </div>
       </aside>
