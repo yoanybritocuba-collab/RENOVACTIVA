@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, LogOut, Menu, X, Eye, EyeOff } from 'lucide-react'
+import { LayoutDashboard, Menu, X, Eye, EyeOff, ExternalLink } from 'lucide-react'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_acJOTZ5reUCVCpJ_vK36ZA_q2bEIhoo'
@@ -19,7 +19,6 @@ export default function AdminDashboard() {
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
 
-  // 🔒 Cierre automático al cerrar pestaña
   useEffect(() => {
     const savedAuth = localStorage.getItem('adminAuth')
     if (savedAuth === 'true') {
@@ -27,13 +26,6 @@ export default function AdminDashboard() {
       loadStats()
     }
     setLoading(false)
-
-    // Si cierras la pestaña, se borra la sesión
-    const handleBeforeUnload = () => {
-      localStorage.removeItem('adminAuth')
-    }
-    window.addEventListener('beforeunload', handleBeforeUnload)
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [])
 
   async function loadStats() {
@@ -60,9 +52,9 @@ export default function AdminDashboard() {
     }
   }
 
-  function signOut() {
+  function goToWeb() {
     localStorage.removeItem('adminAuth')
-    setUser(null)
+    window.location.href = '/'
   }
 
   if (loading) return <div className="min-h-screen bg-[#11110f] flex items-center justify-center text-white/50">Cargando...</div>
@@ -73,8 +65,18 @@ export default function AdminDashboard() {
         <form onSubmit={signIn} className="w-full max-w-md border border-white/10 bg-[#0b0b0a] p-8 rounded-xl">
           <h1 className="font-serif text-2xl text-[#d7bd77]">RENOVACTIVA</h1>
           <p className="text-white/40 text-sm mt-1">Panel de administración</p>
-          <div className="mt-8 space-y-4">
-            {/* Correo (visible) */}
+
+          {/* Botón "Ir a la web" en el login */}
+          <button
+            type="button"
+            onClick={goToWeb}
+            className="mt-2 flex items-center justify-center gap-2 w-full border border-white/15 px-4 py-2 text-white/60 hover:bg-white/5 transition-colors rounded-lg text-sm"
+          >
+            <ExternalLink className="size-4" />
+            Ir a la web
+          </button>
+
+          <div className="mt-6 space-y-4">
             <div>
               <label className="block text-white/50 text-sm mb-1">Correo</label>
               <input
@@ -86,8 +88,6 @@ export default function AdminDashboard() {
                 required
               />
             </div>
-
-            {/* Contraseña (oculta con ojito) */}
             <div>
               <label className="block text-white/50 text-sm mb-1">Contraseña</label>
               <div className="relative">
@@ -108,7 +108,6 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </div>
-
             {error && <p className="text-red-400 text-sm">{error}</p>}
             <button className="w-full bg-[#d7bd77] py-3 text-[#11110f] font-medium rounded-lg hover:bg-white transition-colors">
               Entrar
@@ -131,14 +130,22 @@ export default function AdminDashboard() {
       <aside className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-white/10 bg-[#0b0b0a] p-6 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <Link href="/" className="font-serif text-lg text-[#d7bd77]">RENOVACTIVA</Link>
         <p className="text-[9px] uppercase tracking-[.2em] text-white/30 mt-1">Panel de administración</p>
+
         <nav className="mt-8 space-y-1">
           <Link href="/admin" className="flex items-center gap-3 bg-[#d7bd77] px-4 py-3 text-[#15140f] rounded-lg">
             <LayoutDashboard className="size-4" /> Dashboard
           </Link>
         </nav>
-        <button onClick={signOut} className="absolute bottom-6 left-6 flex items-center gap-3 text-xs text-white/40 hover:text-white transition-colors">
-          <LogOut className="size-4" /> Cerrar sesión
-        </button>
+
+        <div className="absolute bottom-6 left-6 right-6">
+          <button
+            onClick={goToWeb}
+            className="flex items-center justify-center gap-2 w-full bg-[#d7bd77]/20 border border-[#d7bd77]/40 px-4 py-2.5 text-[#d7bd77] rounded-lg hover:bg-[#d7bd77] hover:text-[#11110f] transition-colors text-sm font-medium"
+          >
+            <ExternalLink className="size-4" />
+            Ir a la web
+          </button>
+        </div>
       </aside>
 
       {sidebarOpen && <div className="fixed inset-0 z-30 bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)} />}
@@ -150,7 +157,12 @@ export default function AdminDashboard() {
               <p className="text-[10px] uppercase tracking-[.2em] text-white/40">{user.email}</p>
               <h1 className="font-serif text-2xl">Dashboard</h1>
             </div>
-            <Link href="/" className="border border-white/15 px-4 py-2 text-[10px] uppercase tracking-[.18em] text-white/60 hover:bg-white/5 transition-colors rounded">
+            <Link
+              href="/"
+              target="_blank"
+              className="flex items-center gap-2 border border-white/15 px-4 py-2 text-[10px] uppercase tracking-[.18em] text-white/60 hover:bg-white/5 transition-colors rounded"
+            >
+              <ExternalLink className="size-3.5" />
               Ver sitio
             </Link>
           </div>
