@@ -168,14 +168,7 @@ export default function AdminDashboard() {
               <p className="text-[10px] uppercase tracking-[.2em] text-white/40">{user.email}</p>
               <h1 className="font-serif text-2xl">Dashboard</h1>
             </div>
-            <Link
-              href="/"
-              target="_blank"
-              className="flex items-center gap-2 border border-white/15 px-4 py-2 text-[10px] uppercase tracking-[.18em] text-white/60 hover:bg-white/5 transition-colors rounded"
-            >
-              <ExternalLink className="size-3.5" />
-              Ver sitio
-            </Link>
+            {/* Botón "Ver sitio" ELIMINADO */}
           </div>
         </header>
         <div className="p-6 lg:p-10">
