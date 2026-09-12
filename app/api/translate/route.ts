@@ -11,27 +11,34 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Usar la API gratuita de Google Translate (sin API key)
-    // Nota: En producción, usa la API oficial de Google Cloud
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLanguage}&dt=t&q=${encodeURIComponent(text)}`
+    // Usar MyMemory API (gratuita, sin key)
+    // https://mymemory.translated.net/doc/spec.php
+    const sourceLang = 'es'
+    const targetLang = targetLanguage === 'ca' ? 'ca' : 'en'
+    
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`
 
-    const response = await fetch(url)
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; RenovactivaBot/1.0)'
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`)
+    }
+
     const data = await response.json()
     
-    let translation = ''
-    if (data && data[0]) {
-      for (let i = 0; i < data[0].length; i++) {
-        if (data[0][i] && data[0][i][0]) {
-          translation += data[0][i][0]
-        }
-      }
-    }
+    // MyMemory devuelve: { responseData: { translatedText: "..." } }
+    const translation = data?.responseData?.translatedText || text
 
     return NextResponse.json({ translation })
   } catch (error) {
     console.error('Error en API de traducción:', error)
     return NextResponse.json(
-      { error: 'Error al traducir' },
+      { error: 'Error al traducir', details: (error as Error).message },
       { status: 500 }
     )
   }
