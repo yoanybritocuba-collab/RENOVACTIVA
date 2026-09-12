@@ -14,6 +14,7 @@ export default function Home() {
   const [heroData, setHeroData] = useState<any>(null)
   const [servicesData, setServicesData] = useState<any[]>([])
   const [projectsData, setProjectsData] = useState<any[]>([])
+  const [projectsSection, setProjectsSection] = useState<any>(null)
   const [contactData, setContactData] = useState<any>(null)
   const [footerData, setFooterData] = useState<any>(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -41,7 +42,10 @@ export default function Home() {
 
         if (hero) setHeroData(hero.content)
         if (services) setServicesData(services.content?.items || [])
-        if (projects) setProjectsData(projects.content?.items || [])
+        if (projects) {
+          setProjectsData(projects.content?.items || [])
+          setProjectsSection(projects.content)
+        }
         if (contact) setContactData(contact.content)
         if (footer) setFooterData(footer.content)
       } catch (err) {
@@ -170,9 +174,16 @@ export default function Home() {
       <section id="proyectos" className="mx-auto max-w-[1380px] px-6 py-24 lg:px-10 lg:py-36">
         <div className="mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
-            <p className="eyebrow">{ca ? 'Una selecció' : 'Una selección'}</p>
+            <p className="eyebrow">
+              {ca 
+                ? (projectsSection?.translations?.sectionTitle?.eyebrow || projectsSection?.sectionTitle?.eyebrow || 'Una selecció')
+                : (projectsSection?.sectionTitle?.eyebrow || 'Una selección')}
+            </p>
             <h2 className="section-title">
-              {ca ? <>El resultat<br /><i>parla per si sol.</i></> : <>El resultado<br /><i>habla por sí solo.</i></>}
+              {ca 
+                ? <>{projectsSection?.translations?.sectionTitle?.title || projectsSection?.sectionTitle?.title || 'El resultat'}<br /><i>{projectsSection?.translations?.sectionTitle?.titleItalic || projectsSection?.sectionTitle?.titleItalic || 'parla per si sol.'}</i></>
+                : <>{projectsSection?.sectionTitle?.title || 'El resultado'}<br /><i>{projectsSection?.sectionTitle?.titleItalic || 'habla por sí solo.'}</i></>
+              }
             </h2>
           </div>
         </div>
