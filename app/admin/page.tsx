@@ -2,425 +2,217 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { ArrowUpRight, Globe2, Menu, Play, X, Shield } from 'lucide-react'
-import { LanguageSwitcher } from '@/components/language-switcher'
-import { useLanguage } from '@/components/language-provider'
+import { 
+  LayoutDashboard, Menu, X, Eye, EyeOff, ExternalLink, LogOut,
+  Home, FolderOpen, Wrench, Mail, Image, Settings
+} from 'lucide-react'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
+const ADMIN_EMAIL = 'info@renovactiva.com'
+const ADMIN_PASSWORD = 'Barcelona2026'
 
-export default function Home() {
+export default function AdminDashboard() {
+  const [user, setUser] = useState<{ email?: string } | null>(null)
   const [loading, setLoading] = useState(true)
-  const [heroData, setHeroData] = useState<any>(null)
-  const [servicesData, setServicesData] = useState<any[]>([])
-  const [servicesSection, setServicesSection] = useState<any>(null)
-  const [projectsData, setProjectsData] = useState<any[]>([])
-  const [projectsSection, setProjectsSection] = useState<any>(null)
-  const [contactData, setContactData] = useState<any>(null)
-  const [footerData, setFooterData] = useState<any>(null)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [activeHero, setActiveHero] = useState(0)
-  const { language } = useLanguage()
-  const ca = language === 'ca'
+  const [stats, setStats] = useState({ totalSections: 0, totalProjects: 0, totalServices: 0 })
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content?select=section,content`, {
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`
-          }
-        })
-        if (!res.ok) throw new Error('Error al cargar')
-        const data = await res.json()
-
-        const hero = data.find((d: any) => d.section === 'hero')
-        const services = data.find((d: any) => d.section === 'services')
-        const projects = data.find((d: any) => d.section === 'projects')
-        const contact = data.find((d: any) => d.section === 'contact')
-        const footer = data.find((d: any) => d.section === 'footer')
-
-        if (hero) setHeroData(hero.content)
-        if (services) {
-          setServicesData(services.content?.items || [])
-          setServicesSection(services.content)
-        }
-        if (projects) setProjectsSection(projects.content)
-        if (contact) setContactData(contact.content)
-        if (footer) setFooterData(footer.content)
-
-        try {
-          const trabajosRes = await fetch(`${SUPABASE_URL}/rest/v1/trabajos?select=*&order=orden.asc`, {
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': `Bearer ${SUPABASE_KEY}`
-            }
-          })
-          if (trabajosRes.ok) {
-            const trabajosData = await trabajosRes.json()
-            setProjectsData(trabajosData.map((t: any) => ({
-              title: t.titulo,
-              type: t.tipo,
-              image: t.imagenes?.[0] || '',
-              images: t.imagenes || [],
-              description: t.descripcion,
-              categoria: t.categoria
-            })))
-          }
-        } catch (err) {
-          console.error('Error al cargar trabajos:', err)
-        }
-      } catch (err) {
-        console.error('Error al cargar datos:', err)
-      } finally {
-        setLoading(false)
-      }
+    const savedAuth = localStorage.getItem('adminAuth')
+    if (savedAuth === 'true') {
+      setUser({ email: ADMIN_EMAIL })
+      loadStats()
     }
-    loadData()
-    const timer = setInterval(() => setActiveHero((v) => (v + 1) % 3), 6000)
-    return () => clearInterval(timer)
+    setLoading(false)
   }, [])
 
-  if (loading) {
-    return <div className="min-h-screen bg-[#10100f] flex items-center justify-center text-white/50">Cargando...</div>
+  async function loadStats() {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content?select=section,content`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      })
+      if (!res.ok) throw new Error('Error al cargar')
+      const data = await res.json()
+      const projects = data.find((d: any) => d.section === 'projects')
+      const services = data.find((d: any) => d.section === 'services')
+      setStats({
+        totalSections: data.length,
+        totalProjects: projects?.content?.items?.length || 0,
+        totalServices: services?.content?.items?.length || 0
+      })
+    } catch (err) {
+      console.error('Error:', err)
+    }
   }
 
-  const heroImages = heroData?.images || ['', '', '']
-  const heroTrans = heroData?.translations || {}
-  const footerTrans = footerData?.translations || {}
-  const servicesTrans = servicesSection?.translations || {}
-  const contactTrans = contactData?.translations || {}
+  async function signIn(e: React.FormEvent) {
+    e.preventDefault()
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      localStorage.setItem('adminAuth', 'true')
+      setUser({ email: ADMIN_EMAIL })
+      loadStats()
+    } else {
+      setError('Credenciales incorrectas')
+    }
+  }
 
-  return (
-    <main className="min-h-screen overflow-hidden bg-[#10100f] text-[#f3f0e9]">
-      <header className="absolute inset-x-0 top-0 z-30 border-b border-white/10 bg-black/10 backdrop-blur-md">
-        <div className="mx-auto flex max-w-[1380px] items-center justify-between px-4 py-4 lg:px-10 lg:py-5">
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <img src="/logo.png" alt="Renovactiva" className="h-8 w-auto lg:h-10" />
-            <span className="font-serif text-base tracking-[0.28em] text-[#d7bd77] lg:text-xl whitespace-nowrap">
-              Renovactiva<span className="text-white/40">-SL</span>
-            </span>
-          </Link>
+  function goToWeb() {
+    window.location.href = '/'
+  }
 
-          <nav className="hidden lg:flex items-center gap-8 text-[11px] uppercase tracking-[0.24em] text-white/70">
-            <a href="#proyectos" className="transition-colors hover:text-[#d7bd77]">{ca ? 'Projectes' : 'Proyectos'}</a>
-            <a href="#servicios" className="transition-colors hover:text-[#d7bd77]">{ca ? 'Serveis' : 'Servicios'}</a>
-            <a href="#metodo" className="transition-colors hover:text-[#d7bd77]">{ca ? 'El nostre mètode' : 'Nuestro método'}</a>
-            <a href="#contacto" className="transition-colors hover:text-[#d7bd77]">{ca ? 'Contacte' : 'Contacto'}</a>
-          </nav>
+  function cerrarSesion() {
+    localStorage.removeItem('adminAuth')
+    setUser(null)
+  }
 
-          <div className="flex items-center gap-2 lg:gap-4 flex-shrink-0">
-            <LanguageSwitcher />
-            <Link 
-              href="/admin" 
-              className="hidden sm:flex items-center gap-1.5 border border-[#d7bd77]/60 px-2.5 py-1.5 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 text-[8px] sm:text-[9px] lg:text-[10px] uppercase tracking-[0.2em] text-[#d7bd77] transition-colors hover:bg-[#d7bd77] hover:text-[#10100f] rounded"
-            >
-              <Shield className="size-3" />
-              Admin
-            </Link>
-            <button 
-              aria-label="Abrir menú" 
-              onClick={() => setMenuOpen(!menuOpen)} 
-              className="lg:hidden text-white/70 hover:text-white p-1"
-            >
-              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+  if (loading) return <div className="min-h-screen bg-[#11110f] flex items-center justify-center text-white/50">Cargando...</div>
+
+  if (!user) {
+    return (
+      <main className="min-h-screen bg-[#11110f] flex items-center justify-center px-4">
+        <form onSubmit={signIn} className="w-full max-w-md border border-white/10 bg-[#0b0b0a] p-8 rounded-xl">
+          <h1 className="font-serif text-2xl text-[#d7bd77]">RENOVACTIVA</h1>
+          <p className="text-white/40 text-sm mt-1">Panel de administración</p>
+
+          <button
+            type="button"
+            onClick={goToWeb}
+            className="mt-2 flex items-center justify-center gap-2 w-full border border-white/15 px-4 py-2 text-white/60 hover:bg-white/5 transition-colors rounded-lg text-sm"
+          >
+            <ExternalLink className="size-4" />
+            Ir a la web
+          </button>
+
+          <div className="mt-6 space-y-4">
+            <div>
+              <label className="block text-white/50 text-sm mb-1">Correo</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="info@renovactiva.com"
+                className="w-full bg-transparent border border-white/15 px-4 py-3 text-white rounded-lg focus:border-[#d7bd77] outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-white/50 text-sm mb-1">Contraseña</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full bg-transparent border border-white/15 px-4 py-3 text-white rounded-lg focus:border-[#d7bd77] outline-none pr-12"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                </button>
+              </div>
+            </div>
+            {error && <p className="text-red-400 text-sm">{error}</p>}
+            <button className="w-full bg-[#d7bd77] py-3 text-[#11110f] font-medium rounded-lg hover:bg-white transition-colors">
+              Entrar
             </button>
           </div>
+          <p className="mt-4 text-center text-white/30 text-xs">
+            info@renovactiva.com / Barcelona2026
+          </p>
+        </form>
+      </main>
+    )
+  }
+
+  return (
+    <main className="min-h-screen bg-[#11110f] text-[#f3f0e9]">
+      <button onClick={() => setSidebarOpen(!sidebarOpen)} className="fixed top-4 left-4 z-50 md:hidden bg-[#0b0b0a] border border-white/10 rounded-lg p-2 text-white/70">
+        {sidebarOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+      </button>
+
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-white/10 bg-[#0b0b0a] p-6 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+        <Link href="/" className="font-serif text-lg text-[#d7bd77]">RENOVACTIVA</Link>
+        <p className="text-[9px] uppercase tracking-[.2em] text-white/30 mt-1">Panel de administración</p>
+
+        <nav className="mt-8 space-y-1">
+          <Link href="/admin" className="flex items-center gap-3 bg-[#d7bd77] px-4 py-3 text-[#15140f] rounded-lg">
+            <LayoutDashboard className="size-4" /> Dashboard
+          </Link>
+          <Link href="/admin/hero" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
+            <Home className="size-4" /> Hero
+          </Link>
+          <Link href="/admin/trabajos" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
+            <FolderOpen className="size-4" /> Trabajos
+          </Link>
+          <Link href="/admin/services" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
+            <Wrench className="size-4" /> Servicios
+          </Link>
+          <Link href="/admin/contact" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
+            <Mail className="size-4" /> Contacto
+          </Link>
+          <Link href="/admin/footer" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
+            <Image className="size-4" /> Footer
+          </Link>
+          <Link href="/admin/settings" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
+            <Settings className="size-4" /> Configuración
+          </Link>
+        </nav>
+
+        <div className="absolute bottom-6 left-6 right-6 flex flex-col gap-3">
+          <button
+            onClick={goToWeb}
+            className="flex items-center justify-center gap-2 w-full bg-[#d7bd77]/20 border border-[#d7bd77]/40 px-4 py-2.5 text-[#d7bd77] rounded-lg hover:bg-[#d7bd77] hover:text-[#11110f] transition-colors text-sm font-medium"
+          >
+            <ExternalLink className="size-4" />
+            Ir a la web
+          </button>
+          <button
+            onClick={cerrarSesion}
+            className="flex items-center justify-center gap-2 w-full bg-red-500/10 border border-red-500/30 px-4 py-2.5 text-red-400 rounded-lg hover:bg-red-500 hover:text-white transition-colors text-sm font-medium"
+          >
+            <LogOut className="size-4" />
+            Cerrar sesión
+          </button>
         </div>
+      </aside>
 
-        {menuOpen && (
-          <div className="border-t border-white/10 bg-[#10100f]/95 px-6 py-6 lg:hidden">
-            <nav className="flex flex-col gap-5 text-sm uppercase tracking-[0.18em] text-white/70">
-              <a href="#proyectos" onClick={() => setMenuOpen(false)}>{ca ? 'Projectes' : 'Proyectos'}</a>
-              <a href="#servicios" onClick={() => setMenuOpen(false)}>{ca ? 'Serveis' : 'Servicios'}</a>
-              <a href="#metodo" onClick={() => setMenuOpen(false)}>{ca ? 'El nostre mètode' : 'Nuestro método'}</a>
-              <a href="#contacto" onClick={() => setMenuOpen(false)}>{ca ? 'Contacte' : 'Contacto'}</a>
-              <Link 
-                href="/admin" 
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 border-t border-white/10 pt-5 text-[#d7bd77] hover:text-white transition-colors"
-              >
-                <Shield className="size-4" />
-                {ca ? 'Panell Admin' : 'Panel Admin'}
-              </Link>
-            </nav>
-          </div>
-        )}
-      </header>
+      {sidebarOpen && <div className="fixed inset-0 z-30 bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      <section className="relative flex min-h-[740px] items-end lg:min-h-screen">
-        {heroImages.map((image: string, index: number) => (
-          <div
-            key={index}
-            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
-              index === activeHero ? 'opacity-100' : 'opacity-0'
-            }`}
-            style={{ backgroundImage: `url(${image})` }}
-          />
-        ))}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-black/15" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#10100f] via-transparent to-black/20" />
-        <div className="relative z-10 mx-auto w-full max-w-[1380px] px-6 pb-20 pt-40 lg:px-10 lg:pb-28">
-          <div className="max-w-3xl">
-            <p className="mb-7 text-[11px] uppercase tracking-[0.42em] text-[#d7bd77]">
-              {ca
-                ? (heroTrans.eyebrow || heroData?.eyebrow || 'Arquitectura · Interiorisme · Construcció')
-                : (heroData?.eyebrow || 'Arquitectura · Interiorismo · Construcción')}
-            </p>
-            <h1 className="max-w-3xl font-serif text-5xl leading-[0.98] tracking-[-0.03em] sm:text-7xl lg:text-[104px]">
-              {ca
-                ? (heroTrans.title || heroData?.title || 'Espais que trascendeixen.')
-                : (heroData?.title || 'Espacios que trascienden.')}
-            </h1>
-            <p className="mt-8 max-w-md text-base leading-relaxed text-white/65">
-              {ca
-                ? (heroTrans.description || heroData?.description || "Reformes d'alt nivell per a habitatges, locals i oficines.")
-                : (heroData?.description || 'Reformas de alto nivel para viviendas, locales y oficinas.')}
-            </p>
-            <div className="mt-10 flex flex-wrap items-center gap-5">
-              <a
-                href="#contacto"
-                className="group inline-flex items-center gap-5 bg-[#d7bd77] px-6 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-[#141310] transition-colors hover:bg-white"
-              >
-                {ca
-                  ? (heroTrans.cta || heroData?.cta || 'Parlem del teu projecte')
-                  : (heroData?.cta || 'Hablemos de tu proyecto')}
-                <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-              </a>
-              <a href="#proyectos" className="inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/70 hover:text-[#d7bd77]">
-                <Play className="size-4 fill-current" /> {ca ? 'Veure projectes' : 'Ver proyectos'}
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECCIÓN PROYECTOS: rectángulo + cuadrado / cuadrado + rectángulo */}
-      <section id="proyectos" className="mx-auto max-w-[1380px] px-6 py-24 lg:px-10 lg:py-36">
-        <div className="mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-          <div>
-            <p className="eyebrow">
-              {ca 
-                ? (projectsSection?.translations?.sectionTitle?.eyebrow || projectsSection?.sectionTitle?.eyebrow || 'Una selecció')
-                : (projectsSection?.sectionTitle?.eyebrow || 'Una selección')}
-            </p>
-            <h2 className="section-title">
-              {ca 
-                ? <>{projectsSection?.translations?.sectionTitle?.title || projectsSection?.sectionTitle?.title || 'El resultat'}<br /><i>{projectsSection?.translations?.sectionTitle?.titleItalic || projectsSection?.sectionTitle?.titleItalic || 'parla per si sol.'}</i></>
-                : <>{projectsSection?.sectionTitle?.title || 'El resultado'}<br /><i>{projectsSection?.sectionTitle?.titleItalic || 'habla por sí solo.'}</i></>
-              }
-            </h2>
-          </div>
-        </div>
-
-        <div className="grid gap-5 lg:grid-cols-3">
-          {(projectsData.length > 0 ? projectsData.slice(0, 4) : [
-            { title: 'Casa Paseo del Prado', type: 'Vivienda integral', image: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1400&q=85' },
-            { title: 'Estudio Cobalto', type: 'Oficina corporativa', image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1400&q=85' },
-            { title: 'Atelier Chamberí', type: 'Local comercial', image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1400&q=85' },
-            { title: 'Finca Histórica Barcelona', type: 'Reforma de finca', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85' },
-          ]).map((project: any, index: number) => {
-            const isWide = index === 0 || index === 3
-            
-            return (
-              <div 
-                key={index} 
-                className={`group relative overflow-hidden rounded-lg min-h-[400px] ${
-                  isWide ? 'lg:col-span-2' : 'lg:col-span-1'
-                }`}
-              >
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                  style={{ backgroundImage: `url(${project.image})` }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                <div className="relative flex h-full min-h-[400px] flex-col justify-end p-7">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#d7bd77]">{project.type}</p>
-                  <h3 className="mt-2 font-serif text-3xl">{project.title}</h3>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </section>
-
-      {/* SECCIÓN SERVICIOS: 4 cuadrados iguales (2×2) */}
-      <section id="servicios" className="border-y border-white/10 bg-[#171715] px-6 py-24 lg:px-10 lg:py-32">
-        <div className="mx-auto max-w-[1380px]">
-          <div className="mb-14 flex items-end justify-between">
+      <section className="md:ml-64 min-h-screen">
+        <header className="border-b border-white/10 px-6 py-4 lg:px-10">
+          <div className="flex items-center justify-between ml-12 md:ml-0">
             <div>
-              <p className="eyebrow">
-                {ca 
-                  ? (servicesTrans.eyebrow || servicesSection?.eyebrow || 'El que fem')
-                  : (servicesSection?.eyebrow || 'Lo que hacemos')}
-              </p>
-              <h2 className="section-title">
-                {ca 
-                  ? <>{servicesTrans.title || servicesSection?.title || 'Una visió'}<br /><i>{servicesTrans.titleItalic || servicesSection?.titleItalic || 'sense límits.'}</i></>
-                  : <>{servicesSection?.title || 'Una visión'}<br /><i>{servicesSection?.titleItalic || 'sin límites.'}</i></>
-                }
-              </h2>
+              <p className="text-[10px] uppercase tracking-[.2em] text-white/40">{user.email}</p>
+              <h1 className="font-serif text-2xl">Dashboard</h1>
             </div>
           </div>
-
-          {/* 4 cuadrados iguales en 2x2 */}
-          <div className="grid gap-px bg-white/10 md:grid-cols-2">
-            {servicesData.slice(0, 4).map((service: any, index: number) => (
-              <Link 
-                key={index} 
-                href={service.href || '#'} 
-                className="group relative min-h-[500px] overflow-hidden bg-[#171715] p-7"
-              >
-                <div
-                  className="absolute inset-0 bg-cover bg-center opacity-45 transition-all duration-700 group-hover:scale-105 group-hover:opacity-65"
-                  style={{ backgroundImage: `url(${service.image || service.images?.[0] || ''})` }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#10100f] via-[#10100f]/30 to-transparent" />
-                <div className="relative flex h-full flex-col justify-between">
-                  <span className="font-serif text-5xl text-[#d7bd77]/70">{service.number}</span>
-                  <div>
-                    <h3 className="whitespace-pre-line font-serif text-4xl leading-none">
-                      {service.title?.[language] || ''}
-                    </h3>
-                    <p className="mt-5 max-w-[210px] text-sm leading-relaxed text-white/55">
-                      {service.copy?.[language] || ''}
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            ))}
+        </header>
+        <div className="p-6 lg:p-10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="border border-white/10 bg-white/[.02] p-6 rounded-xl">
+              <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Secciones</p>
+              <strong className="block mt-2 font-serif text-4xl text-[#d7bd77]">{stats.totalSections}</strong>
+            </div>
+            <div className="border border-white/10 bg-white/[.02] p-6 rounded-xl">
+              <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Trabajos</p>
+              <strong className="block mt-2 font-serif text-4xl text-[#d7bd77]">{stats.totalProjects}</strong>
+            </div>
+            <div className="border border-white/10 bg-white/[.02] p-6 rounded-xl">
+              <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Servicios</p>
+              <strong className="block mt-2 font-serif text-4xl text-[#d7bd77]">{stats.totalServices}</strong>
+            </div>
           </div>
         </div>
       </section>
-
-      <section id="metodo" className="mx-auto max-w-[1380px] px-6 py-24 lg:px-10 lg:py-36">
-        <div className="grid gap-16 lg:grid-cols-[0.8fr_1.2fr]">
-          <div>
-            <p className="eyebrow">{ca ? 'El nostre mètode' : 'Nuestro método'}</p>
-            <h2 className="section-title">
-              {ca ? <>L'excel·lència<br /><i>és un procés.</i></> : <>La excelencia<br /><i>es un proceso.</i></>}
-            </h2>
-          </div>
-          <div className="divide-y divide-white/10">
-            {[
-              { es: 'Escuchamos', ca: 'Escoltem', description: { es: 'Entendemos tu visión, tus necesidades y la forma en que quieres vivir.', ca: 'Entenem la teva visió, les teves necessitats.' } },
-              { es: 'Diseñamos', ca: 'Dissenyem', description: { es: 'Convertimos las ideas en un proyecto claro, bello y posible.', ca: 'Convertim les idees en un projecte clar.' } },
-              { es: 'Construimos', ca: 'Construïm', description: { es: 'Coordinamos cada gremio y cuidamos cada acabado.', ca: 'Coordinem cada ofici i cuidem cada acabat.' } },
-              { es: 'Entregamos', ca: 'Lliurem', description: { es: 'Te entregamos un espacio listo para empezar una nueva etapa.', ca: 'Et lliurem un espai a punt.' } },
-            ].map((step, index) => (
-              <div key={index} className="group flex items-center justify-between py-7">
-                <div className="flex items-center gap-8">
-                  <span className="text-xs text-[#d7bd77]">0{index + 1}</span>
-                  <h3 className="font-serif text-3xl transition-colors group-hover:text-[#d7bd77]">
-                    {step[language] || ''}
-                  </h3>
-                </div>
-                <p className="hidden max-w-[220px] text-right text-xs leading-relaxed text-white/40 md:block">
-                  {step.description[language] || ''}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SECCIÓN CONTACTO CON BOTÓN VERDE */}
-      <section id="contacto" className="relative overflow-hidden bg-[#d7bd77] px-6 py-24 text-[#141310] lg:px-10 lg:py-32">
-        <div className="relative mx-auto flex max-w-[1380px] flex-col justify-between gap-12 lg:flex-row lg:items-end">
-          <div>
-            <p className="eyebrow !text-[#141310]/60">{ca ? 'El primer pas' : 'El primer paso'}</p>
-            <h2 className="max-w-3xl font-serif text-5xl leading-none tracking-tight sm:text-7xl">
-              {ca ? <>Fem alguna cosa<br /><i>extraordinària.</i></> : <>Hagamos algo<br /><i>extraordinario.</i></>}
-            </h2>
-          </div>
-          <div className="max-w-sm">
-            <p className="text-sm leading-relaxed text-[#141310]/70">
-              {ca ? "Explica'ns la teva idea." : 'Cuéntanos tu idea.'}
-            </p>
-            <a
-              href={`mailto:${footerData?.contact?.email || contactData?.email || 'info@renovactiva.com'}`}
-              className="mt-7 inline-flex items-center gap-3 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors text-[11px] uppercase tracking-[0.2em] font-medium"
-            >
-              {ca ? 'Demanar pressupost' : 'Solicitar presupuesto'}
-              <ArrowUpRight className="size-4" />
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <footer className="bg-[#0b0b0a] px-6 py-14 lg:px-10">
-        <div className="mx-auto max-w-[1380px]">
-          <div className="flex flex-col justify-between gap-10 border-b border-white/10 pb-12 md:flex-row">
-            <div>
-              <Link href="/" className="flex items-center gap-3">
-                <img src="/logo.png" alt="Renovactiva" className="h-12 w-auto" />
-                <span className="font-serif text-xl tracking-[0.28em] text-[#d7bd77]">
-                  Renovactiva<span className="text-white/40">-SL</span>
-                </span>
-              </Link>
-              <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/40">
-                {ca
-                  ? (footerTrans.description || footerData?.description || 'Dissenyem i construïm espais amb intenció.')
-                  : (footerData?.description || 'Diseñamos y construimos espacios con intención.')}
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-x-14 gap-y-8 text-sm text-white/50">
-              <div>
-                <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77]">
-                  {ca ? 'Contacte' : 'Contacto'}
-                </p>
-                <p>{footerData?.contact?.phone || '+34 600 000 000'}</p>
-                <p>{footerData?.contact?.email || 'info@renovactiva.com'}</p>
-              </div>
-              <div>
-                <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77]">
-                  {ca ? "Visita'ns" : 'Visítanos'}
-                </p>
-                <p>
-                  {ca
-                    ? (footerTrans.address?.street || footerData?.address?.street || 'Carrer Exemple 123')
-                    : (footerData?.address?.street || 'Carrer Exemple 123')}
-                </p>
-                <p>
-                  {footerData?.address?.postal || '08001'}{' '}
-                  {ca
-                    ? (footerTrans.address?.city || footerData?.address?.city || 'Barcelona')
-                    : (footerData?.address?.city || 'Barcelona')}
-                </p>
-                {footerData?.schedule && (
-                  <p className="mt-2">
-                    🕒 {ca
-                      ? (footerTrans.schedule || footerData.schedule)
-                      : footerData.schedule}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col justify-between gap-5 pt-7 text-[10px] uppercase tracking-[0.18em] text-white/30 sm:flex-row">
-            <p>
-              {ca
-                ? (footerTrans.copyright || footerData?.copyright || '© 2025 Renovactiva-SL. Tots els drets reservats.')
-                : (footerData?.copyright || '© 2025 Renovactiva-SL. Todos los derechos reservados.')}
-            </p>
-            <div className="flex gap-5">
-              {footerData?.social?.instagram && (
-                <a href={footerData.social.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-[#d7bd77] transition-colors">Instagram</a>
-              )}
-              {footerData?.social?.linkedin && (
-                <a href={footerData.social.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-[#d7bd77] transition-colors">LinkedIn</a>
-              )}
-              {footerData?.social?.youtube && (
-                <a href={footerData.social.youtube} target="_blank" rel="noopener noreferrer" className="hover:text-[#d7bd77] transition-colors">YouTube</a>
-              )}
-              {footerData?.social?.facebook && (
-                <a href={footerData.social.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-[#d7bd77] transition-colors">Facebook</a>
-              )}
-            </div>
-          </div>
-        </div>
-      </footer>
     </main>
   )
 }
