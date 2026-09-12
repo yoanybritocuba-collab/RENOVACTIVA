@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, Languages } from 'lucide-react'
 
 interface AdminSectionProps {
   title: string
@@ -39,10 +39,11 @@ export default function AdminSection({
             <button
               onClick={onSave}
               disabled={saving}
-              className="flex items-center gap-1.5 bg-[#d7bd77] px-4 py-2 text-[#11110f] rounded-lg hover:bg-white transition-colors disabled:opacity-50 text-sm font-medium"
+              className="flex items-center gap-2 bg-[#d7bd77] px-4 py-2 text-[#11110f] rounded-lg hover:bg-white transition-colors disabled:opacity-50 text-sm font-medium"
             >
               <Save className="size-4" />
-              {saving ? 'Guardando...' : 'Guardar'}
+              <Languages className="size-4" />
+              {saving ? 'Guardando y traduciendo...' : 'Guardar y traducir'}
             </button>
           )}
         </div>
