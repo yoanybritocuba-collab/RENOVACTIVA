@@ -36,7 +36,18 @@ export default function ServicesPage() {
       })
       if (!res.ok) throw new Error('Error al cargar')
       const result = await res.json()
-      if (result.length > 0) setData(result[0])
+      if (result.length > 0) {
+        const servicesData = result[0]
+        // Migrar de "image" a "images" si es necesario
+        const items = (servicesData.content.items || []).map((item: any) => ({
+          ...item,
+          images: item.images || (item.image ? [item.image] : [])
+        }))
+        setData({
+          ...servicesData,
+          content: { ...servicesData.content, items }
+        })
+      }
     } catch (err) { setError('Error: ' + (err as Error).message) }
     finally { setLoading(false) }
   }
@@ -46,6 +57,7 @@ export default function ServicesPage() {
     try {
       const contentToSave = { ...data.content }
 
+      // Traducir títulos de la sección
       const translations = {
         eyebrow: await translate(data.content.eyebrow || '', 'ca'),
         title: await translate(data.content.title || '', 'ca'),
@@ -53,6 +65,7 @@ export default function ServicesPage() {
       }
       contentToSave.translations = translations
 
+      // Traducir cada servicio
       const translatedItems = await Promise.all(
         (data.content.items || []).map(async (item: any) => {
           const newItem = { ...item }
@@ -90,7 +103,7 @@ export default function ServicesPage() {
     setData({ ...data, content: { ...data.content, [key]: value } })
   }
 
-  function updateItem(index: number, key: string, value: string) {
+  function updateItem(index: number, key: string, value: any) {
     const newItems = [...(data.content.items || [])]
     newItems[index] = { ...newItems[index], [key]: value }
     setData({ ...data, content: { ...data.content, items: newItems } })
@@ -111,7 +124,7 @@ export default function ServicesPage() {
       number: String(newItems.length + 1).padStart(2, '0'),
       title: { es: '', ca: '' },
       copy: { es: '', ca: '' },
-      image: '',
+      images: [],
       href: ''
     })
     setData({ ...data, content: { ...data.content, items: newItems } })
@@ -162,22 +175,23 @@ export default function ServicesPage() {
         {/* Lista de servicios */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-white/60 text-sm font-semibold">🖼️ Servicios ({(data.content.items || []).length})</h3>
+            <h3 className="text-white/60 text-sm font-semibold">🛠 Servicios ({(data.content.items || []).length})</h3>
             <button onClick={addItem} className="flex items-center gap-1 text-[#d7bd77] hover:text-white text-sm">
               <Plus className="size-4" /> Añadir servicio
             </button>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-8">
             {(data.content.items || []).map((item: any, index: number) => (
-              <div key={index} className="border border-white/10 rounded-lg p-4 space-y-4 bg-white/[.02]">
+              <div key={index} className="border border-white/10 rounded-xl p-5 space-y-5 bg-white/[.02]">
                 <div className="flex items-center justify-between">
-                  <span className="text-white/40 text-sm">Servicio {index + 1}</span>
-                  <button onClick={() => removeItem(index)} className="text-red-400 hover:text-red-300">
+                  <span className="text-white/50 text-sm font-medium">Servicio {index + 1}</span>
+                  <button onClick={() => removeItem(index)} className="text-red-400 hover:text-red-300 p-1">
                     <Trash2 className="size-4" />
                   </button>
                 </div>
 
+                {/* Número y enlace */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-white/50 text-xs mb-1">Número</label>
@@ -191,34 +205,34 @@ export default function ServicesPage() {
                   </div>
                 </div>
 
-                {/* Subidor de imágenes */}
+                {/* Imágenes (múltiples) */}
                 <div>
-                  <label className="block text-white/50 text-xs mb-2">Imagen del servicio</label>
+                  <label className="block text-white/50 text-xs mb-2">🖼️ Imágenes del servicio ({item.images?.length || 0})</label>
                   <ImageUploader
-                    images={item.image ? [item.image] : []}
-                    onChange={(imgs) => updateItem(index, 'image', imgs[0] || '')}
+                    images={item.images || []}
+                    onChange={(imgs) => updateItem(index, 'images', imgs)}
                     folder={`services/${item.number || index}`}
-                    maxImages={1}
+                    maxImages={20}
                     allowVideos={false}
                   />
                 </div>
 
-                {/* Español */}
+                {/* Textos ES */}
                 <div className="border-l-2 border-[#d7bd77]/30 pl-3 space-y-2">
                   <p className="text-[#d7bd77] text-xs font-bold">🇪🇸 Español</p>
                   <input type="text" value={item.title?.es || ''} onChange={(e) => updateItemNested(index, 'title', 'es', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Título (ES)" />
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Título del servicio" />
                   <input type="text" value={item.copy?.es || ''} onChange={(e) => updateItemNested(index, 'copy', 'es', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Descripción (ES)" />
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Descripción del servicio" />
                 </div>
 
-                {/* Catalán */}
+                {/* Textos CA */}
                 <div className="border-l-2 border-white/10 pl-3 space-y-2">
                   <p className="text-white/40 text-xs font-bold">🇨🇦 Català</p>
                   <input type="text" value={item.title?.ca || ''} onChange={(e) => updateItemNested(index, 'title', 'ca', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Títol (CA)" />
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Títol del servei" />
                   <input type="text" value={item.copy?.ca || ''} onChange={(e) => updateItemNested(index, 'copy', 'ca', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Descripció (CA)" />
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Descripció del servei" />
                 </div>
               </div>
             ))}
