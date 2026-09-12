@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { ArrowUpRight, Globe2, Menu, Play, X } from 'lucide-react'
+import { ArrowUpRight, Globe2, Menu, Play, X, Shield } from 'lucide-react'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { useLanguage } from '@/components/language-provider'
 
@@ -82,10 +82,18 @@ export default function Home() {
 
           <div className="flex items-center gap-2 lg:gap-4 flex-shrink-0">
             <LanguageSwitcher />
-            <Link href="/admin" className="hidden sm:block border border-[#d7bd77]/60 px-3 py-1.5 lg:px-4 lg:py-2 text-[9px] lg:text-[10px] uppercase tracking-[0.2em] text-[#d7bd77] transition-colors hover:bg-[#d7bd77] hover:text-[#10100f]">
+            <Link 
+              href="/admin" 
+              className="hidden sm:flex items-center gap-1.5 border border-[#d7bd77]/60 px-2.5 py-1.5 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 text-[8px] sm:text-[9px] lg:text-[10px] uppercase tracking-[0.2em] text-[#d7bd77] transition-colors hover:bg-[#d7bd77] hover:text-[#10100f] rounded"
+            >
+              <Shield className="size-3" />
               Admin
             </Link>
-            <button aria-label="Abrir menú" onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden text-white/70 hover:text-white">
+            <button 
+              aria-label="Abrir menú" 
+              onClick={() => setMenuOpen(!menuOpen)} 
+              className="lg:hidden text-white/70 hover:text-white p-1"
+            >
               {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
@@ -98,6 +106,16 @@ export default function Home() {
               <a href="#servicios" onClick={() => setMenuOpen(false)}>{ca ? 'Serveis' : 'Servicios'}</a>
               <a href="#metodo" onClick={() => setMenuOpen(false)}>{ca ? 'El nostre mètode' : 'Nuestro método'}</a>
               <a href="#contacto" onClick={() => setMenuOpen(false)}>{ca ? 'Contacte' : 'Contacto'}</a>
+              
+              {/* Enlace al Admin en el menú móvil */}
+              <Link 
+                href="/admin" 
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 border-t border-white/10 pt-5 text-[#d7bd77] hover:text-white transition-colors"
+              >
+                <Shield className="size-4" />
+                {ca ? 'Panell Admin' : 'Panel Admin'}
+              </Link>
             </nav>
           </div>
         )}
@@ -253,7 +271,7 @@ export default function Home() {
       <section id="contacto" className="relative overflow-hidden bg-[#d7bd77] px-6 py-24 text-[#141310] lg:px-10 lg:py-32">
         <div className="relative mx-auto flex max-w-[1380px] flex-col justify-between gap-12 lg:flex-row lg:items-end">
           <div>
-            <p className="eyebrow !text-[#141310]/60">El primer paso</p>
+            <p className="eyebrow !text-[#141310]/60">{ca ? 'El primer pas' : 'El primer paso'}</p>
             <h2 className="max-w-3xl font-serif text-5xl leading-none tracking-tight sm:text-7xl">
               {ca ? <>Fem alguna cosa<br /><i>extraordinària.</i></> : <>Hagamos algo<br /><i>extraordinario.</i></>}
             </h2>
