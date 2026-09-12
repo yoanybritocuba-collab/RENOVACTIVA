@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Upload, X, Link as LinkIcon, Image as ImageIcon, Loader2 } from 'lucide-react'
+import { Upload, X, Link as LinkIcon, Image as ImageIcon, Loader2, Video, GripVertical, Eye } from 'lucide-react'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
-const SUPABASE_KEY = 'sb_publishable_acJOTZ5reUCVCpJ_vK36ZA_q2bEIhIo'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
 const BUCKET = 'renovactiva-images'
 
 interface ImageUploaderProps {
@@ -12,13 +12,26 @@ interface ImageUploaderProps {
   onChange: (images: string[]) => void
   folder: string
   maxImages?: number
+  allowVideos?: boolean
 }
 
-export default function ImageUploader({ images, onChange, folder, maxImages = 20 }: ImageUploaderProps) {
+export default function ImageUploader({ 
+  images, 
+  onChange, 
+  folder, 
+  maxImages = 20,
+  allowVideos = true 
+}: ImageUploaderProps) {
   const [uploading, setUploading] = useState(false)
   const [mode, setMode] = useState<'upload' | 'url'>('upload')
   const [urlInput, setUrlInput] = useState('')
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const isVideo = (url: string) => {
+    const videoExts = ['.mp4', '.webm', '.mov', '.avi']
+    return videoExts.some(ext => url.toLowerCase().includes(ext))
+  }
 
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files
@@ -69,7 +82,26 @@ export default function ImageUploader({ images, onChange, folder, maxImages = 20
   }
 
   function removeImage(index: number) {
+    if (!confirm('¿Eliminar este archivo?')) return
     onChange(images.filter((_, i) => i !== index))
+  }
+
+  function moveImage(fromIndex: number, toIndex: number) {
+    if (fromIndex === toIndex) return
+    const newImages = [...images]
+    const [moved] = newImages.splice(fromIndex, 1)
+    newImages.splice(toIndex, 0, moved)
+    onChange(newImages)
+  }
+
+  function moveUp(index: number) {
+    if (index === 0) return
+    moveImage(index, index - 1)
+  }
+
+  function moveDown(index: number) {
+    if (index === images.length - 1) return
+    moveImage(index, index + 1)
   }
 
   return (
@@ -106,7 +138,7 @@ export default function ImageUploader({ images, onChange, folder, maxImages = 20
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept={allowVideos ? 'image/*,video/*' : 'image/*'}
             multiple
             onChange={handleFileUpload}
             className="hidden"
@@ -126,18 +158,22 @@ export default function ImageUploader({ images, onChange, folder, maxImages = 20
             {uploading ? (
               <>
                 <Loader2 className="size-8 text-[#d7bd77] animate-spin" />
-                <p className="text-white/60 text-sm">Subiendo imágenes...</p>
+                <p className="text-white/60 text-sm">Subiendo archivos...</p>
               </>
             ) : images.length >= maxImages ? (
               <>
                 <ImageIcon className="size-8 text-white/30" />
-                <p className="text-white/40 text-sm">Límite alcanzado ({maxImages} imágenes)</p>
+                <p className="text-white/40 text-sm">Límite alcanzado ({maxImages} archivos)</p>
               </>
             ) : (
               <>
                 <Upload className="size-8 text-[#d7bd77]" />
-                <p className="text-white/80 text-sm font-medium">Haz clic o arrastra imágenes aquí</p>
-                <p className="text-white/40 text-xs">Máximo {maxImages} imágenes · 50MB cada una</p>
+                <p className="text-white/80 text-sm font-medium">
+                  Haz clic o arrastra {allowVideos ? 'fotos y videos' : 'imágenes'} aquí
+                </p>
+                <p className="text-white/40 text-xs">
+                  Máximo {maxImages} archivos · 50MB cada uno
+                </p>
               </>
             )}
           </label>
@@ -149,7 +185,7 @@ export default function ImageUploader({ images, onChange, folder, maxImages = 20
             value={urlInput}
             onChange={(e) => setUrlInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addUrl())}
-            placeholder="https://images.unsplash.com/..."
+            placeholder="https://ejemplo.com/foto.jpg o video.mp4"
             className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/30 focus:border-[#d7bd77] outline-none text-sm"
           />
           <button
@@ -163,47 +199,98 @@ export default function ImageUploader({ images, onChange, folder, maxImages = 20
         </div>
       )}
 
-      {/* Galería de imágenes */}
+      {/* Galería de archivos */}
       {images.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-white/60 text-sm">📷 {images.length} imagen{images.length !== 1 ? 'es' : ''} de {maxImages}</p>
-            {images.length >= maxImages && (
-              <p className="text-yellow-400 text-xs">Límite alcanzado</p>
-            )}
+            <p className="text-white/60 text-sm">
+              📁 {images.length} archivo{images.length !== 1 ? 's' : ''} de {maxImages}
+            </p>
+            <p className="text-white/30 text-xs">Arrastra para reordenar</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {images.map((img, i) => (
-              <div key={i} className="relative group aspect-square">
+            {images.map((url, i) => (
+              <div
+                key={i}
+                draggable
+                onDragStart={() => setDragIndex(i)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => {
+                  if (dragIndex !== null) moveImage(dragIndex, i)
+                  setDragIndex(null)
+                }}
+                className={`relative group aspect-square cursor-move ${
+                  dragIndex === i ? 'opacity-50' : ''
+                }`}
+              >
                 <div className="w-full h-full bg-white/5 rounded-lg overflow-hidden border border-white/10">
-                  {img ? (
-                    <img src={img} alt={`Imagen ${i+1}`} className="w-full h-full object-cover" />
+                  {isVideo(url) ? (
+                    <video 
+                      src={url} 
+                      className="w-full h-full object-cover"
+                      muted
+                      onMouseOver={(e) => (e.target as HTMLVideoElement).play()}
+                      onMouseOut={(e) => {
+                        const v = e.target as HTMLVideoElement
+                        v.pause()
+                        v.currentTime = 0
+                      }}
+                    />
+                  ) : url ? (
+                    <img src={url} alt={`Archivo ${i+1}`} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-white/20">
                       <ImageIcon className="size-8" />
                     </div>
                   )}
                 </div>
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 rounded-lg">
-                  <a
-                    href={img}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-1.5 bg-white/20 rounded hover:bg-white/30"
-                  >
-                    <ImageIcon className="size-4 text-white" />
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => removeImage(i)}
-                    className="p-1.5 bg-red-500/80 rounded hover:bg-red-600"
-                  >
-                    <X className="size-4 text-white" />
-                  </button>
-                </div>
-                <span className="absolute top-1 left-1 bg-black/70 text-white/80 text-[10px] px-1.5 py-0.5 rounded">
-                  #{i+1}
+
+                {/* Indicadores */}
+                <span className="absolute top-1 left-1 bg-black/70 text-white/80 text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1">
+                  {isVideo(url) ? <Video className="size-3" /> : <ImageIcon className="size-3" />}
+                  #{i + 1}
                 </span>
+
+                {/* Acciones al pasar el ratón */}
+                <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 rounded-lg">
+                  <div className="flex gap-2">
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1.5 bg-white/20 rounded hover:bg-white/30"
+                      title="Ver"
+                    >
+                      <Eye className="size-4 text-white" />
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      className="p-1.5 bg-red-500/80 rounded hover:bg-red-600"
+                      title="Eliminar"
+                    >
+                      <X className="size-4 text-white" />
+                    </button>
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() => moveUp(i)}
+                      disabled={i === 0}
+                      className="px-2 py-0.5 bg-white/10 rounded text-[10px] text-white hover:bg-white/20 disabled:opacity-30"
+                    >
+                      ←
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveDown(i)}
+                      disabled={i === images.length - 1}
+                      className="px-2 py-0.5 bg-white/10 rounded text-[10px] text-white hover:bg-white/20 disabled:opacity-30"
+                    >
+                      →
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
