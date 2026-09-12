@@ -39,18 +39,34 @@ export default function AdminSection({
             <button
               onClick={onSave}
               disabled={saving}
-              className="flex items-center gap-2 bg-[#d7bd77] px-4 py-2 text-[#11110f] rounded-lg hover:bg-white transition-colors disabled:opacity-50 text-sm font-medium"
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 disabled:opacity-50 text-sm font-medium ${
+                notice
+                  ? 'bg-green-500 text-white hover:bg-green-600 scale-105'
+                  : 'bg-[#d7bd77] text-[#11110f] hover:bg-white'
+              }`}
             >
               <Save className="size-4" />
               <Languages className="size-4" />
-              {saving ? 'Guardando y traduciendo...' : 'Guardar y traducir'}
+              {saving ? 'Guardando y traduciendo...' : notice ? '✓ ¡Guardado!' : 'Guardar y traducir'}
             </button>
           )}
         </div>
       </header>
 
-      {error && <div className="max-w-5xl mx-auto px-4 pt-4"><div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-2.5 rounded-lg text-sm">{error}</div></div>}
-      {notice && <div className="max-w-5xl mx-auto px-4 pt-4"><div className="bg-green-500/10 border border-green-500/50 text-green-400 px-4 py-2.5 rounded-lg text-sm">{notice}</div></div>}
+      {error && (
+        <div className="max-w-5xl mx-auto px-4 pt-4">
+          <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-2.5 rounded-lg text-sm">
+            {error}
+          </div>
+        </div>
+      )}
+      {notice && (
+        <div className="max-w-5xl mx-auto px-4 pt-4">
+          <div className="bg-green-500/10 border border-green-500/50 text-green-400 px-4 py-2.5 rounded-lg text-sm">
+            {notice}
+          </div>
+        </div>
+      )}
 
       <div className="max-w-5xl mx-auto px-4 py-6">
         <div className="border border-white/10 bg-white/[.02] rounded-xl p-4 sm:p-6">
