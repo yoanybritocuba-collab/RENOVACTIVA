@@ -149,9 +149,9 @@ export default function ServicesPage() {
 
         <div className="space-y-8">
           {(data.content.items || []).map((item: any, index: number) => (
-            <div key={index} className="border border-white/10 rounded-xl p-5 space-y-5 bg-white/[.02]">
-              <div className="flex items-center justify-between">
-                <span className="text-white/50 text-sm font-medium">Servicio {index + 1}</span>
+            <div key={index} className="space-y-5">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <h3 className="text-[#d7bd77] font-serif text-lg">Servicio {index + 1}</h3>
                 <button onClick={() => removeItem(index)} className="text-red-400 hover:text-red-300 p-1">
                   <Trash2 className="size-4" />
                 </button>
