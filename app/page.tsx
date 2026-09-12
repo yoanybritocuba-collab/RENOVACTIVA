@@ -263,7 +263,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 4 cuadrados iguales en 2x2 */}
           <div className="grid gap-px bg-white/10 md:grid-cols-2">
             {servicesData.slice(0, 4).map((service: any, index: number) => (
               <Link 
@@ -324,6 +323,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* SECCIÓN CONTACTO CON BOTÓN VERDE */}
       <section id="contacto" className="relative overflow-hidden bg-[#d7bd77] px-6 py-24 text-[#141310] lg:px-10 lg:py-32">
         <div className="relative mx-auto flex max-w-[1380px] flex-col justify-between gap-12 lg:flex-row lg:items-end">
           <div>
@@ -337,8 +337,8 @@ export default function Home() {
               {ca ? "Explica'ns la teva idea." : 'Cuéntanos tu idea.'}
             </p>
             <a
-              href={`mailto:${footerData?.contact?.email || contactData?.email || 'info@renovactiva-sl.com'}`}
-              className="mt-7 inline-flex items-center gap-4 border-b border-[#141310] pb-2 text-[11px] uppercase tracking-[0.2em]"
+              href={`mailto:${footerData?.contact?.email || contactData?.email || 'info@renovactiva.com'}`}
+              className="mt-7 inline-flex items-center gap-3 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors text-[11px] uppercase tracking-[0.2em] font-medium"
             >
               {ca ? 'Demanar pressupost' : 'Solicitar presupuesto'}
               <ArrowUpRight className="size-4" />
