@@ -42,12 +42,32 @@ export default function Home() {
 
         if (hero) setHeroData(hero.content)
         if (services) setServicesData(services.content?.items || [])
-        if (projects) {
-          setProjectsData(projects.content?.items || [])
-          setProjectsSection(projects.content)
-        }
+        if (projects) setProjectsSection(projects.content)
         if (contact) setContactData(contact.content)
         if (footer) setFooterData(footer.content)
+
+        // Cargar trabajos desde la tabla trabajos
+        try {
+          const trabajosRes = await fetch(`${SUPABASE_URL}/rest/v1/trabajos?select=*&order=orden.asc`, {
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+          })
+          if (trabajosRes.ok) {
+            const trabajosData = await trabajosRes.json()
+            setProjectsData(trabajosData.map((t: any) => ({
+              title: t.titulo,
+              type: t.tipo,
+              image: t.imagenes?.[0] || '',
+              images: t.imagenes || [],
+              description: t.descripcion,
+              categoria: t.categoria
+            })))
+          }
+        } catch (err) {
+          console.error('Error al cargar trabajos:', err)
+        }
       } catch (err) {
         console.error('Error al cargar datos:', err)
       } finally {
@@ -188,11 +208,7 @@ export default function Home() {
           </div>
         </div>
         <div className="grid gap-5 lg:grid-cols-[1.4fr_0.8fr]">
-          {(projectsData.length > 0 ? projectsData : [
-            { title: 'Casa Paseo del Prado', type: 'Vivienda integral', image: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1400&q=85' },
-            { title: 'Estudio Cobalto', type: 'Oficina corporativa', image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1400&q=85' },
-            { title: 'Atelier Chamberí', type: 'Local comercial', image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1400&q=85' },
-          ]).map((project, index) => (
+          {projectsData.length > 0 ? projectsData.map((project: any, index: number) => (
             <div key={index} className="group relative overflow-hidden rounded-lg">
               <div
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
@@ -204,7 +220,34 @@ export default function Home() {
                 <h3 className="mt-2 font-serif text-3xl">{project.title}</h3>
               </div>
             </div>
-          ))}
+          )) : (
+            <>
+              <div className="group relative overflow-hidden rounded-lg">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1400&q=85)` }} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                <div className="relative flex h-full min-h-[230px] flex-col justify-end p-7">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#d7bd77]">Vivienda integral</p>
+                  <h3 className="mt-2 font-serif text-3xl">Casa Paseo del Prado</h3>
+                </div>
+              </div>
+              <div className="group relative overflow-hidden rounded-lg">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1400&q=85)` }} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                <div className="relative flex h-full min-h-[230px] flex-col justify-end p-7">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#d7bd77]">Oficina corporativa</p>
+                  <h3 className="mt-2 font-serif text-3xl">Estudio Cobalto</h3>
+                </div>
+              </div>
+              <div className="group relative overflow-hidden rounded-lg">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1400&q=85)` }} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                <div className="relative flex h-full min-h-[230px] flex-col justify-end p-7">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#d7bd77]">Local comercial</p>
+                  <h3 className="mt-2 font-serif text-3xl">Atelier Chamberí</h3>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
