@@ -2,10 +2,9 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { LanguageProvider } from '@/components/language-provider'
-import BackButton from '@/components/BackButton'
 
 export const metadata: Metadata = {
-  title: 'RENOVATIVA-SL | Arquitectura, interiorismo y construcción',
+  title: 'Renovactiva-SL | Arquitectura, interiorismo y construcción',
   description: 'Reformas de alto nivel para viviendas, locales comerciales y oficinas en Barcelona.',
   generator: 'v0.app',
   icons: {
@@ -48,7 +47,6 @@ export default function RootLayout({
       <body className="antialiased">
         <LanguageProvider>
           {children}
-          <BackButton />
         </LanguageProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
