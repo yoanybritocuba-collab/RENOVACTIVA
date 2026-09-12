@@ -121,6 +121,15 @@ export default function ServicesPage() {
       href: ''
     })
     setData({ ...data, content: { ...data.content, items: newItems } })
+
+    // Scroll automático al nuevo servicio
+    setTimeout(() => {
+      const newIndex = newItems.length - 1
+      const element = document.getElementById(`service-${newIndex}`)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 100)
   }
 
   function removeItem(index: number) {
@@ -140,16 +149,21 @@ export default function ServicesPage() {
       notice={notice}
     >
       <div className="space-y-6">
+        {/* Botón de añadir arriba, grande y visible */}
+        <button
+          onClick={addItem}
+          className="w-full flex items-center justify-center gap-2 bg-[#d7bd77] px-6 py-4 text-[#11110f] rounded-xl hover:bg-white transition-colors text-base font-medium"
+        >
+          <Plus className="size-5" /> Añadir servicio
+        </button>
+
         <div className="flex items-center justify-between">
           <h3 className="text-white/60 text-sm font-semibold">🛠 Servicios ({(data.content.items || []).length})</h3>
-          <button onClick={addItem} className="flex items-center gap-2 bg-[#d7bd77] px-4 py-2 text-[#11110f] rounded-lg hover:bg-white transition-colors text-sm font-medium">
-            <Plus className="size-4" /> Añadir servicio
-          </button>
         </div>
 
         <div className="space-y-8">
           {(data.content.items || []).map((item: any, index: number) => (
-            <div key={index} className="space-y-5">
+            <div key={index} id={`service-${index}`} className="space-y-5 scroll-mt-20">
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <h3 className="text-[#d7bd77] font-serif text-lg">Servicio {index + 1}</h3>
                 <button onClick={() => removeItem(index)} className="text-red-400 hover:text-red-300 p-1">
