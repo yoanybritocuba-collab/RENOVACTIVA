@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, Menu, X, Eye, EyeOff, ExternalLink, LogOut } from 'lucide-react'
+import { LayoutDashboard, Menu, X, Eye, EyeOff, ExternalLink, LogOut, FileText } from 'lucide-react'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_acJOTZ5reUCVCpJ_vK36ZA_q2bEIhoo'
@@ -139,6 +139,12 @@ export default function AdminDashboard() {
           <Link href="/admin" className="flex items-center gap-3 bg-[#d7bd77] px-4 py-3 text-[#15140f] rounded-lg">
             <LayoutDashboard className="size-4" /> Dashboard
           </Link>
+          <Link
+            href="/admin/presupuestos"
+            className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 hover:text-white rounded-lg transition-colors"
+          >
+            <FileText className="size-4" /> Presupuestos
+          </Link>
         </nav>
 
         <div className="absolute bottom-6 left-6 right-6 flex flex-col gap-3">
@@ -168,7 +174,6 @@ export default function AdminDashboard() {
               <p className="text-[10px] uppercase tracking-[.2em] text-white/40">{user.email}</p>
               <h1 className="font-serif text-2xl">Dashboard</h1>
             </div>
-            {/* Botón "Ver sitio" ELIMINADO */}
           </div>
         </header>
         <div className="p-6 lg:p-10">
