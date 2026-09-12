@@ -2,7 +2,10 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, Menu, X, Eye, EyeOff, ExternalLink, LogOut } from 'lucide-react'
+import { 
+  LayoutDashboard, Menu, X, Eye, EyeOff, ExternalLink, LogOut,
+  Home, FolderOpen, Wrench, Mail, Image, Settings
+} from 'lucide-react'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_acJOTZ5reUCVCpJ_vK36ZA_q2bEIhoo'
@@ -12,7 +15,7 @@ const ADMIN_PASSWORD = 'Barcelona2026'
 export default function AdminDashboard() {
   const [user, setUser] = useState<{ email?: string } | null>(null)
   const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState({ totalSections: 0 })
+  const [stats, setStats] = useState({ totalSections: 0, totalProjects: 0, totalServices: 0 })
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -30,12 +33,18 @@ export default function AdminDashboard() {
 
   async function loadStats() {
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content?select=section`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content?select=section,content`, {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
       })
       if (!res.ok) throw new Error('Error al cargar')
       const data = await res.json()
-      setStats({ totalSections: data.length })
+      const projects = data.find((d: any) => d.section === 'projects')
+      const services = data.find((d: any) => d.section === 'services')
+      setStats({
+        totalSections: data.length,
+        totalProjects: projects?.content?.items?.length || 0,
+        totalServices: services?.content?.items?.length || 0
+      })
     } catch (err) {
       console.error('Error:', err)
     }
@@ -139,6 +148,24 @@ export default function AdminDashboard() {
           <Link href="/admin" className="flex items-center gap-3 bg-[#d7bd77] px-4 py-3 text-[#15140f] rounded-lg">
             <LayoutDashboard className="size-4" /> Dashboard
           </Link>
+          <Link href="/admin/hero" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
+            <Home className="size-4" /> Hero
+          </Link>
+          <Link href="/admin/projects" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
+            <FolderOpen className="size-4" /> Trabajos
+          </Link>
+          <Link href="/admin/services" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
+            <Wrench className="size-4" /> Servicios
+          </Link>
+          <Link href="/admin/contact" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
+            <Mail className="size-4" /> Contacto
+          </Link>
+          <Link href="/admin/footer" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
+            <Image className="size-4" /> Footer
+          </Link>
+          <Link href="/admin/settings" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
+            <Settings className="size-4" /> Configuración
+          </Link>
         </nav>
 
         <div className="absolute bottom-6 left-6 right-6 flex flex-col gap-3">
@@ -177,13 +204,18 @@ export default function AdminDashboard() {
               <strong className="block mt-2 font-serif text-4xl text-[#d7bd77]">{stats.totalSections}</strong>
             </div>
             <div className="border border-white/10 bg-white/[.02] p-6 rounded-xl">
-              <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Estado</p>
-              <strong className="block mt-2 font-serif text-2xl text-green-400">Activo</strong>
+              <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Trabajos</p>
+              <strong className="block mt-2 font-serif text-4xl text-[#d7bd77]">{stats.totalProjects}</strong>
             </div>
             <div className="border border-white/10 bg-white/[.02] p-6 rounded-xl">
-              <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Admin</p>
-              <strong className="block mt-2 font-serif text-2xl text-[#d7bd77]">Conectado</strong>
+              <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Servicios</p>
+              <strong className="block mt-2 font-serif text-4xl text-[#d7bd77]">{stats.totalServices}</strong>
             </div>
+          </div>
+
+          <div className="mt-8 border border-white/10 bg-white/[.02] p-6 rounded-xl">
+            <h2 className="font-serif text-lg text-[#d7bd77]">Bienvenido al panel</h2>
+            <p className="text-white/40 text-sm mt-2">Desde aquí puedes editar el contenido de tu web. Usa el menú lateral para navegar entre las secciones.</p>
           </div>
         </div>
       </section>
