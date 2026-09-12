@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Image as ImageIcon, Trash2, Edit, Save, X } from 'lucide-react'
+import ImageUploader from '@/components/admin/ImageUploader'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
@@ -40,7 +41,6 @@ export default function AdminTrabajos() {
   const [trabajos, setTrabajos] = useState<Trabajo[]>([])
   const [editing, setEditing] = useState<Trabajo | null>(null)
   const [form, setForm] = useState<Trabajo>(emptyTrabajo)
-  const [imageInput, setImageInput] = useState('')
   const [filterCategoria, setFilterCategoria] = useState('')
 
   useEffect(() => { loadTrabajos() }, [])
@@ -108,23 +108,12 @@ export default function AdminTrabajos() {
 
   function startEdit(trabajo: Trabajo) {
     setEditing(trabajo)
-    setForm(trabajo)
+    setForm({ ...trabajo, imagenes: trabajo.imagenes || [] })
   }
 
   function cancelEdit() {
     setEditing(null)
     setForm(emptyTrabajo)
-    setImageInput('')
-  }
-
-  function addImage() {
-    if (!imageInput.trim()) return
-    setForm({ ...form, imagenes: [...form.imagenes, imageInput.trim()] })
-    setImageInput('')
-  }
-
-  function removeImage(index: number) {
-    setForm({ ...form, imagenes: form.imagenes.filter((_, i) => i !== index) })
   }
 
   const categorias = [...new Set(trabajos.map(t => t.categoria).filter(Boolean))]
@@ -159,7 +148,7 @@ export default function AdminTrabajos() {
       {error && <div className="max-w-7xl mx-auto px-4 pt-4"><div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-2.5 rounded-lg text-sm">{error}</div></div>}
       {notice && <div className="max-w-7xl mx-auto px-4 pt-4"><div className="bg-green-500/10 border border-green-500/50 text-green-400 px-4 py-2.5 rounded-lg text-sm">{notice}</div></div>}
 
-      <div className="max-w-7xl mx-auto px-4 py-6 grid gap-6 lg:grid-cols-[1fr_1.2fr]">
+      <div className="max-w-7xl mx-auto px-4 py-6 grid gap-6 lg:grid-cols-[1fr_1.4fr]">
         {/* Lista de trabajos */}
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -169,7 +158,7 @@ export default function AdminTrabajos() {
               onChange={(e) => setFilterCategoria(e.target.value)}
               className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-[#d7bd77] outline-none"
             >
-              <option value="">Todas las categorías</option>
+              <option value="">Todas</option>
               {categorias.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
@@ -207,7 +196,7 @@ export default function AdminTrabajos() {
               </div>
             ))}
             {trabajosFiltrados.length === 0 && (
-              <p className="text-white/40 text-center py-8">No hay trabajos en esta categoría</p>
+              <p className="text-white/40 text-center py-8">No hay trabajos</p>
             )}
           </div>
         </div>
@@ -262,24 +251,15 @@ export default function AdminTrabajos() {
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm resize-y" placeholder="Descripción del proyecto..." />
               </div>
 
+              {/* Imágenes con ImageUploader (subir archivos o pegar URLs) */}
               <div>
-                <label className="block text-white/50 text-sm mb-1">Imágenes</label>
-                <div className="flex gap-2 mb-3">
-                  <input type="text" value={imageInput} onChange={(e) => setImageInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && addImage()}
-                    className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="https://images.unsplash.com/..." />
-                  <button onClick={addImage} className="bg-[#d7bd77] text-[#11110f] px-4 py-2.5 rounded-lg font-medium hover:bg-white transition-colors text-sm">Añadir</button>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {form.imagenes.map((img, i) => (
-                    <div key={i} className="relative group aspect-video">
-                      <img src={img} alt={`Imagen ${i+1}`} className="w-full h-full object-cover rounded-lg" />
-                      <button onClick={() => removeImage(i)} className="absolute top-1 right-1 p-1 bg-red-500/80 rounded opacity-0 group-hover:opacity-100">
-                        <Trash2 className="size-3 text-white" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                <h3 className="text-white/60 text-sm font-semibold mb-3">🖼️ Imágenes del trabajo</h3>
+                <ImageUploader
+                  images={form.imagenes || []}
+                  onChange={(imagenes) => setForm({ ...form, imagenes })}
+                  folder={`trabajos/${form.titulo || 'nuevo'}`}
+                  maxImages={20}
+                />
               </div>
 
               <div className="flex items-center gap-3">
