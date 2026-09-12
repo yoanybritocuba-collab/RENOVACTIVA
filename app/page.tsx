@@ -50,7 +50,6 @@ export default function Home() {
         if (contact) setContactData(contact.content)
         if (footer) setFooterData(footer.content)
 
-        // Cargar trabajos desde la tabla trabajos
         try {
           const trabajosRes = await fetch(`${SUPABASE_URL}/rest/v1/trabajos?select=*&order=orden.asc`, {
             headers: {
@@ -196,6 +195,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* SECCIÓN PROYECTOS: rectángulo + cuadrado / cuadrado + rectángulo */}
       <section id="proyectos" className="mx-auto max-w-[1380px] px-6 py-24 lg:px-10 lg:py-36">
         <div className="mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
@@ -213,70 +213,38 @@ export default function Home() {
           </div>
         </div>
 
-        {projectsData.length > 0 ? (
-          <div className="grid gap-5 lg:grid-cols-3">
-            {projectsData.slice(0, 4).map((project: any, index: number) => {
-              // Formato: 1 ancho, 2 pequeños, 1 ancho
-              const isWide = index === 0 || index === 3
-              
-              return (
-                <div 
-                  key={index} 
-                  className={`group relative overflow-hidden rounded-lg min-h-[400px] ${
-                    isWide ? 'lg:col-span-2' : 'lg:col-span-1'
-                  }`}
-                >
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                    style={{ backgroundImage: `url(${project.image})` }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                  <div className="relative flex h-full min-h-[400px] flex-col justify-end p-7">
-                    <p className="text-[10px] uppercase tracking-[0.24em] text-[#d7bd77]">{project.type}</p>
-                    <h3 className="mt-2 font-serif text-3xl">{project.title}</h3>
-                  </div>
+        <div className="grid gap-5 lg:grid-cols-3">
+          {(projectsData.length > 0 ? projectsData.slice(0, 4) : [
+            { title: 'Casa Paseo del Prado', type: 'Vivienda integral', image: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1400&q=85' },
+            { title: 'Estudio Cobalto', type: 'Oficina corporativa', image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1400&q=85' },
+            { title: 'Atelier Chamberí', type: 'Local comercial', image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1400&q=85' },
+            { title: 'Finca Histórica Barcelona', type: 'Reforma de finca', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85' },
+          ]).map((project: any, index: number) => {
+            const isWide = index === 0 || index === 3
+            
+            return (
+              <div 
+                key={index} 
+                className={`group relative overflow-hidden rounded-lg min-h-[400px] ${
+                  isWide ? 'lg:col-span-2' : 'lg:col-span-1'
+                }`}
+              >
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                  style={{ backgroundImage: `url(${project.image})` }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                <div className="relative flex h-full min-h-[400px] flex-col justify-end p-7">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#d7bd77]">{project.type}</p>
+                  <h3 className="mt-2 font-serif text-3xl">{project.title}</h3>
                 </div>
-              )
-            })}
-          </div>
-        ) : (
-          <div className="grid gap-5 lg:grid-cols-3">
-            <div className="group relative overflow-hidden rounded-lg lg:col-span-2 min-h-[400px]">
-              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1400&q=85)` }} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-              <div className="relative flex h-full min-h-[400px] flex-col justify-end p-7">
-                <p className="text-[10px] uppercase tracking-[0.24em] text-[#d7bd77]">Vivienda integral</p>
-                <h3 className="mt-2 font-serif text-3xl">Casa Paseo del Prado</h3>
               </div>
-            </div>
-            <div className="group relative overflow-hidden rounded-lg min-h-[400px]">
-              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1400&q=85)` }} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-              <div className="relative flex h-full min-h-[400px] flex-col justify-end p-7">
-                <p className="text-[10px] uppercase tracking-[0.24em] text-[#d7bd77]">Oficina corporativa</p>
-                <h3 className="mt-2 font-serif text-3xl">Estudio Cobalto</h3>
-              </div>
-            </div>
-            <div className="group relative overflow-hidden rounded-lg min-h-[400px]">
-              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1400&q=85)` }} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-              <div className="relative flex h-full min-h-[400px] flex-col justify-end p-7">
-                <p className="text-[10px] uppercase tracking-[0.24em] text-[#d7bd77]">Local comercial</p>
-                <h3 className="mt-2 font-serif text-3xl">Atelier Chamberí</h3>
-              </div>
-            </div>
-            <div className="group relative overflow-hidden rounded-lg lg:col-span-2 min-h-[400px]">
-              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85)` }} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-              <div className="relative flex h-full min-h-[400px] flex-col justify-end p-7">
-                <p className="text-[10px] uppercase tracking-[0.24em] text-[#d7bd77]">Reforma de finca</p>
-                <h3 className="mt-2 font-serif text-3xl">Finca Histórica Barcelona</h3>
-              </div>
-            </div>
-          </div>
-        )}
+            )
+          })}
+        </div>
       </section>
 
+      {/* SECCIÓN SERVICIOS: 4 cuadrados iguales (2×2) */}
       <section id="servicios" className="border-y border-white/10 bg-[#171715] px-6 py-24 lg:px-10 lg:py-32">
         <div className="mx-auto max-w-[1380px]">
           <div className="mb-14 flex items-end justify-between">
@@ -294,9 +262,15 @@ export default function Home() {
               </h2>
             </div>
           </div>
-          <div className="grid gap-px bg-white/10 md:grid-cols-3">
-            {servicesData.map((service: any, index: number) => (
-              <Link key={index} href={service.href || '#'} className="group relative min-h-[470px] overflow-hidden bg-[#171715] p-7">
+
+          {/* 4 cuadrados iguales en 2x2 */}
+          <div className="grid gap-px bg-white/10 md:grid-cols-2">
+            {servicesData.slice(0, 4).map((service: any, index: number) => (
+              <Link 
+                key={index} 
+                href={service.href || '#'} 
+                className="group relative min-h-[500px] overflow-hidden bg-[#171715] p-7"
+              >
                 <div
                   className="absolute inset-0 bg-cover bg-center opacity-45 transition-all duration-700 group-hover:scale-105 group-hover:opacity-65"
                   style={{ backgroundImage: `url(${service.image || service.images?.[0] || ''})` }}
