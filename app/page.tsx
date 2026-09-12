@@ -61,6 +61,7 @@ export default function Home() {
 
   const heroImages = heroData?.images || ['', '', '']
   const heroTrans = heroData?.translations || {}
+  const footerTrans = footerData?.translations || {}
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#10100f] text-[#f3f0e9]">
@@ -106,8 +107,6 @@ export default function Home() {
               <a href="#servicios" onClick={() => setMenuOpen(false)}>{ca ? 'Serveis' : 'Servicios'}</a>
               <a href="#metodo" onClick={() => setMenuOpen(false)}>{ca ? 'El nostre mètode' : 'Nuestro método'}</a>
               <a href="#contacto" onClick={() => setMenuOpen(false)}>{ca ? 'Contacte' : 'Contacto'}</a>
-              
-              {/* Enlace al Admin en el menú móvil */}
               <Link 
                 href="/admin" 
                 onClick={() => setMenuOpen(false)}
@@ -281,7 +280,7 @@ export default function Home() {
               {ca ? "Explica'ns la teva idea." : 'Cuéntanos tu idea.'}
             </p>
             <a
-              href={`mailto:${contactData?.email || 'info@renovactiva-sl.com'}`}
+              href={`mailto:${footerData?.contact?.email || contactData?.email || 'info@renovactiva-sl.com'}`}
               className="mt-7 inline-flex items-center gap-4 border-b border-[#141310] pb-2 text-[11px] uppercase tracking-[0.2em]"
             >
               {ca ? 'Demanar pressupost' : 'Solicitar presupuesto'}
@@ -302,27 +301,63 @@ export default function Home() {
                 </span>
               </Link>
               <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/40">
-                {ca ? 'Dissenyem i construïm espais amb intenció.' : 'Diseñamos y construimos espacios con intención.'}
+                {ca
+                  ? (footerTrans.description || footerData?.description || 'Dissenyem i construïm espais amb intenció.')
+                  : (footerData?.description || 'Diseñamos y construimos espacios con intención.')}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-x-14 gap-y-8 text-sm text-white/50">
               <div>
-                <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77]">{ca ? 'Contacte' : 'Contacto'}</p>
-                <p>{contactData?.phone || '+34 600 000 000'}</p>
-                <p>{contactData?.email || 'info@renovactiva-sl.com'}</p>
+                <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77]">
+                  {ca ? 'Contacte' : 'Contacto'}
+                </p>
+                <p>{footerData?.contact?.phone || '+34 600 000 000'}</p>
+                <p>{footerData?.contact?.email || 'info@renovactiva.com'}</p>
               </div>
               <div>
-                <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77]">{ca ? "Visita'ns" : 'Visítanos'}</p>
-                <p>{contactData?.address || 'Carrer Exemple 123'}</p>
-                <p>08001 Barcelona</p>
+                <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77]">
+                  {ca ? "Visita'ns" : 'Visítanos'}
+                </p>
+                <p>
+                  {ca
+                    ? (footerTrans.address?.street || footerData?.address?.street || 'Carrer Exemple 123')
+                    : (footerData?.address?.street || 'Carrer Exemple 123')}
+                </p>
+                <p>
+                  {footerData?.address?.postal || '08001'}{' '}
+                  {ca
+                    ? (footerTrans.address?.city || footerData?.address?.city || 'Barcelona')
+                    : (footerData?.address?.city || 'Barcelona')}
+                </p>
+                {footerData?.schedule && (
+                  <p className="mt-2">
+                    🕒 {ca
+                      ? (footerTrans.schedule || footerData.schedule)
+                      : footerData.schedule}
+                  </p>
+                )}
               </div>
             </div>
           </div>
           <div className="flex flex-col justify-between gap-5 pt-7 text-[10px] uppercase tracking-[0.18em] text-white/30 sm:flex-row">
-            <p>{footerData?.copyright || (ca ? '© 2025 Renovactiva-SL. Tots els drets reservats.' : '© 2025 Renovactiva-SL. Todos los derechos reservados.')}</p>
+            <p>
+              {ca
+                ? (footerTrans.copyright || footerData?.copyright || '© 2025 Renovactiva-SL. Tots els drets reservats.')
+                : (footerData?.copyright || '© 2025 Renovactiva-SL. Todos los derechos reservados.')}
+            </p>
             <div className="flex gap-5">
-              <Globe2 className="size-4" />
-              <ArrowUpRight className="size-4" />
+              {footerData?.social?.instagram && (
+                <a href={footerData.social.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-[#d7bd77] transition-colors">Instagram</a>
+              )}
+              {footerData?.social?.linkedin && (
+                <a href={footerData.social.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-[#d7bd77] transition-colors">LinkedIn</a>
+              )}
+              {footerData?.social?.youtube && (
+                <a href={footerData.social.youtube} target="_blank" rel="noopener noreferrer" className="hover:text-[#d7bd77] transition-colors">YouTube</a>
+              )}
+              {footerData?.social?.facebook && (
+                <a href={footerData.social.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-[#d7bd77] transition-colors">Facebook</a>
+              )}
             </div>
           </div>
         </div>
