@@ -12,6 +12,10 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 export default function Home() {
   const [loading, setLoading] = useState(true)
   const [heroData, setHeroData] = useState<any>(null)
+  const [servicesData, setServicesData] = useState<any[]>([])
+  const [projectsData, setProjectsData] = useState<any[]>([])
+  const [contactData, setContactData] = useState<any>(null)
+  const [footerData, setFooterData] = useState<any>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeHero, setActiveHero] = useState(0)
   const { language } = useLanguage()
@@ -20,7 +24,7 @@ export default function Home() {
   useEffect(() => {
     async function loadData() {
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content?section=eq.hero&select=*`, {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content?select=section,content`, {
           headers: {
             'apikey': SUPABASE_KEY,
             'Authorization': `Bearer ${SUPABASE_KEY}`
@@ -28,7 +32,18 @@ export default function Home() {
         })
         if (!res.ok) throw new Error('Error al cargar')
         const data = await res.json()
-        if (data.length > 0) setHeroData(data[0].content)
+
+        const hero = data.find((d: any) => d.section === 'hero')
+        const services = data.find((d: any) => d.section === 'services')
+        const projects = data.find((d: any) => d.section === 'projects')
+        const contact = data.find((d: any) => d.section === 'contact')
+        const footer = data.find((d: any) => d.section === 'footer')
+
+        if (hero) setHeroData(hero.content)
+        if (services) setServicesData(services.content?.items || [])
+        if (projects) setProjectsData(projects.content?.items || [])
+        if (contact) setContactData(contact.content)
+        if (footer) setFooterData(footer.content)
       } catch (err) {
         console.error('Error al cargar datos:', err)
       } finally {
@@ -45,6 +60,7 @@ export default function Home() {
   }
 
   const heroImages = heroData?.images || ['', '', '']
+  const heroTrans = heroData?.translations || {}
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#10100f] text-[#f3f0e9]">
@@ -78,10 +94,10 @@ export default function Home() {
         {menuOpen && (
           <div className="border-t border-white/10 bg-[#10100f]/95 px-6 py-6 lg:hidden">
             <nav className="flex flex-col gap-5 text-sm uppercase tracking-[0.18em] text-white/70">
-              <a href="#proyectos" onClick={() => setMenuOpen(false)}>Proyectos</a>
-              <a href="#servicios" onClick={() => setMenuOpen(false)}>Servicios</a>
-              <a href="#metodo" onClick={() => setMenuOpen(false)}>Nuestro método</a>
-              <a href="#contacto" onClick={() => setMenuOpen(false)}>Contacto</a>
+              <a href="#proyectos" onClick={() => setMenuOpen(false)}>{ca ? 'Projectes' : 'Proyectos'}</a>
+              <a href="#servicios" onClick={() => setMenuOpen(false)}>{ca ? 'Serveis' : 'Servicios'}</a>
+              <a href="#metodo" onClick={() => setMenuOpen(false)}>{ca ? 'El nostre mètode' : 'Nuestro método'}</a>
+              <a href="#contacto" onClick={() => setMenuOpen(false)}>{ca ? 'Contacte' : 'Contacto'}</a>
             </nav>
           </div>
         )}
@@ -102,24 +118,32 @@ export default function Home() {
         <div className="relative z-10 mx-auto w-full max-w-[1380px] px-6 pb-20 pt-40 lg:px-10 lg:pb-28">
           <div className="max-w-3xl">
             <p className="mb-7 text-[11px] uppercase tracking-[0.42em] text-[#d7bd77]">
-              {heroData?.eyebrow || 'Arquitectura · Interiorismo · Construcción'}
+              {ca
+                ? (heroTrans.eyebrow || heroData?.eyebrow || 'Arquitectura · Interiorisme · Construcció')
+                : (heroData?.eyebrow || 'Arquitectura · Interiorismo · Construcción')}
             </p>
             <h1 className="max-w-3xl font-serif text-5xl leading-[0.98] tracking-[-0.03em] sm:text-7xl lg:text-[104px]">
-              {heroData?.title || 'Espacios que trascienden.'}
+              {ca
+                ? (heroTrans.title || heroData?.title || 'Espais que trascendeixen.')
+                : (heroData?.title || 'Espacios que trascienden.')}
             </h1>
             <p className="mt-8 max-w-md text-base leading-relaxed text-white/65">
-              {heroData?.description || 'Reformas de alto nivel para viviendas, locales y oficinas.'}
+              {ca
+                ? (heroTrans.description || heroData?.description || "Reformes d'alt nivell per a habitatges, locals i oficines.")
+                : (heroData?.description || 'Reformas de alto nivel para viviendas, locales y oficinas.')}
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-5">
               <a
                 href="#contacto"
                 className="group inline-flex items-center gap-5 bg-[#d7bd77] px-6 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-[#141310] transition-colors hover:bg-white"
               >
-                {heroData?.cta || 'Hablemos de tu proyecto'}
+                {ca
+                  ? (heroTrans.cta || heroData?.cta || 'Parlem del teu projecte')
+                  : (heroData?.cta || 'Hablemos de tu proyecto')}
                 <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
               </a>
               <a href="#proyectos" className="inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/70 hover:text-[#d7bd77]">
-                <Play className="size-4 fill-current" /> Ver proyectos
+                <Play className="size-4 fill-current" /> {ca ? 'Veure projectes' : 'Ver proyectos'}
               </a>
             </div>
           </div>
@@ -136,11 +160,11 @@ export default function Home() {
           </div>
         </div>
         <div className="grid gap-5 lg:grid-cols-[1.4fr_0.8fr]">
-          {[
+          {(projectsData.length > 0 ? projectsData : [
             { title: 'Casa Paseo del Prado', type: 'Vivienda integral', image: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1400&q=85' },
             { title: 'Estudio Cobalto', type: 'Oficina corporativa', image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1400&q=85' },
             { title: 'Atelier Chamberí', type: 'Local comercial', image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1400&q=85' },
-          ].map((project, index) => (
+          ]).map((project, index) => (
             <div key={index} className="group relative overflow-hidden rounded-lg">
               <div
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
@@ -167,12 +191,12 @@ export default function Home() {
             </div>
           </div>
           <div className="grid gap-px bg-white/10 md:grid-cols-3">
-            {[
-              { number: '01', title: { es: 'Reformas de viviendas', ca: 'Reformes d\'habitatges' }, href: '/reformas-viviendas', image: 'https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?auto=format&fit=crop&w=1400&q=85', copy: { es: 'Espacios que se adaptan a tu forma de vivir.', ca: 'Espais que s\'adapten a la teva manera de viure.' } },
+            {(servicesData.length > 0 ? servicesData : [
+              { number: '01', title: { es: 'Reformas de viviendas', ca: "Reformes d'habitatges" }, href: '/reformas-viviendas', image: 'https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?auto=format&fit=crop&w=1400&q=85', copy: { es: 'Espacios que se adaptan a tu forma de vivir.', ca: "Espais que s'adapten a la teva manera de viure." } },
               { number: '02', title: { es: 'Locales comerciales', ca: 'Locals comercials' }, href: '/reformas-locales-comerciales', image: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?auto=format&fit=crop&w=1400&q=85', copy: { es: 'Tu marca, convertida en una experiencia.', ca: 'La teva marca, convertida en una experiència.' } },
-              { number: '03', title: { es: 'Reformas de oficinas', ca: 'Reformes d\'oficines' }, href: '/reformas-oficinas', image: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=85', copy: { es: 'Lugares donde las ideas cobran vida.', ca: 'Llocs on les idees cobren vida.' } },
-            ].map((service) => (
-              <Link key={service.number} href={service.href} className="group relative min-h-[470px] overflow-hidden bg-[#171715] p-7">
+              { number: '03', title: { es: 'Reformas de oficinas', ca: "Reformes d'oficines" }, href: '/reformas-oficinas', image: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=85', copy: { es: 'Lugares donde las ideas cobran vida.', ca: 'Llocs on les idees cobren vida.' } },
+            ]).map((service) => (
+              <Link key={service.number} href={service.href || '#'} className="group relative min-h-[470px] overflow-hidden bg-[#171715] p-7">
                 <div
                   className="absolute inset-0 bg-cover bg-center opacity-45 transition-all duration-700 group-hover:scale-105 group-hover:opacity-65"
                   style={{ backgroundImage: `url(${service.image})` }}
@@ -182,10 +206,10 @@ export default function Home() {
                   <span className="font-serif text-5xl text-[#d7bd77]/70">{service.number}</span>
                   <div>
                     <h3 className="whitespace-pre-line font-serif text-4xl leading-none">
-                      {service.title[language] || ''}
+                      {service.title?.[language] || ''}
                     </h3>
                     <p className="mt-5 max-w-[210px] text-sm leading-relaxed text-white/55">
-                      {service.copy[language] || ''}
+                      {service.copy?.[language] || ''}
                     </p>
                   </div>
                 </div>
@@ -239,7 +263,7 @@ export default function Home() {
               {ca ? "Explica'ns la teva idea." : 'Cuéntanos tu idea.'}
             </p>
             <a
-              href="mailto:info@renovactiva-sl.com"
+              href={`mailto:${contactData?.email || 'info@renovactiva-sl.com'}`}
               className="mt-7 inline-flex items-center gap-4 border-b border-[#141310] pb-2 text-[11px] uppercase tracking-[0.2em]"
             >
               {ca ? 'Demanar pressupost' : 'Solicitar presupuesto'}
@@ -265,19 +289,19 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-2 gap-x-14 gap-y-8 text-sm text-white/50">
               <div>
-                <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77]">Contacto</p>
-                <p>+34 600 000 000</p>
-                <p>info@renovactiva-sl.com</p>
+                <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77]">{ca ? 'Contacte' : 'Contacto'}</p>
+                <p>{contactData?.phone || '+34 600 000 000'}</p>
+                <p>{contactData?.email || 'info@renovactiva-sl.com'}</p>
               </div>
               <div>
-                <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77]">Visítanos</p>
-                <p>Carrer Exemple 123</p>
+                <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77]">{ca ? "Visita'ns" : 'Visítanos'}</p>
+                <p>{contactData?.address || 'Carrer Exemple 123'}</p>
                 <p>08001 Barcelona</p>
               </div>
             </div>
           </div>
           <div className="flex flex-col justify-between gap-5 pt-7 text-[10px] uppercase tracking-[0.18em] text-white/30 sm:flex-row">
-            <p>© 2025 Renovactiva-SL. Todos los derechos reservados.</p>
+            <p>{footerData?.copyright || (ca ? '© 2025 Renovactiva-SL. Tots els drets reservats.' : '© 2025 Renovactiva-SL. Todos los derechos reservados.')}</p>
             <div className="flex gap-5">
               <Globe2 className="size-4" />
               <ArrowUpRight className="size-4" />
