@@ -90,6 +90,7 @@ export default function Home() {
   const heroTrans = heroData?.translations || {}
   const footerTrans = footerData?.translations || {}
   const servicesTrans = servicesSection?.translations || {}
+  const contactTrans = contactData?.translations || {}
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#10100f] text-[#f3f0e9]">
@@ -195,7 +196,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECCIÓN PROYECTOS: rectángulo + cuadrado / cuadrado + rectángulo */}
+      {/* SECCIÓN PROYECTOS */}
       <section id="proyectos" className="mx-auto max-w-[1380px] px-6 py-24 lg:px-10 lg:py-36">
         <div className="mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
@@ -244,7 +245,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECCIÓN SERVICIOS: 4 cuadrados iguales (2×2) */}
+      {/* SECCIÓN SERVICIOS */}
       <section id="servicios" className="border-y border-white/10 bg-[#171715] px-6 py-24 lg:px-10 lg:py-32">
         <div className="mx-auto max-w-[1380px]">
           <div className="mb-14 flex items-end justify-between">
@@ -292,6 +293,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* SECCIÓN MÉTODO */}
       <section id="metodo" className="mx-auto max-w-[1380px] px-6 py-24 lg:px-10 lg:py-36">
         <div className="grid gap-16 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
@@ -323,21 +325,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECCIÓN CONTACTO CON BOTÓN VERDE */}
+      {/* SECCIÓN CONTACTO CON BOTÓN VERDE Y EMAIL */}
       <section id="contacto" className="relative overflow-hidden bg-[#d7bd77] px-6 py-24 text-[#141310] lg:px-10 lg:py-32">
         <div className="relative mx-auto flex max-w-[1380px] flex-col justify-between gap-12 lg:flex-row lg:items-end">
           <div>
             <p className="eyebrow !text-[#141310]/60">{ca ? 'El primer pas' : 'El primer paso'}</p>
             <h2 className="max-w-3xl font-serif text-5xl leading-none tracking-tight sm:text-7xl">
-              {ca ? <>Fem alguna cosa<br /><i>extraordinària.</i></> : <>Hagamos algo<br /><i>extraordinario.</i></>}
+              {ca 
+                ? <>{contactTrans.title || 'Fem alguna cosa'}<br /><i>{contactTrans.titleItalic || 'extraordinària.'}</i></>
+                : <>Hagamos algo<br /><i>extraordinario.</i></>}
             </h2>
           </div>
           <div className="max-w-sm">
             <p className="text-sm leading-relaxed text-[#141310]/70">
-              {ca ? "Explica'ns la teva idea." : 'Cuéntanos tu idea.'}
+              {ca 
+                ? (contactTrans.subtitle || "Explica'ns la teva idea.")
+                : 'Cuéntanos tu idea.'}
             </p>
             <a
-              href={`mailto:${footerData?.contact?.email || contactData?.email || 'info@renovactiva.com'}`}
+              href="mailto:info@renovactiva.com?subject=Solicitud%20de%20presupuesto%20-%20Renovactiva&body=Hola%2C%20me%20gustar%C3%ADa%20solicitar%20un%20presupuesto%20para%20mi%20proyecto.%0A%0ANombre%3A%20%0ATel%C3%A9fono%3A%20%0ADescripci%C3%B3n%20del%20proyecto%3A%20"
               className="mt-7 inline-flex items-center gap-3 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors text-[11px] uppercase tracking-[0.2em] font-medium"
             >
               {ca ? 'Demanar pressupost' : 'Solicitar presupuesto'}
