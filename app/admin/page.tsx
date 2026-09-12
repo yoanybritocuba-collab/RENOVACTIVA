@@ -156,6 +156,9 @@ export default function AdminDashboard() {
           <Link href="/admin/services" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
             <Wrench className="size-4" /> Servicios
           </Link>
+          <Link href="/admin/contact" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
+            <Mail className="size-4" /> Contacto
+          </Link>
           <Link href="/admin/footer" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
             <Image className="size-4" /> Footer
           </Link>
