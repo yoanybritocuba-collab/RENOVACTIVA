@@ -245,7 +245,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECCIÓN SERVICIOS */}
+      {/* SECCIÓN SERVICIOS - 4 CUADRADOS IGUALES */}
       <section id="servicios" className="border-y border-white/10 bg-[#171715] px-6 py-24 lg:px-10 lg:py-32">
         <div className="mx-auto max-w-[1380px]">
           <div className="mb-14 flex items-end justify-between">
@@ -264,31 +264,34 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid gap-px bg-white/10 md:grid-cols-2">
-            {servicesData.slice(0, 4).map((service: any, index: number) => (
-              <Link 
-                key={index} 
-                href={service.href || '#'} 
-                className="group relative min-h-[500px] overflow-hidden bg-[#171715] p-7"
-              >
-                <div
-                  className="absolute inset-0 bg-cover bg-center opacity-45 transition-all duration-700 group-hover:scale-105 group-hover:opacity-65"
-                  style={{ backgroundImage: `url(${service.image || service.images?.[0] || ''})` }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#10100f] via-[#10100f]/30 to-transparent" />
-                <div className="relative flex h-full flex-col justify-between">
-                  <span className="font-serif text-5xl text-[#d7bd77]/70">{service.number}</span>
-                  <div>
-                    <h3 className="whitespace-pre-line font-serif text-4xl leading-none">
-                      {service.title?.[language] || ''}
-                    </h3>
-                    <p className="mt-5 max-w-[210px] text-sm leading-relaxed text-white/55">
-                      {service.copy?.[language] || ''}
-                    </p>
+          <div className="grid gap-5 md:grid-cols-2">
+            {servicesData.slice(0, 4).map((service: any, index: number) => {
+              const imageUrl = service.images?.[0] || service.image || ''
+              return (
+                <Link 
+                  key={index} 
+                  href={service.href || '#'} 
+                  className="group relative min-h-[500px] overflow-hidden bg-[#171715] p-7 rounded-lg"
+                >
+                  <div
+                    className="absolute inset-0 bg-cover bg-center opacity-45 transition-all duration-700 group-hover:scale-105 group-hover:opacity-65"
+                    style={{ backgroundImage: `url(${imageUrl})` }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#10100f] via-[#10100f]/30 to-transparent" />
+                  <div className="relative flex h-full flex-col justify-between">
+                    <span className="font-serif text-5xl text-[#d7bd77]/70">{service.number}</span>
+                    <div>
+                      <h3 className="whitespace-pre-line font-serif text-4xl leading-none">
+                        {service.title?.[language] || ''}
+                      </h3>
+                      <p className="mt-5 max-w-[210px] text-sm leading-relaxed text-white/55">
+                        {service.copy?.[language] || ''}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -325,22 +328,18 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECCIÓN CONTACTO CON BOTÓN VERDE Y EMAIL */}
+      {/* SECCIÓN CONTACTO CON BOTÓN VERDE */}
       <section id="contacto" className="relative overflow-hidden bg-[#d7bd77] px-6 py-24 text-[#141310] lg:px-10 lg:py-32">
         <div className="relative mx-auto flex max-w-[1380px] flex-col justify-between gap-12 lg:flex-row lg:items-end">
           <div>
             <p className="eyebrow !text-[#141310]/60">{ca ? 'El primer pas' : 'El primer paso'}</p>
             <h2 className="max-w-3xl font-serif text-5xl leading-none tracking-tight sm:text-7xl">
-              {ca 
-                ? <>{contactTrans.title || 'Fem alguna cosa'}<br /><i>{contactTrans.titleItalic || 'extraordinària.'}</i></>
-                : <>Hagamos algo<br /><i>extraordinario.</i></>}
+              {ca ? <>Fem alguna cosa<br /><i>extraordinària.</i></> : <>Hagamos algo<br /><i>extraordinario.</i></>}
             </h2>
           </div>
           <div className="max-w-sm">
             <p className="text-sm leading-relaxed text-[#141310]/70">
-              {ca 
-                ? (contactTrans.subtitle || "Explica'ns la teva idea.")
-                : 'Cuéntanos tu idea.'}
+              {ca ? "Explica'ns la teva idea." : 'Cuéntanos tu idea.'}
             </p>
             <a
               href="mailto:info@renovactiva.com?subject=Solicitud%20de%20presupuesto%20-%20Renovactiva&body=Hola%2C%20me%20gustar%C3%ADa%20solicitar%20un%20presupuesto%20para%20mi%20proyecto.%0A%0ANombre%3A%20%0ATel%C3%A9fono%3A%20%0ADescripci%C3%B3n%20del%20proyecto%3A%20"
