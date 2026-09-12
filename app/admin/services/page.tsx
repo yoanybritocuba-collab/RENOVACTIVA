@@ -38,7 +38,6 @@ export default function ServicesPage() {
       const result = await res.json()
       if (result.length > 0) {
         const servicesData = result[0]
-        // Migrar de "image" a "images" si es necesario
         const items = (servicesData.content.items || []).map((item: any) => ({
           ...item,
           images: item.images || (item.image ? [item.image] : [])
@@ -57,7 +56,6 @@ export default function ServicesPage() {
     try {
       const contentToSave = { ...data.content }
 
-      // Traducir títulos de la sección
       const translations = {
         eyebrow: await translate(data.content.eyebrow || '', 'ca'),
         title: await translate(data.content.title || '', 'ca'),
@@ -65,7 +63,6 @@ export default function ServicesPage() {
       }
       contentToSave.translations = translations
 
-      // Traducir cada servicio
       const translatedItems = await Promise.all(
         (data.content.items || []).map(async (item: any) => {
           const newItem = { ...item }
@@ -97,10 +94,6 @@ export default function ServicesPage() {
     } catch (err) {
       setError('❌ ' + (err as Error).message)
     } finally { setSaving(false) }
-  }
-
-  function updateField(key: string, value: string) {
-    setData({ ...data, content: { ...data.content, [key]: value } })
   }
 
   function updateItem(index: number, key: string, value: any) {
@@ -147,96 +140,64 @@ export default function ServicesPage() {
       notice={notice}
     >
       <div className="space-y-6">
-        {/* Título de la sección */}
-        <div className="border-b border-white/10 pb-6">
-          <h3 className="text-white/60 text-sm font-semibold mb-4">✏️ Título de la sección</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-white/50 text-sm mb-1">Eyebrow</label>
-              <input type="text" value={data.content.eyebrow || ''} onChange={(e) => updateField('eyebrow', e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="Lo que hacemos" />
-              {data.content.translations?.eyebrow && <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.translations.eyebrow}</p>}
-            </div>
-            <div>
-              <label className="block text-white/50 text-sm mb-1">Título</label>
-              <input type="text" value={data.content.title || ''} onChange={(e) => updateField('title', e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="Una visión" />
-              {data.content.translations?.title && <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.translations.title}</p>}
-            </div>
-            <div>
-              <label className="block text-white/50 text-sm mb-1">Título en cursiva</label>
-              <input type="text" value={data.content.titleItalic || ''} onChange={(e) => updateField('titleItalic', e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="sin límites." />
-              {data.content.translations?.titleItalic && <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.translations.titleItalic}</p>}
-            </div>
-          </div>
+        <div className="flex items-center justify-between">
+          <h3 className="text-white/60 text-sm font-semibold">🛠 Servicios ({(data.content.items || []).length})</h3>
+          <button onClick={addItem} className="flex items-center gap-2 bg-[#d7bd77] px-4 py-2 text-[#11110f] rounded-lg hover:bg-white transition-colors text-sm font-medium">
+            <Plus className="size-4" /> Añadir servicio
+          </button>
         </div>
 
-        {/* Lista de servicios */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-white/60 text-sm font-semibold">🛠 Servicios ({(data.content.items || []).length})</h3>
-            <button onClick={addItem} className="flex items-center gap-1 text-[#d7bd77] hover:text-white text-sm">
-              <Plus className="size-4" /> Añadir servicio
-            </button>
-          </div>
+        <div className="space-y-8">
+          {(data.content.items || []).map((item: any, index: number) => (
+            <div key={index} className="border border-white/10 rounded-xl p-5 space-y-5 bg-white/[.02]">
+              <div className="flex items-center justify-between">
+                <span className="text-white/50 text-sm font-medium">Servicio {index + 1}</span>
+                <button onClick={() => removeItem(index)} className="text-red-400 hover:text-red-300 p-1">
+                  <Trash2 className="size-4" />
+                </button>
+              </div>
 
-          <div className="space-y-8">
-            {(data.content.items || []).map((item: any, index: number) => (
-              <div key={index} className="border border-white/10 rounded-xl p-5 space-y-5 bg-white/[.02]">
-                <div className="flex items-center justify-between">
-                  <span className="text-white/50 text-sm font-medium">Servicio {index + 1}</span>
-                  <button onClick={() => removeItem(index)} className="text-red-400 hover:text-red-300 p-1">
-                    <Trash2 className="size-4" />
-                  </button>
-                </div>
-
-                {/* Número y enlace */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-white/50 text-xs mb-1">Número</label>
-                    <input type="text" value={item.number || ''} onChange={(e) => updateItem(index, 'number', e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="01" />
-                  </div>
-                  <div>
-                    <label className="block text-white/50 text-xs mb-1">Enlace</label>
-                    <input type="text" value={item.href || ''} onChange={(e) => updateItem(index, 'href', e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="/reformas-viviendas" />
-                  </div>
-                </div>
-
-                {/* Imágenes (múltiples) */}
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-white/50 text-xs mb-2">🖼️ Imágenes del servicio ({item.images?.length || 0})</label>
-                  <ImageUploader
-                    images={item.images || []}
-                    onChange={(imgs) => updateItem(index, 'images', imgs)}
-                    folder={`services/${item.number || index}`}
-                    maxImages={20}
-                    allowVideos={false}
-                  />
+                  <label className="block text-white/50 text-xs mb-1">Número</label>
+                  <input type="text" value={item.number || ''} onChange={(e) => updateItem(index, 'number', e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="01" />
                 </div>
-
-                {/* Textos ES */}
-                <div className="border-l-2 border-[#d7bd77]/30 pl-3 space-y-2">
-                  <p className="text-[#d7bd77] text-xs font-bold">🇪🇸 Español</p>
-                  <input type="text" value={item.title?.es || ''} onChange={(e) => updateItemNested(index, 'title', 'es', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Título del servicio" />
-                  <input type="text" value={item.copy?.es || ''} onChange={(e) => updateItemNested(index, 'copy', 'es', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Descripción del servicio" />
-                </div>
-
-                {/* Textos CA */}
-                <div className="border-l-2 border-white/10 pl-3 space-y-2">
-                  <p className="text-white/40 text-xs font-bold">🇨🇦 Català</p>
-                  <input type="text" value={item.title?.ca || ''} onChange={(e) => updateItemNested(index, 'title', 'ca', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Títol del servei" />
-                  <input type="text" value={item.copy?.ca || ''} onChange={(e) => updateItemNested(index, 'copy', 'ca', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Descripció del servei" />
+                <div>
+                  <label className="block text-white/50 text-xs mb-1">Enlace</label>
+                  <input type="text" value={item.href || ''} onChange={(e) => updateItem(index, 'href', e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="/reformas-viviendas" />
                 </div>
               </div>
-            ))}
-          </div>
+
+              <div>
+                <label className="block text-white/50 text-xs mb-2">🖼️ Imágenes del servicio ({item.images?.length || 0})</label>
+                <ImageUploader
+                  images={item.images || []}
+                  onChange={(imgs) => updateItem(index, 'images', imgs)}
+                  folder={`services/${item.number || index}`}
+                  maxImages={20}
+                  allowVideos={false}
+                />
+              </div>
+
+              <div className="border-l-2 border-[#d7bd77]/30 pl-3 space-y-2">
+                <p className="text-[#d7bd77] text-xs font-bold">🇪🇸 Español</p>
+                <input type="text" value={item.title?.es || ''} onChange={(e) => updateItemNested(index, 'title', 'es', e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Título del servicio" />
+                <input type="text" value={item.copy?.es || ''} onChange={(e) => updateItemNested(index, 'copy', 'es', e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Descripción del servicio" />
+              </div>
+
+              <div className="border-l-2 border-white/10 pl-3 space-y-2">
+                <p className="text-white/40 text-xs font-bold">🇨🇦 Català</p>
+                <input type="text" value={item.title?.ca || ''} onChange={(e) => updateItemNested(index, 'title', 'ca', e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Títol del servei" />
+                <input type="text" value={item.copy?.ca || ''} onChange={(e) => updateItemNested(index, 'copy', 'ca', e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Descripció del servei" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </AdminSection>
