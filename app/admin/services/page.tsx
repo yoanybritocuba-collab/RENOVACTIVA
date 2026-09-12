@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import AdminSection from '@/components/admin/AdminSection'
+import ImageUploader from '@/components/admin/ImageUploader'
 import { useTranslation } from '@/lib/useTranslation'
 import { Plus, Trash2 } from 'lucide-react'
 
@@ -44,8 +45,7 @@ export default function ServicesPage() {
     setSaving(true); setError(''); setNotice('🌐 Traduciendo y guardando...')
     try {
       const contentToSave = { ...data.content }
-      
-      // Traducir los títulos de la sección
+
       const translations = {
         eyebrow: await translate(data.content.eyebrow || '', 'ca'),
         title: await translate(data.content.title || '', 'ca'),
@@ -53,7 +53,6 @@ export default function ServicesPage() {
       }
       contentToSave.translations = translations
 
-      // Traducir los títulos y textos de cada servicio
       const translatedItems = await Promise.all(
         (data.content.items || []).map(async (item: any) => {
           const newItem = { ...item }
@@ -169,9 +168,9 @@ export default function ServicesPage() {
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             {(data.content.items || []).map((item: any, index: number) => (
-              <div key={index} className="border border-white/10 rounded-lg p-4 space-y-3 bg-white/[.02]">
+              <div key={index} className="border border-white/10 rounded-lg p-4 space-y-4 bg-white/[.02]">
                 <div className="flex items-center justify-between">
                   <span className="text-white/40 text-sm">Servicio {index + 1}</span>
                   <button onClick={() => removeItem(index)} className="text-red-400 hover:text-red-300">
@@ -192,15 +191,16 @@ export default function ServicesPage() {
                   </div>
                 </div>
 
+                {/* Subidor de imágenes */}
                 <div>
-                  <label className="block text-white/50 text-xs mb-1">URL de la imagen</label>
-                  <input type="text" value={item.image || ''} onChange={(e) => updateItem(index, 'image', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="https://..." />
-                  {item.image && (
-                    <div className="mt-2 w-32 aspect-video rounded overflow-hidden border border-white/10">
-                      <img src={item.image} alt="" className="w-full h-full object-cover" />
-                    </div>
-                  )}
+                  <label className="block text-white/50 text-xs mb-2">Imagen del servicio</label>
+                  <ImageUploader
+                    images={item.image ? [item.image] : []}
+                    onChange={(imgs) => updateItem(index, 'image', imgs[0] || '')}
+                    folder={`services/${item.number || index}`}
+                    maxImages={1}
+                    allowVideos={false}
+                  />
                 </div>
 
                 {/* Español */}
