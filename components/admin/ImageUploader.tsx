@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Upload, X, Link as LinkIcon, Image as ImageIcon, Loader2, Video, GripVertical, Eye } from 'lucide-react'
+import { Upload, X, Link as LinkIcon, Image as ImageIcon, Loader2, Video, Eye } from 'lucide-react'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
@@ -28,6 +28,18 @@ export default function ImageUploader({
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Función para limpiar el nombre del archivo/carpeta
+  function cleanName(name: string): string {
+    return name
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')  // Elimina acentos
+      .replace(/ñ/g, 'n')                // Reemplaza ñ
+      .replace(/[^a-z0-9./-]/g, '-')     // Reemplaza espacios y símbolos
+      .replace(/-+/g, '-')               // Elimina guiones duplicados
+      .replace(/^-|-$/g, '')             // Elimina guiones al inicio/final
+  }
+
   const isVideo = (url: string) => {
     const videoExts = ['.mp4', '.webm', '.mov', '.avi']
     return videoExts.some(ext => url.toLowerCase().includes(ext))
@@ -43,8 +55,12 @@ export default function ImageUploader({
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
-        const fileExt = file.name.split('.').pop()
-        const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+        
+        // Limpiar nombre de la carpeta y del archivo
+        const cleanFolder = cleanName(folder)
+        const fileExt = file.name.split('.').pop() || 'jpg'
+        const cleanBaseName = cleanName(file.name.replace(/\.[^/.]+$/, '')) || 'archivo'
+        const fileName = `${cleanFolder}/${Date.now()}-${cleanBaseName}.${fileExt}`
 
         const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${fileName}`, {
           method: 'POST',
@@ -173,6 +189,9 @@ export default function ImageUploader({
                 </p>
                 <p className="text-white/40 text-xs">
                   Máximo {maxImages} archivos · 50MB cada uno
+                </p>
+                <p className="text-white/30 text-[10px]">
+                  Acepta cualquier nombre (acentos, ñ, espacios, etc.)
                 </p>
               </>
             )}
