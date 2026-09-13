@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { 
   LayoutDashboard, Menu, X, Eye, EyeOff, ExternalLink, LogOut,
-  Home, FolderOpen, Wrench, Mail, Image
+  Home, FolderOpen, Wrench, Mail, Image, Settings
 } from 'lucide-react'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
@@ -161,6 +161,9 @@ export default function AdminDashboard() {
           </Link>
           <Link href="/admin/footer" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
             <Image className="size-4" /> Footer
+          </Link>
+          <Link href="/admin/settings" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
+            <Settings className="size-4" /> Configuración
           </Link>
         </nav>
 
