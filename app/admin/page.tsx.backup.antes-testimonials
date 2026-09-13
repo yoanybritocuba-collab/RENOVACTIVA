@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { 
   LayoutDashboard, Menu, X, Eye, EyeOff, ExternalLink, LogOut,
-  Home, FolderOpen, Wrench, Mail, Image, Star
+  Home, FolderOpen, Wrench, Mail, Image
 } from 'lucide-react'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
@@ -139,7 +139,7 @@ export default function AdminDashboard() {
         {sidebarOpen ? <X className="size-5" /> : <Menu className="size-5" />}
       </button>
 
-      <aside className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-white/10 bg-[#0b0b0a] p-6 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 overflow-y-auto`}>
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-white/10 bg-[#0b0b0a] p-6 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <Link href="/" className="font-serif text-lg text-[#d7bd77]">RENOVACTIVA</Link>
         <p className="text-[9px] uppercase tracking-[.2em] text-white/30 mt-1">Panel de administración</p>
 
@@ -155,9 +155,6 @@ export default function AdminDashboard() {
           </Link>
           <Link href="/admin/services" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
             <Wrench className="size-4" /> Servicios
-          </Link>
-          <Link href="/admin/testimonials" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
-            <Star className="size-4" /> Testimonios
           </Link>
           <Link href="/admin/contact" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
             <Mail className="size-4" /> Contacto

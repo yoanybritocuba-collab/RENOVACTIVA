@@ -195,12 +195,10 @@
 }
 
 /* ============================================================
-   NUEVO — PALETA Y ANIMACIONES RENOVACTIVA
-   (Añadido: verde esmeralda + dorado + negro profundo)
+   PALETA Y UTILIDADES RENOVACTIVA
    ============================================================ */
 
 :root {
-  /* Paleta Renovactiva */
   --renov-negro: #0A0F0C;
   --renov-negro-puro: #050806;
   --renov-verde-oscuro: #14251C;
@@ -213,10 +211,7 @@
   --renov-crema: #F3F0E9;
 }
 
-/* ----------------------------------------
-   UTILIDADES DE COLOR
-   ---------------------------------------- */
-
+/* Utilidades de color */
 .bg-renov-negro { background-color: var(--renov-negro); }
 .bg-renov-negro-puro { background-color: var(--renov-negro-puro); }
 .bg-renov-verde-oscuro { background-color: var(--renov-verde-oscuro); }
@@ -233,19 +228,13 @@
 .border-renov-verde { border-color: var(--renov-verde-brillante); }
 .border-renov-dorado { border-color: var(--renov-dorado); }
 
-/* ----------------------------------------
-   ANIMACIONES DE ENTRADA (al hacer scroll)
-   ---------------------------------------- */
+/* ============================================================
+   ANIMACIONES
+   ============================================================ */
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeIn {
@@ -254,47 +243,23 @@
 }
 
 @keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes blurIn {
-  from {
-    opacity: 0;
-    filter: blur(12px);
-  }
-  to {
-    opacity: 1;
-    filter: blur(0);
-  }
+  from { opacity: 0; filter: blur(12px); }
+  to { opacity: 1; filter: blur(0); }
 }
 
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.94);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes lineGrow {
@@ -302,50 +267,14 @@
   to { width: 100%; }
 }
 
-@keyframes numberCount {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+.anim-fade-in-up { animation: fadeInUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards; opacity: 0; }
+.anim-fade-in { animation: fadeIn 1s ease forwards; opacity: 0; }
+.anim-slide-left { animation: slideInLeft 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards; opacity: 0; }
+.anim-slide-right { animation: slideInRight 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards; opacity: 0; }
+.anim-blur-in { animation: blurIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards; opacity: 0; }
+.anim-scale-in { animation: scaleIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; opacity: 0; }
+.anim-line-grow { animation: lineGrow 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
-/* ----------------------------------------
-   CLASES DE ANIMACIÓN
-   ---------------------------------------- */
-
-.anim-fade-in-up {
-  animation: fadeInUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  opacity: 0;
-}
-
-.anim-fade-in {
-  animation: fadeIn 1s ease forwards;
-  opacity: 0;
-}
-
-.anim-slide-left {
-  animation: slideInLeft 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  opacity: 0;
-}
-
-.anim-slide-right {
-  animation: slideInRight 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  opacity: 0;
-}
-
-.anim-blur-in {
-  animation: blurIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  opacity: 0;
-}
-
-.anim-scale-in {
-  animation: scaleIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  opacity: 0;
-}
-
-.anim-line-grow {
-  animation: lineGrow 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-/* Delays para efectos escalonados (stagger) */
 .delay-100 { animation-delay: 0.1s; }
 .delay-200 { animation-delay: 0.2s; }
 .delay-300 { animation-delay: 0.3s; }
@@ -355,29 +284,17 @@
 .delay-700 { animation-delay: 0.7s; }
 .delay-800 { animation-delay: 0.8s; }
 
-/* ----------------------------------------
-   EFECTOS HOVER PARA TARJETAS
-   ---------------------------------------- */
+/* ============================================================
+   HOVER PARA TARJETAS
+   ============================================================ */
 
-.card-hover-lift {
-  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.card-hover-lift:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 50px rgba(16, 183, 127, 0.12);
-}
+.card-hover-lift { transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+.card-hover-lift:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(16, 183, 127, 0.12); }
 
-.card-hover-zoom {
-  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.card-hover-zoom:hover {
-  transform: scale(1.05);
-}
+.card-hover-zoom { transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
+.card-hover-zoom:hover { transform: scale(1.05); }
 
-.card-hover-border {
-  position: relative;
-  transition: all 0.4s ease;
-}
+.card-hover-border { position: relative; transition: all 0.4s ease; }
 .card-hover-border::after {
   content: '';
   position: absolute;
@@ -392,9 +309,9 @@
   box-shadow: 0 0 30px rgba(16, 183, 127, 0.15);
 }
 
-/* ----------------------------------------
-   BOTONES CON HOVER ANIMADO
-   ---------------------------------------- */
+/* ============================================================
+   BOTONES
+   ============================================================ */
 
 .btn-renov-verde {
   background-color: var(--renov-verde-brillante);
@@ -418,13 +335,11 @@
   box-shadow: 0 8px 24px rgba(215, 189, 119, 0.35);
 }
 
-/* ----------------------------------------
-   TEXTO CON SUBRAYADO ANIMADO
-   ---------------------------------------- */
+/* ============================================================
+   SUBRAYADO ANIMADO
+   ============================================================ */
 
-.link-underline {
-  position: relative;
-}
+.link-underline { position: relative; }
 .link-underline::after {
   content: '';
   position: absolute;
@@ -435,17 +350,13 @@
   background-color: var(--renov-verde-brillante);
   transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.link-underline:hover::after {
-  width: 100%;
-}
+.link-underline:hover::after { width: 100%; }
 
-/* ----------------------------------------
-   EFECTO DE FONDO CON TEXTURA SUAVE
-   ---------------------------------------- */
+/* ============================================================
+   TEXTURAS Y LÍNEAS DECORATIVAS
+   ============================================================ */
 
-.section-texture {
-  position: relative;
-}
+.section-texture { position: relative; }
 .section-texture::before {
   content: '';
   position: absolute;
@@ -454,10 +365,6 @@
                     radial-gradient(circle at 80% 80%, rgba(215, 189, 119, 0.03) 0%, transparent 50%);
   pointer-events: none;
 }
-
-/* ----------------------------------------
-   LÍNEA DECORATIVA VERDE
-   ---------------------------------------- */
 
 .line-verde {
   display: block;
@@ -471,9 +378,88 @@
   background: linear-gradient(90deg, transparent 0%, var(--renov-verde-brillante) 50%, transparent 100%);
 }
 
-/* ----------------------------------------
-   RESPETAR PREFERENCIAS DE ACCESIBILIDAD
-   ---------------------------------------- */
+/* ============================================================
+   FIX ANIMACIONES MÓVIL
+   ============================================================ */
+
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  main {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+}
+
+@supports (padding: env(safe-area-inset-top)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* ============================================================
+   HERO — TEXTO CON NEGRITA + SOMBRA (SIN CUADRO)
+   ============================================================ */
+
+/* Título del hero: negrita máxima + sombra fuerte para legibilidad */
+.text-hero-title {
+  font-weight: 700;
+  text-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 2px 6px rgba(0, 0, 0, 0.7),
+    0 4px 16px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(16, 183, 127, 0.25);
+  letter-spacing: -0.03em;
+}
+
+/* Eyebrow: negrita + sombra suave */
+.text-hero-eyebrow {
+  font-weight: 700;
+  text-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 2px 6px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(16, 183, 127, 0.2);
+}
+
+/* Descripción: peso medio + sombra suave */
+.text-hero-description {
+  font-weight: 500;
+  text-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.85),
+    0 2px 8px rgba(0, 0, 0, 0.55);
+}
+
+/* En móvil, sombra un poco más fuerte (pantallas más pequeñas) */
+@media (max-width: 768px) {
+  .text-hero-title {
+    text-shadow: 
+      0 1px 2px rgba(0, 0, 0, 0.95),
+      0 2px 6px rgba(0, 0, 0, 0.75),
+      0 4px 16px rgba(0, 0, 0, 0.55);
+  }
+  
+  .text-hero-eyebrow,
+  .text-hero-description {
+    text-shadow: 
+      0 1px 2px rgba(0, 0, 0, 0.95),
+      0 2px 8px rgba(0, 0, 0, 0.65);
+  }
+}
+
+/* ============================================================
+   ACCESIBILIDAD — PREFERENCIAS DE MOVIMIENTO
+   ============================================================ */
 
 @media (prefers-reduced-motion: reduce) {
   .anim-fade-in-up,
