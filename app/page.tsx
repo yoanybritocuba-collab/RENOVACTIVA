@@ -6,6 +6,8 @@ import { ArrowUpRight, Menu, Play, X, Shield, ChevronLeft, ChevronRight, Camera,
 import { motion, AnimatePresence } from 'framer-motion'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { useLanguage } from '@/components/language-provider'
+import { PuppyMascot } from '@/components/PuppyMascot'
+import { Chatbot } from '@/components/Chatbot'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
@@ -31,6 +33,9 @@ export default function Home() {
   // Estados para el formulario de reseña
   const [reviewCode, setReviewCode] = useState('')
   const [reviewMessage, setReviewMessage] = useState('')
+  
+  // Estado para el chat del perrito
+  const [isChatOpen, setIsChatOpen] = useState(false)
   
   const { language } = useLanguage()
   const ca = language === 'ca'
@@ -775,7 +780,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* 7. DEJA TU RESEÑA — NUEVA SECCIÓN */}
+      {/* 7. DEJA TU RESEÑA */}
       <section className="relative border-y border-white/10 bg-[#0D0D0D] px-6 py-24 lg:px-10 lg:py-32">
         <div className="relative mx-auto max-w-[700px]">
           
@@ -823,7 +828,6 @@ export default function Home() {
           >
             <form onSubmit={handleReviewSubmit} className="space-y-6">
               
-              {/* Icono + Texto */}
               <div className="flex items-center justify-center gap-3 mb-2">
                 <div className="flex items-center justify-center size-10 rounded-full bg-[#10B77F]/10 border border-[#10B77F]/40">
                   <KeyRound className="size-5 text-[#10B77F]" />
@@ -833,7 +837,6 @@ export default function Home() {
                 </span>
               </div>
 
-              {/* Input del código */}
               <div className="relative">
                 <input
                   type="text"
@@ -845,7 +848,6 @@ export default function Home() {
                 />
               </div>
 
-              {/* Botón enviar */}
               <button
                 type="submit"
                 disabled={!reviewCode.trim()}
@@ -858,7 +860,6 @@ export default function Home() {
                 <ArrowUpRight className="relative z-10 size-4 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
               </button>
 
-              {/* Mensaje de respuesta */}
               <AnimatePresence>
                 {reviewMessage && (
                   <motion.div
@@ -873,7 +874,6 @@ export default function Home() {
                 )}
               </AnimatePresence>
 
-              {/* Nota debajo */}
               <div className="pt-4 border-t border-white/10 text-center">
                 <p className="text-xs text-white/50">
                   {ca 
@@ -1262,6 +1262,17 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* 🐶 PERRITO MASCOTA RENOV */}
+      {!isChatOpen && (
+        <PuppyMascot onClick={() => setIsChatOpen(true)} />
+      )}
+
+      {/* 💬 PANEL DE CHAT */}
+      <Chatbot 
+        isOpen={isChatOpen} 
+        onClose={() => setIsChatOpen(false)} 
+      />
     </main>
   )
 }
