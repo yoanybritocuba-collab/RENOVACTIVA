@@ -23,16 +23,16 @@ async function loadSiteData() {
       },
       cache: 'no-store'
     })
-    
+
     if (!res.ok) return null
     const data = await res.json()
-    
+
     const services = data.find((d: any) => d.section === 'services')?.content || {}
     const projects = data.find((d: any) => d.section === 'projects')?.content || {}
     const contact = data.find((d: any) => d.section === 'contact')?.content || {}
     const footer = data.find((d: any) => d.section === 'footer')?.content || {}
     const testimonials = data.find((d: any) => d.section === 'testimonials')?.content || {}
-    
+
     return { services, projects, contact, footer, testimonials }
   } catch {
     return null
@@ -44,9 +44,9 @@ async function loadSiteData() {
 // ============================================================
 function buildSystemPrompt(siteData: any, language: string) {
   const isCa = language === 'ca'
-  
+
   // Servicios
-  const servicesList = siteData?.services?.items?.map((s: any) => 
+  const servicesList = siteData?.services?.items?.map((s: any) =>
     `- ${s.title?.[language] || s.title?.es || ''}: ${s.copy?.[language] || s.copy?.es || ''}`
   ).join('\n') || 'Reformas de viviendas, locales comerciales, oficinas y fincas.'
 
@@ -84,7 +84,19 @@ INSTRUCCIONS:
 2. Si no saps alguna cosa, digues: "Per a aquesta informació, el millor és que ens escriguis a ${email}"
 3. Sempre intenta portar el client cap a demanar pressupost.
 4. NO inventis preus ni terminis exactes. Digues: "depèn de cada projecte, demana pressupost".
-5. Si el client pregunta per una reforma concreta, ofereix un exemple similar dels projectes.`
+5. Si el client pregunta per una reforma concreta, ofereix un exemple similar dels projectes.
+6. IMPORTANT - COMPRENSIÓ DEL LLENGUATGE:
+   - El client pot escriure amb faltes d'ortografia, errors tipogràfics, abreviatures o sense accents.
+   - INTERPRETA SEMPRE la intenció real del missatge, no la forma.
+   - Exemples:
+     * "k tal reforma d baño" → "¿Qué tal una reforma de baño?"
+     * "presupuesto para piso" → "presupuesto para vivienda"
+     * "cuanto cuesta" → "¿cuánto cuesta?"
+     * "q haceis" → "¿qué hacéis?"
+     * "reforma lokales" → "reforma de locales"
+   - NO corregeixis les faltes al client.
+   - Simplement respon com si hagués escrit correctament.
+7. Si el missatge és molt ambigu i no entens res, pregunta amablement: "Pots explicar-me una mica més què necessites? 🐶"`
   }
 
   return `Eres Renov, el asistente virtual de Renovactiva, una empresa de reformas de Barcelona.
@@ -111,7 +123,19 @@ INSTRUCCIONES:
 2. Si no sabes algo, di: "Para esa información, lo mejor es que nos escribas a ${email}"
 3. Siempre intenta llevar al cliente hacia pedir presupuesto.
 4. NO inventes precios ni plazos exactos. Di: "depende de cada proyecto, pide presupuesto".
-5. Si el cliente pregunta por una reforma concreta, ofrece un ejemplo similar de los proyectos.`
+5. Si el cliente pregunta por una reforma concreta, ofrece un ejemplo similar de los proyectos.
+6. IMPORTANTE - COMPRENSIÓN DEL LENGUAJE:
+   - El cliente puede escribir con faltas de ortografía, errores tipográficos, abreviaturas o sin acentos.
+   - INTERPRETA SIEMPRE la intención real del mensaje, no la forma.
+   - Ejemplos:
+     * "k tal reforma d baño" → "¿Qué tal una reforma de baño?"
+     * "presupuesto para piso" → "presupuesto para vivienda"
+     * "cuanto cuesta" → "¿cuánto cuesta?"
+     * "q haceis" → "¿qué hacéis?"
+     * "reforma lokales" → "reforma de locales"
+   - NO corrijas las faltas al cliente.
+   - Simplemente responde como si hubiera escrito correctamente.
+7. Si el mensaje es muy ambiguo y no entiendes nada, pregunta amablemente: "¿Puedes explicarme un poco más qué necesitas? 🐶"`
 }
 
 // ============================================================
