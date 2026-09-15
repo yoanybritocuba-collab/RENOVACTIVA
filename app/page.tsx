@@ -1107,10 +1107,13 @@ export default function Home() {
                     : (footerData?.address?.city || 'Barcelona')}
                 </p>
                 {footerData?.schedule && (
-                  <p className="mt-2">
-                    🕒 {ca
-                      ? (footerTrans.schedule || footerData.schedule)
-                      : footerData.schedule}
+                  <p className="mt-3 flex items-start gap-2">
+                    <span className="flex-shrink-0">🕒</span>
+                    <span>
+                      {ca
+                        ? (footerTrans.schedule || footerData.schedule)
+                        : footerData.schedule}
+                    </span>
                   </p>
                 )}
               </div>
