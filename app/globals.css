@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './nova.css';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
@@ -412,7 +413,6 @@ body {
    HERO — TEXTO CON NEGRITA + SOMBRA (SIN CUADRO)
    ============================================================ */
 
-/* Título del hero: negrita máxima + sombra fuerte para legibilidad */
 .text-hero-title {
   font-weight: 700;
   text-shadow: 
@@ -423,7 +423,6 @@ body {
   letter-spacing: -0.03em;
 }
 
-/* Eyebrow: negrita + sombra suave */
 .text-hero-eyebrow {
   font-weight: 700;
   text-shadow: 
@@ -432,7 +431,6 @@ body {
     0 0 20px rgba(16, 183, 127, 0.2);
 }
 
-/* Descripción: peso medio + sombra suave */
 .text-hero-description {
   font-weight: 500;
   text-shadow: 
@@ -440,7 +438,6 @@ body {
     0 2px 8px rgba(0, 0, 0, 0.55);
 }
 
-/* En móvil, sombra un poco más fuerte (pantallas más pequeñas) */
 @media (max-width: 768px) {
   .text-hero-title {
     text-shadow: 
@@ -454,6 +451,83 @@ body {
     text-shadow: 
       0 1px 2px rgba(0, 0, 0, 0.95),
       0 2px 8px rgba(0, 0, 0, 0.65);
+  }
+}
+
+/* ============================================================
+   MASCOTA — BURBUJA UN SOLO RENGLÓN + STANDBY
+   ============================================================ */
+
+/* Burbuja de un solo renglón */
+.mascot-speech {
+  white-space: nowrap !important;
+  max-width: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0.55rem 1rem !important;
+  font-size: 0.85rem !important;
+  line-height: 1.2 !important;
+  border-radius: 999px !important;
+  transition: opacity 0.8s ease, filter 0.8s ease, transform 0.3s ease !important;
+}
+
+/* Cursor parpadeante */
+.bubble-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  animation: bubble-cursor-blink 0.9s ease-in-out infinite;
+}
+
+@keyframes bubble-cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* STANDBY — cuando la mascota está inactiva */
+.mascot-assistant.is-standby {
+  opacity: 0.35;
+  filter: grayscale(30%) blur(0.3px);
+  transition: opacity 0.8s ease, filter 0.8s ease;
+}
+
+.mascot-assistant.is-standby .mascot-speech {
+  opacity: 0.5;
+  transform: scale(0.98);
+}
+
+.mascot-assistant.is-standby .mascot-trigger {
+  transform: scale(0.94);
+  transition: transform 0.8s ease;
+}
+
+/* Cuando el cursor está cerca → vuelve a activo */
+.mascot-assistant:not(.is-standby) {
+  opacity: 1;
+  filter: none;
+  transition: opacity 0.4s ease, filter 0.4s ease;
+}
+
+.mascot-assistant:not(.is-standby) .mascot-speech {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.mascot-assistant:not(.is-standby) .mascot-trigger {
+  transform: scale(1);
+}
+
+/* Móvil → sin standby (es más difícil detectar cerca) */
+@media (max-width: 768px) {
+  .mascot-assistant.is-standby {
+    opacity: 0.6;
+    filter: none;
+  }
+  
+  .mascot-speech {
+    white-space: normal !important;
+    max-width: 200px !important;
+    font-size: 0.8rem !important;
+    padding: 0.5rem 0.85rem !important;
   }
 }
 

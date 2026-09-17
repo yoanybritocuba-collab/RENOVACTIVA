@@ -6,8 +6,7 @@ import { ArrowUpRight, Menu, Play, X, Shield, ChevronLeft, ChevronRight, Camera,
 import { motion, AnimatePresence } from 'framer-motion'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { useLanguage } from '@/components/language-provider'
-import { PuppyMascot } from '@/components/PuppyMascot'
-import { Chatbot } from '@/components/Chatbot'
+import { MascotAssistant } from '@/components/MascotAssistant'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
@@ -30,12 +29,8 @@ export default function Home() {
   
   const [openFaq, setOpenFaq] = useState<number | null>(0)
   
-  // Estados para el formulario de reseña
   const [reviewCode, setReviewCode] = useState('')
   const [reviewMessage, setReviewMessage] = useState('')
-  
-  // Estado para el chat del perrito
-  const [isChatOpen, setIsChatOpen] = useState(false)
   
   const { language } = useLanguage()
   const ca = language === 'ca'
@@ -154,7 +149,6 @@ export default function Home() {
     setCurrentPhotoIndex(prev => prev > 0 ? prev - 1 : total - 1)
   }
 
-  // Datos para NÚMEROS
   const statsData = [
     { icon: Briefcase, number: 150, suffix: '+', labelEs: 'Proyectos realizados', labelCa: 'Projectes realitzats' },
     { icon: Award, number: 15, suffix: '', labelEs: 'Años de experiencia', labelCa: 'Anys d\'experiència' },
@@ -162,7 +156,6 @@ export default function Home() {
     { icon: HomeIcon, number: 250, suffix: 'K', labelEs: 'm² reformados', labelCa: 'm² reformats' },
   ]
 
-  // Datos para FAQ
   const faqs = [
     {
       qEs: '¿Cuánto tarda una reforma integral?',
@@ -1266,16 +1259,8 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* 🐶 PERRITO MASCOTA RENOV */}
-      {!isChatOpen && (
-        <PuppyMascot onClick={() => setIsChatOpen(true)} />
-      )}
-
-      {/* 💬 PANEL DE CHAT */}
-      <Chatbot 
-        isOpen={isChatOpen} 
-        onClose={() => setIsChatOpen(false)} 
-      />
+      {/* 🤖 ROBOT RENOV CON CHAT IA */}
+      <MascotAssistant lang={ca ? 'ca' : 'es'} />
     </main>
   )
 }
