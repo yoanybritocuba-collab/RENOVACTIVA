@@ -1,5 +1,7 @@
 /* ============================================
    NOVA — mascota/robot IA con chat (adaptado a Renovactiva)
+   Robot: gris metálico + verde (original)
+   Burbuja: texto dorado (nuevo)
    ============================================ */
 
 .mascot-assistant {
@@ -11,7 +13,8 @@
   height: 60px !important;
   font-family: Arial, Helvetica, sans-serif;
   touch-action: none;
-  will-change: left, top;
+  will-change: left, top, opacity;
+  transition: opacity 1.2s ease, filter 1.2s ease;
 }
 
 .mascot-assistant.is-positioned {
@@ -22,33 +25,146 @@
 .mascot-assistant.is-dragging { cursor: grabbing; }
 
 /* ============================================
-   BURBUJA — pegada ARRIBA del robot
+   DEEP SLEEP — Mascota casi invisible
+   ============================================ */
+.mascot-assistant.is-deep-sleep {
+  opacity: 0.10 !important;
+  filter: grayscale(60%) blur(1px) !important;
+}
+
+.mascot-assistant.is-deep-sleep .robot-eye {
+  opacity: 1 !important;
+  filter: none !important;
+  background: #10B77F !important;
+  box-shadow: 
+    0 0 14px #10B77F, 
+    0 0 28px #10B77F, 
+    0 0 50px rgba(16, 183, 127, 0.7),
+    0 0 80px rgba(16, 183, 127, 0.4) !important;
+  animation: deepSleepEyePulse 2s ease-in-out infinite, robotBlink 5s ease-in-out infinite !important;
+}
+
+.mascot-assistant.is-deep-sleep .robot-core {
+  opacity: 1 !important;
+  filter: none !important;
+  background: #000 !important;
+  border: 2px solid #10B77F !important;
+  box-shadow: 
+    0 0 16px #10B77F, 
+    0 0 32px #10B77F, 
+    0 0 60px rgba(16, 183, 127, 0.6) !important;
+  animation: deepSleepCorePulse 1.8s ease-in-out infinite !important;
+}
+
+@keyframes deepSleepEyePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+@keyframes deepSleepCorePulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}
+
+/* ============================================
+   HOVER — La mascota se activa a opacidad MEDIA-ALTA
+   ============================================ */
+.mascot-assistant.is-hovering {
+  opacity: 0.80 !important;
+  filter: grayscale(10%) blur(0.1px) !important;
+  transition: opacity 0.6s ease, filter 0.6s ease;
+}
+
+.mascot-assistant.is-hovering .robot-eye,
+.mascot-assistant.is-hovering .robot-core {
+  filter: none !important;
+}
+
+/* La burbuja NO cambia de posición en hover */
+.mascot-assistant.is-hovering .mascot-speech {
+  margin-bottom: -38px !important;
+  bottom: 100% !important;
+}
+
+/* ============================================
+   CARTEL AL HOVER — MISMA POSICIÓN que la burbuja
+   ============================================ */
+.mascot-hover-cartel {
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: -38px;
+  right: 0;
+  display: inline-block;
+  padding: 10px 18px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #D7BD77;                       /* ⭐ Dorado */
+  background: #000;
+  border: 1px solid #D7BD77;            /* ⭐ Borde dorado */
+  border-radius: 12px;
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.9), 
+    0 0 24px rgba(215, 189, 119, 0.5),  /* ⭐ Brillo dorado */
+    0 0 60px rgba(215, 189, 119, 0.2);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: cartelFadeIn 0.4s ease forwards;
+}
+
+.mascot-hover-cartel::after {
+  content: '';
+  position: absolute;
+  right: 26px;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  background: #000;
+  border-right: 1px solid #D7BD77;
+  border-bottom: 1px solid #D7BD77;
+  transform: rotate(45deg);
+}
+
+@keyframes cartelFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   BURBUJA — ⭐ TEXTO Y BORDE DORADOS
    ============================================ */
 .mascot-speech {
   position: absolute !important;
   bottom: 100% !important;
-  margin-bottom: -30px !important;
+  margin-bottom: -38px !important;
   right: 0 !important;
   left: auto !important;
   transform: none !important;
 
   display: inline-block !important;
   width: fit-content !important;
-  max-width: 1030px;
+  max-width: 400px;
   min-width: 60px;
-  min-height: 40px;
+  min-height: auto;
 
-  padding: 12px 16px !important;
-  color: var(--renov-verde-brillante);
+  padding: 10px 16px !important;
+  color: #D7BD77 !important;                            /* ⭐ Letras doradas */
   background: #000 !important;
-  border: 1px solid var(--renov-verde-brillante) !important;
-  border-radius: 14px;
-  box-shadow: 0 12px 32px rgba(0,0,0,.7), 0 0 18px rgba(16,183,127,.25) !important;
+  border: 1px solid #D7BD77 !important;                 /* ⭐ Borde dorado */
+  border-radius: 10px !important;
+  box-shadow: 
+    0 12px 32px rgba(0,0,0,.7), 
+    0 0 18px rgba(215,189,119,.35),                     /* ⭐ Sombra dorada */
+    0 0 40px rgba(215,189,119,.15) !important;
   font-size: 13px;
-  line-height: 1.5;
-  white-space: normal !important;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap !important;
+  word-wrap: normal;
+  overflow-wrap: normal;
   text-align: left;
   direction: ltr;
   animation: speechIn .35s ease both;
@@ -65,8 +181,8 @@
   width: 12px;
   height: 12px;
   background: #000;
-  border-right: 1px solid var(--renov-verde-brillante);
-  border-bottom: 1px solid var(--renov-verde-brillante);
+  border-right: 1px solid #D7BD77;      /* ⭐ Flechita dorada */
+  border-bottom: 1px solid #D7BD77;
   transform: rotate(45deg);
 }
 
@@ -77,28 +193,93 @@
 
 .mascot-speech.is-recurring {
   animation: speechAttention 2s ease-in-out infinite;
-  border-color: var(--renov-verde-brillante);
-  box-shadow: 0 12px 32px rgba(0,0,0,.7), 0 0 32px rgba(16,183,127,.45), 0 0 60px rgba(16,183,127,.2) !important;
+  border-color: #D7BD77;
+  box-shadow: 
+    0 12px 32px rgba(0,0,0,.7), 
+    0 0 32px rgba(215,189,119,.55), 
+    0 0 60px rgba(215,189,119,.25) !important;
 }
 
 @keyframes speechAttention {
   0%, 100% {
     transform: translateY(0);
-    box-shadow: 0 12px 32px rgba(0,0,0,.7), 0 0 24px rgba(16,183,127,.4);
+    box-shadow: 0 12px 32px rgba(0,0,0,.7), 0 0 24px rgba(215,189,119,.5);
   }
   50% {
     transform: translateY(-6px);
-    box-shadow: 0 12px 32px rgba(0,0,0,.7), 0 0 42px rgba(16,183,127,.7), 0 0 80px rgba(16,183,127,.3);
+    box-shadow: 0 12px 32px rgba(0,0,0,.7), 0 0 42px rgba(215,189,119,.8), 0 0 80px rgba(215,189,119,.35);
   }
 }
 
 .typing-caret {
   display: inline-block;
   margin-left: 2px;
-  color: var(--renov-verde-brillante);
+  color: #D7BD77;                        /* ⭐ Cursor dorado */
   animation: typingBlink .7s steps(1) infinite;
 }
 @keyframes typingBlink { 50% { opacity: 0; } }
+
+.mascot-speech.is-typing {
+  border-color: #D7BD77;
+  box-shadow: 0 12px 32px rgba(0,0,0,.7), 0 0 18px rgba(215,189,119,.4);
+}
+
+.typing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.typing-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.typing-dots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #D7BD77;
+  animation: typingDot 1.2s ease-in-out infinite;
+}
+
+.typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes typingDot {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+
+.mascot-speech.is-shaking {
+  animation: mascotShake 0.9s ease-in-out;
+  border-color: #D7BD77 !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,.7), 0 0 32px rgba(215,189,119,.7), 0 0 60px rgba(215,189,119,.4) !important;
+}
+
+@keyframes mascotShake {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  15%  { transform: translate(-6px, -3px) rotate(-3deg); }
+  30%  { transform: translate(6px, 3px) rotate(3deg); }
+  45%  { transform: translate(-5px, -2px) rotate(-2deg); }
+  60%  { transform: translate(5px, 2px) rotate(2deg); }
+  75%  { transform: translate(-3px, -1px) rotate(-1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.bubble-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  color: #D7BD77;                        /* ⭐ Cursor dorado */
+  font-weight: 100;
+  animation: bubbleCursorBlink 0.8s steps(1) infinite;
+  vertical-align: baseline;
+}
+
+@keyframes bubbleCursorBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
 
 /* ============================================
    ROBOT
@@ -140,21 +321,21 @@
 .mascot-trigger-copy { display: none; }
 
 /* ============================================
-   PANEL DE CHAT
+   PANEL DE CHAT — ⭐ TEXTO DORADO
    ============================================ */
 .mascot-panel {
   position: fixed !important;
   right: 24px !important;
-  bottom: 170px !important;
+  bottom: 155px !important;
   display: grid;
   grid-template-rows: auto 1fr auto;
   width: min(360px, calc(100vw - 32px));
   height: min(480px, calc(100svh - 220px));
   overflow: hidden;
-  border: 1px solid var(--renov-verde-brillante);
+  border: 1px solid #D7BD77;
   border-radius: 14px;
   background: #000;
-  box-shadow: 0 24px 80px rgba(0,0,0,.9), 0 0 34px rgba(16,183,127,.2);
+  box-shadow: 0 24px 80px rgba(0,0,0,.9), 0 0 34px rgba(215,189,119,.25);
   backdrop-filter: blur(20px);
   animation: mascotIn .3s ease both;
   pointer-events: auto;
@@ -171,7 +352,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  border-bottom: 1px solid rgba(16,183,127,.28);
+  border-bottom: 1px solid rgba(215,189,119,.3);
   background: #000;
 }
 .mascot-header-actions { display: flex; align-items: center; gap: 6px; }
@@ -179,9 +360,9 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  border: 1px solid rgba(16,183,127,.28);
+  border: 1px solid rgba(215,189,119,.3);
   background: #000;
-  color: var(--renov-verde-brillante);
+  color: #D7BD77;
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: .06em;
@@ -192,29 +373,29 @@
   opacity: .85;
 }
 .mascot-clear:hover {
-  color: var(--renov-dorado);
-  border-color: var(--renov-dorado);
+  color: #10B77F;
+  border-color: #10B77F;
   opacity: 1;
 }
 
 .mascot-heading { display: flex; align-items: center; gap: 10px; }
 .mascot-heading div { display: grid; gap: 3px; }
-.mascot-heading strong { font-size: 12px; color: var(--renov-verde-brillante); }
-.mascot-heading span { font-size: 9px; color: var(--renov-verde-brillante); opacity: .7; }
+.mascot-heading strong { font-size: 12px; color: #D7BD77; }
+.mascot-heading span { font-size: 9px; color: #D7BD77; opacity: .7; }
 
 .mascot-close {
   display: grid;
   place-items: center;
   width: 28px;
   height: 28px;
-  border: 1px solid rgba(16,183,127,.28);
-  color: var(--renov-verde-brillante);
+  border: 1px solid rgba(215,189,119,.3);
+  color: #D7BD77;
   background: #000;
   border-radius: 6px;
   transition: all .2s;
   cursor: pointer;
 }
-.mascot-close:hover { color: var(--renov-dorado); border-color: var(--renov-dorado); }
+.mascot-close:hover { color: #10B77F; border-color: #10B77F; }
 
 .mascot-messages {
   display: flex;
@@ -228,17 +409,17 @@
   display: flex;
   gap: 10px;
   align-items: flex-start;
-  color: var(--renov-verde-brillante);
+  color: #D7BD77;
   font-size: 12px;
   line-height: 1.5;
 }
-.mascot-welcome svg { flex: 0 0 auto; margin-top: 2px; color: var(--renov-verde-brillante); }
-.mascot-welcome p { color: var(--renov-verde-brillante); margin: 0; opacity: .9; }
+.mascot-welcome svg { flex: 0 0 auto; margin-top: 2px; color: #D7BD77; }
+.mascot-welcome p { color: #D7BD77; margin: 0; opacity: .9; }
 
 .mascot-message {
   max-width: 88%;
   padding: 9px 12px;
-  color: var(--renov-verde-brillante);
+  color: #D7BD77;
   font-size: 12px;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -247,53 +428,53 @@
 }
 .from-nova {
   align-self: flex-start;
-  border-left: 2px solid var(--renov-verde-brillante);
-  background: rgba(16,183,127,.08);
+  border-left: 2px solid #D7BD77;
+  background: rgba(215,189,119,.08);
 }
 .from-user {
   align-self: flex-end;
-  border-right: 2px solid var(--renov-dorado);
-  background: rgba(215,189,119,.1);
+  border-right: 2px solid #10B77F;
+  background: rgba(16,183,127,.1);
 }
-.is-thinking { color: var(--renov-verde-brillante); opacity: .7; }
-.is-thinking span { color: var(--renov-verde-brillante); animation: blinkDots 1s infinite; }
+.is-thinking { color: #D7BD77; opacity: .7; }
+.is-thinking span { color: #D7BD77; animation: blinkDots 1s infinite; }
 @keyframes blinkDots { 50% { opacity: .35; } }
 
 .mascot-form {
   display: flex;
   gap: 8px;
   padding: 12px;
-  border-top: 1px solid rgba(16,183,127,.28);
+  border-top: 1px solid rgba(215,189,119,.3);
   background: #000;
 }
 .mascot-form input {
   min-width: 0;
   flex: 1;
   padding: 10px 12px;
-  color: var(--renov-verde-brillante);
+  color: #D7BD77;
   background: #000;
-  border: 1px solid rgba(16,183,127,.28);
+  border: 1px solid rgba(215,189,119,.3);
   border-radius: 8px;
   outline: none;
   font-size: 12px;
 }
-.mascot-form input::placeholder { color: var(--renov-verde-brillante); opacity: .4; }
-.mascot-form input:focus { border-color: var(--renov-verde-brillante); box-shadow: 0 0 0 3px rgba(16,183,127,.15); }
+.mascot-form input::placeholder { color: #D7BD77; opacity: .4; }
+.mascot-form input:focus { border-color: #D7BD77; box-shadow: 0 0 0 3px rgba(215,189,119,.15); }
 .mascot-form button {
   display: grid;
   place-items: center;
   width: 40px;
   color: #000;
-  background: var(--renov-verde-brillante);
-  border: 1px solid var(--renov-verde-brillante);
+  background: #D7BD77;
+  border: 1px solid #D7BD77;
   border-radius: 8px;
   cursor: pointer;
 }
-.mascot-form button:hover { color: #000; background: var(--renov-dorado); border-color: var(--renov-dorado); }
+.mascot-form button:hover { color: #000; background: #10B77F; border-color: #10B77F; }
 .mascot-form button:disabled { opacity: .45; cursor: not-allowed; }
 
 /* ============================================
-   ROBOT CSS
+   ROBOT CSS — ⭐ ORIGINAL (gris metálico + verde)
    ============================================ */
 .live-robot {
   position: relative;
@@ -477,19 +658,23 @@
   }
   .mascot-assistant .mascot-speech {
     width: fit-content !important;
-    max-width: 95vw !important;
+    max-width: 90vw !important;
     min-width: 60px;
-    min-height: 40px;
-    padding: 11px 14px !important;
-    font-size: 13px !important;
-    line-height: 1.45 !important;
+    min-height: auto;
+    padding: 10px 14px !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
     bottom: 100% !important;
-    margin-bottom: -20px !important;
+    margin-bottom: -34px !important;
     right: 0 !important;
     text-align: left;
+    border-radius: 10px !important;
+    color: #D7BD77 !important;
+    border-color: #D7BD77 !important;
   }
   .mascot-assistant .mascot-speech::after {
     right: 20px;
+    border-color: #D7BD77;
   }
 
   .mascot-panel {
@@ -497,94 +682,46 @@
     max-width: 320px !important;
     height: min(62svh, 460px) !important;
     right: 12px !important;
-    bottom: 160px !important;
+    bottom: 145px !important;
     border-radius: 14px !important;
+    border-color: #D7BD77 !important;
   }
-  .mascot-panel-header { padding: 11px 13px !important; }
-  .mascot-heading strong { font-size: 12px !important; }
-  .mascot-heading span { font-size: 9px !important; }
-  .mascot-clear { font-size: 8px !important; padding: 5px 7px !important; }
-  .mascot-close { width: 26px !important; height: 26px !important; }
+  .mascot-panel-header { padding: 11px 13px !important; border-bottom-color: rgba(215,189,119,.3) !important; }
+  .mascot-heading strong { font-size: 12px !important; color: #D7BD77 !important; }
+  .mascot-heading span { font-size: 9px !important; color: #D7BD77 !important; }
+  .mascot-clear { font-size: 8px !important; padding: 5px 7px !important; color: #D7BD77 !important; border-color: rgba(215,189,119,.3) !important; }
+  .mascot-close { width: 26px !important; height: 26px !important; color: #D7BD77 !important; border-color: rgba(215,189,119,.3) !important; }
   .mascot-messages { padding: 12px !important; gap: 8px !important; }
-  .mascot-message { font-size: 12px !important; line-height: 1.45 !important; padding: 8px 11px !important; max-width: 92% !important; }
-  .mascot-welcome p { font-size: 12px !important; line-height: 1.45 !important; }
-  .mascot-form { padding: 10px !important; gap: 6px !important; }
-  .mascot-form input { font-size: 12px !important; padding: 9px 11px !important; }
-  .mascot-form button { width: 38px !important; height: 38px !important; }
+  .mascot-message { font-size: 12px !important; line-height: 1.45 !important; padding: 8px 11px !important; max-width: 92% !important; color: #D7BD77 !important; }
+  .mascot-welcome p { font-size: 12px !important; line-height: 1.45 !important; color: #D7BD77 !important; }
+  .mascot-form { padding: 10px !important; gap: 6px !important; border-top-color: rgba(215,189,119,.3) !important; }
+  .mascot-form input { font-size: 12px !important; padding: 9px 11px !important; color: #D7BD77 !important; border-color: rgba(215,189,119,.3) !important; }
+  .mascot-form button { width: 38px !important; height: 38px !important; background: #D7BD77 !important; border-color: #D7BD77 !important; }
+  .mascot-form button:hover { background: #10B77F !important; border-color: #10B77F !important; }
+
+  .mascot-assistant.is-deep-sleep {
+    opacity: 0.5 !important;
+    filter: grayscale(40%) !important;
+  }
+
+  .mascot-assistant.is-hovering {
+    opacity: 0.9 !important;
+  }
+
+  .mascot-hover-cartel {
+    font-size: 11px;
+    padding: 6px 10px;
+    margin-bottom: -34px !important;
+    color: #D7BD77 !important;
+    border-color: #D7BD77 !important;
+  }
+  .mascot-hover-cartel::after {
+    border-color: #D7BD77;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .live-robot, .robot-head, .robot-eye, .robot-mouth, .robot-core, .robot-arm, .robot-shadow,
-  .mascot-speech.is-recurring { animation: none; }
-}
-/* ============================================
-   BURBUJA � NUEVAS FASES (typing + shake)
-   ============================================ */
-
-/* Estado: escribiendo... con 3 puntitos */
-.mascot-speech.is-typing {
-  border-color: var(--renov-verde-brillante);
-  box-shadow: 0 12px 32px rgba(0,0,0,.7), 0 0 18px rgba(16,183,127,.3);
-}
-
-.typing-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.typing-dots {
-  display: inline-flex;
-  gap: 3px;
-}
-
-.typing-dots span {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--renov-verde-brillante);
-  animation: typingDot 1.2s ease-in-out infinite;
-}
-
-.typing-dots span:nth-child(2) { animation-delay: 0.15s; }
-.typing-dots span:nth-child(3) { animation-delay: 0.3s; }
-
-@keyframes typingDot {
-  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-  30% { opacity: 1; transform: translateY(-3px); }
-}
-
-/* Estado: tambaleo fuerte cada 7 segundos */
-.mascot-speech.is-shaking {
-  animation: mascotShake 0.9s ease-in-out;
-  border-color: var(--renov-dorado) !important;
-  box-shadow: 0 12px 32px rgba(0,0,0,.7), 0 0 32px rgba(215,189,119,.6), 0 0 60px rgba(215,189,119,.3) !important;
-}
-
-@keyframes mascotShake {
-  0%   { transform: translate(0, 0) rotate(0deg); }
-  15%  { transform: translate(-6px, -3px) rotate(-3deg); }
-  30%  { transform: translate(6px, 3px) rotate(3deg); }
-  45%  { transform: translate(-5px, -2px) rotate(-2deg); }
-  60%  { transform: translate(5px, 2px) rotate(2deg); }
-  75%  { transform: translate(-3px, -1px) rotate(-1deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
-}
-
-/* ============================================
-   CURSOR PARPADEANTE (efecto tecleo real)
-   ============================================ */
-
-.bubble-cursor {
-  display: inline-block;
-  margin-left: 2px;
-  color: var(--renov-verde-brillante);
-  font-weight: 100;
-  animation: bubbleCursorBlink 0.8s steps(1) infinite;
-  vertical-align: baseline;
-}
-
-@keyframes bubbleCursorBlink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
+  .mascot-speech.is-recurring, .mascot-assistant.is-deep-sleep .robot-eye,
+  .mascot-assistant.is-deep-sleep .robot-core { animation: none; }
 }

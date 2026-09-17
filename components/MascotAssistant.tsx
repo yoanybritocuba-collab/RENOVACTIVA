@@ -7,39 +7,37 @@ import { Send, Sparkles, X, RotateCcw } from 'lucide-react'
 
 type MascotLang = 'es' | 'ca'
 
-// ⭐ TIPO DEL MENSAJE ESPECIAL DE NOVA (letra a letra en el chat)
-type NovaIntro = { text: string } | null
-
 export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
   const [open, setOpen] = useState(false)
   const [input, setInput] = useState('')
   const [greeting, setGreeting] = useState('')
 
-  // ⭐ Texto visible en la burbuja (se reemplaza letra a letra)
+  // Texto de la burbuja
   const [bubbleText, setBubbleText] = useState('')
   const [showCursor, setShowCursor] = useState(false)
   const [phase, setPhase] = useState<
     'greeting' | 'help' | 'linger' | 'silenced' | 'farewell'
   >('greeting')
 
-  // ⭐ Estado del chat
-  const [hasOpenedOnce, setHasOpenedOnce] = useState(false)     // Ya abrió el chat al menos una vez
-  const [hasChatted, setHasChatted] = useState(false)           // Ya escribió algo
-  const [introTyped, setIntroTyped] = useState('')              // El saludo escribiéndose letra a letra
-  const [introDone, setIntroDone] = useState(false)             // El saludo terminó
+  // Estado del chat
+  const [hasOpenedOnce, setHasOpenedOnce] = useState(false)
+  const [hasChatted, setHasChatted] = useState(false)
+  const [introTyped, setIntroTyped] = useState('')
+  const [introDone, setIntroDone] = useState(false)
 
-  // ⭐ Standby
-  const [isStandby, setIsStandby] = useState(false)
+  // ⭐ STANDBY PROFUNDO + HOVER ACTIVO
+  const [isDeepSleep, setIsDeepSleep] = useState(false)
   const [nearCursor, setNearCursor] = useState(false)
+  const [showHoverCartel, setShowHoverCartel] = useState(false)
 
   const [pos, setPos] = useState<{ x: number; y: number }>({ x: -1, y: -1 })
   const [isDragging, setIsDragging] = useState(false)
   const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // ⭐ Control de timers
   const timeoutsRef = useRef<number[]>([])
   const cancelledRef = useRef(false)
 
@@ -52,6 +50,7 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
       linger: 'Me quedo por aquí si necesitas algo',
       chatIntro: 'Soy el asistente de Renovactiva. Mi nombre es Nova. ¿En qué le puedo ayudar?',
       farewell: 'Gracias por confiar en Renovactiva. Aquí estoy si necesitas algo más.',
+      hoverCartel: '¿En qué puedo ayudarte?',
       newChat: 'Nuevo chat',
       thinking: 'Nova está pensando',
       placeholder: 'Pregúntale algo a Nova...',
@@ -67,8 +66,9 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
       greetEvening: 'Bona nit',
       help: 'En què et puc ajudar?',
       linger: 'Em quedo per aquí si necessites res',
-      chatIntro: 'Sóc l\'assistent de Renovactiva. El meu nom és Nova. En què li puc ajudar?',
+      chatIntro: "Sóc l'assistent de Renovactiva. El meu nom és Nova. En què li puc ajudar?",
       farewell: 'Gràcies per confiar en Renovactiva. Aquí estic si necessites res més.',
+      hoverCartel: 'En què puc ajudar-te?',
       newChat: 'Nou xat',
       thinking: 'Nova està pensant',
       placeholder: 'Pregunta-li alguna cosa a Nova...',
@@ -83,7 +83,7 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
   const t = texts[lang]
 
   // ============================================================
-  // ⏱️ Helper: añade timeouts cancelables
+  // TIMERS
   // ============================================================
   const addTimeout = (fn: () => void, ms: number) => {
     const id = window.setTimeout(fn, ms)
@@ -97,13 +97,9 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
   }
 
   // ============================================================
-  // ⌨️ TECLEO RÁPIDO (humano, ágil)
+  // TECLEO LETRA A LETRA
   // ============================================================
-  const typeText = (
-    text: string,
-    onDone: () => void,
-    speed = 25
-  ) => {
+  const typeText = (text: string, onDone: () => void, speed = 25) => {
     let i = 0
     setBubbleText('')
     setShowCursor(true)
@@ -128,7 +124,6 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
     addTimeout(tick, 300)
   }
 
-  // ⭐ TECLEO dentro del CHAT (para el saludo de Nova)
   const typeIntroInChat = (text: string, onDone: () => void, speed = 25) => {
     let i = 0
     setIntroTyped('')
@@ -151,7 +146,7 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
   }
 
   // ============================================================
-  // 🎬 SECUENCIA DE LA BURBUJA (al entrar en la web)
+  // SECUENCIA DE LA BURBUJA
   // ============================================================
   useEffect(() => {
     cancelledRef.current = false
@@ -166,18 +161,19 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
     setBubbleText('')
     setShowCursor(false)
 
-    // PASO 1: Saludo
     addTimeout(() => {
       typeText(greetingText, () => {
-        // PASO 2: "¿En qué te puedo ayudar?"
         addTimeout(() => {
           setBubbleText('')
           typeText(t.help, () => {
-            // PASO 3: "Me quedo por aquí si necesitas algo"
             addTimeout(() => {
               setBubbleText('')
               typeText(t.linger, () => {
                 setPhase('linger')
+                addTimeout(() => {
+                  setBubbleText('')
+                  setIsDeepSleep(true)
+                }, 5000)
               }, 30)
             }, 2000)
           }, 25)
@@ -193,7 +189,7 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
   }, [lang])
 
   // ============================================================
-  // ⭐ STANDBY
+  // DETECTAR CURSOR CERCA DEL ROBOT
   // ============================================================
   useEffect(() => {
     if (open) {
@@ -202,56 +198,55 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
     }
 
     const handleMouseMove = (e: MouseEvent) => {
-      const container = containerRef.current
-      if (!container) return
-      const rect = container.getBoundingClientRect()
-      const centerX = rect.left + rect.width / 2
-      const centerY = rect.top + rect.height / 2
-      const distance = Math.sqrt(
-        Math.pow(e.clientX - centerX, 2) + Math.pow(e.clientY - centerY, 2)
-      )
-      setNearCursor(distance < 180)
+      const trigger = triggerRef.current
+      if (!trigger) return
+      const rect = trigger.getBoundingClientRect()
+      const cx = rect.left + rect.width / 2
+      const cy = rect.top + rect.height / 2
+      const dist = Math.sqrt(Math.pow(e.clientX - cx, 2) + Math.pow(e.clientY - cy, 2))
+      setNearCursor(dist < 120)
     }
 
     document.addEventListener('mousemove', handleMouseMove)
     return () => document.removeEventListener('mousemove', handleMouseMove)
   }, [open])
 
+  // ⭐ CARTEL HOVER + ACTIVACIÓN
   useEffect(() => {
-    if (open || nearCursor || isDragging) {
-      setIsStandby(false)
+    if (open) {
+      setShowHoverCartel(false)
       return
     }
-    const timer = window.setTimeout(() => setIsStandby(true), 8000)
-    return () => window.clearTimeout(timer)
-  }, [open, nearCursor, isDragging, phase])
+    if (isDeepSleep && nearCursor) {
+      setShowHoverCartel(true)
+    } else {
+      setShowHoverCartel(false)
+    }
+  }, [isDeepSleep, nearCursor, open])
 
   // ============================================================
-  // 💬 CHAT
+  // CHAT
   // ============================================================
   const { messages, sendMessage, status, setMessages } = useChat({
     transport: new DefaultChatTransport({ api: '/api/chat', body: { language: lang } }),
   })
 
-  // Detectar cuando el usuario envía su primer mensaje → marcar hasChatted
   useEffect(() => {
     if (messages.length > 0 && !hasChatted) {
       setHasChatted(true)
     }
   }, [messages.length, hasChatted])
 
-  // Auto-scroll
   useEffect(() => {
     if (!open) return
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [messages.length, status, open, introTyped])
 
-  // Cerrar al hacer clic fuera o Escape
   useEffect(() => {
     if (!open) return
     const onPointerDown = (e: PointerEvent) => {
       const panel = panelRef.current
-      const trigger = containerRef.current
+      const trigger = triggerRef.current
       const target = e.target as Node
       if (panel && panel.contains(target)) return
       if (trigger && trigger.contains(target)) return
@@ -270,7 +265,7 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
   }, [open, hasChatted])
 
   // ============================================================
-  // ⭐ ABRIR EL CHAT
+  // ABRIR / CERRAR CHAT
   // ============================================================
   const handleOpenChat = () => {
     cancelledRef.current = true
@@ -278,52 +273,45 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
     cancelledRef.current = false
 
     setOpen(true)
+    setIsDeepSleep(false)
+    setShowHoverCartel(false)
 
-    // Si es la primera vez que abre el chat → escribir el saludo dentro
     if (!hasOpenedOnce) {
       setHasOpenedOnce(true)
       setIntroDone(false)
       setIntroTyped('')
-      // Esperar un momento a que se abra el panel
       addTimeout(() => {
-        typeIntroInChat(t.chatIntro, () => {
-          setIntroDone(true)
-        }, 25)
+        typeIntroInChat(t.chatIntro, () => setIntroDone(true), 25)
       }, 400)
     } else {
-      // Ya lo abrió antes → mostrar saludo de golpe
       setIntroTyped(t.chatIntro)
       setIntroDone(true)
     }
   }
 
-  // ============================================================
-  // ⭐ CERRAR EL CHAT → despedida si hubo conversación
-  // ============================================================
   const handleCloseChat = () => {
     setOpen(false)
     cancelledRef.current = true
     clearAllTimeouts()
     cancelledRef.current = false
 
-    // Solo despedirse si el cliente escribió algo
     if (hasChatted) {
       addTimeout(() => {
         setBubbleText('')
         typeText(t.farewell, () => {
           setPhase('farewell')
+          addTimeout(() => {
+            setBubbleText('')
+            setIsDeepSleep(true)
+          }, 5000)
         }, 25)
       }, 500)
     } else {
-      // Si no escribió → mostrar el mensaje persistente
-      setBubbleText(hasOpenedOnce ? t.linger : t.linger)
+      setBubbleText(t.linger)
       setPhase('linger')
     }
   }
 
-  // ============================================================
-  // ⭐ NUEVO CHAT (reinicia todo)
-  // ============================================================
   const newChat = () => {
     setMessages([])
     setInput('')
@@ -331,6 +319,7 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
     setIntroDone(false)
     setIntroTyped('')
     setHasOpenedOnce(false)
+    setIsDeepSleep(false)
     cancelledRef.current = true
     clearAllTimeouts()
     cancelledRef.current = false
@@ -341,19 +330,14 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
   }
 
   // ============================================================
-  // 🖱️ DRAG
+  // DRAG
   // ============================================================
   const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
     const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX
     const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY
     const rect = containerRef.current?.getBoundingClientRect()
     if (!rect) return
-    dragRef.current = {
-      startX: clientX,
-      startY: clientY,
-      origX: rect.left,
-      origY: rect.top,
-    }
+    dragRef.current = { startX: clientX, startY: clientY, origX: rect.left, origY: rect.top }
     setIsDragging(true)
   }
 
@@ -395,19 +379,39 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
     if (!hasChatted) setHasChatted(true)
   }
 
-  // Silenciar la burbuja al hacer clic en ella
-  const silenceBubble = () => {
+  const handleBubbleClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
     setPhase('silenced')
     setBubbleText('')
     setShowCursor(false)
     cancelledRef.current = true
     clearAllTimeouts()
+    cancelledRef.current = false
+  }
+
+  const handleRobotClick = () => {
+    if (open) {
+      handleCloseChat()
+    } else {
+      handleOpenChat()
+    }
   }
 
   const containerStyle: React.CSSProperties =
     pos.x !== -1
       ? { left: `${pos.x}px`, top: `${pos.y}px`, right: 'auto', bottom: 'auto' }
       : {}
+
+  // ⭐ Clases del contenedor
+  const containerClasses = [
+    'mascot-assistant',
+    open ? 'is-open' : '',
+    isDragging ? 'is-dragging' : '',
+    pos.x !== -1 ? 'is-positioned' : '',
+    isDeepSleep ? 'is-deep-sleep' : '',
+    // ⭐ NUEVO: cuando el cursor está cerca Y está dormido → activar
+    isDeepSleep && nearCursor ? 'is-hovering' : ''
+  ].filter(Boolean).join(' ')
 
   return (
     <>
@@ -432,7 +436,6 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
           </div>
 
           <div className="mascot-messages" aria-live="polite">
-            {/* ⭐ Saludo de Nova escribiéndose letra a letra (primera vez) */}
             {introTyped && (
               <div className="mascot-message from-nova">
                 <span>{introTyped}</span>
@@ -440,7 +443,6 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
               </div>
             )}
 
-            {/* Mensajes del chat */}
             {messages.map((message) => {
               const isUser = message.role === 'user'
               const fullText = message.parts
@@ -482,17 +484,22 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
 
       <div
         ref={containerRef}
-        className={`mascot-assistant ${open ? 'is-open' : ''} ${isDragging ? 'is-dragging' : ''} ${pos.x !== -1 ? 'is-positioned' : ''} ${isStandby ? 'is-standby' : ''}`}
+        className={containerClasses}
         style={containerStyle}
       >
-        {!open && bubbleText && phase !== 'silenced' && (
+        {!open && bubbleText && phase !== 'silenced' && !isDeepSleep && (
           <div
             className="mascot-speech"
             aria-live="polite"
             role="button"
             tabIndex={0}
-            onClick={silenceBubble}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') silenceBubble() }}
+            onClick={handleBubbleClick}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                handleBubbleClick(e as any)
+              }
+            }}
             title={lang === 'es' ? 'Toca para cerrar' : 'Toca per tancar'}
             style={{ cursor: 'pointer' }}
           >
@@ -501,10 +508,17 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
           </div>
         )}
 
+        {showHoverCartel && (
+          <div className="mascot-hover-cartel">
+            {t.hoverCartel}
+          </div>
+        )}
+
         <button
+          ref={triggerRef}
           className="mascot-trigger"
           type="button"
-          onClick={() => (open ? handleCloseChat() : handleOpenChat())}
+          onClick={handleRobotClick}
           onMouseDown={handleDragStart}
           onTouchStart={handleDragStart}
           aria-expanded={open}

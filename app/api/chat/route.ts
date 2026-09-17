@@ -191,7 +191,8 @@ export async function POST(req: Request) {
         })
         .filter((m: any) => m.content.trim() !== ''),
       temperature: 0.4,
-      maxTokens: 300,
+      // ✅ CORREGIDO: 'maxTokens' ya no existe, ahora es 'maxOutputTokens'
+      maxOutputTokens: 300,
     })
 
     return result.toUIMessageStreamResponse()
