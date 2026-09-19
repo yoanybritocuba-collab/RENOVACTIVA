@@ -52,7 +52,7 @@ export default function TestimonialsPage() {
   }
 
   async function saveData() {
-    setSaving(true); setError(''); setNotice('🌐 Traduciendo y guardando...')
+    setSaving(true); setError(''); setNotice('Traduciendo y guardando...')
     try {
       const contentToSave = { ...data.content }
 
@@ -93,9 +93,17 @@ export default function TestimonialsPage() {
 
       if (!res.ok) throw new Error('Error al guardar')
       setData({ ...data, content: contentToSave })
-      setNotice('✅ Testimonios guardados y traducidos correctamente')
+
+      try {
+        await fetch('/api/revalidate', { method: 'POST' })
+      } catch (e) {
+        console.warn('Revalidate falló:', e)
+      }
+
+      setNotice('Testimonios guardados y traducidos correctamente')
+      setTimeout(() => setNotice(''), 3000)
     } catch (err) {
-      setError('❌ ' + (err as Error).message)
+      setError((err as Error).message)
     } finally { setSaving(false) }
   }
 
@@ -155,7 +163,7 @@ export default function TestimonialsPage() {
 
   return (
     <AdminSection
-      title="⭐ Testimonios"
+      title="Testimonios"
       description="Gestiona las reseñas de tus clientes"
       onSave={saveData}
       saving={saving}
@@ -172,7 +180,7 @@ export default function TestimonialsPage() {
         </button>
 
         <div className="border border-white/10 rounded-xl p-5 bg-white/[.02]">
-          <h3 className="text-white/60 text-sm font-semibold mb-4">✏️ Cabecera de la sección</h3>
+          <h3 className="text-white/60 text-sm font-semibold mb-4">Cabecera de la sección</h3>
           
           <div className="space-y-4">
             <div>
@@ -185,7 +193,7 @@ export default function TestimonialsPage() {
                 placeholder="Lo que dicen nuestros clientes"
               />
               {data.content.eyebrow.ca && (
-                <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.eyebrow.ca}</p>
+                <p className="text-white/40 text-xs mt-1">CA: {data.content.eyebrow.ca}</p>
               )}
             </div>
 
@@ -199,7 +207,7 @@ export default function TestimonialsPage() {
                 placeholder="Opiniones reales"
               />
               {data.content.title.ca && (
-                <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.title.ca}</p>
+                <p className="text-white/40 text-xs mt-1">CA: {data.content.title.ca}</p>
               )}
             </div>
 
@@ -213,7 +221,7 @@ export default function TestimonialsPage() {
                 placeholder="que hablan por nosotros."
               />
               {data.content.titleItalic.ca && (
-                <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.titleItalic.ca}</p>
+                <p className="text-white/40 text-xs mt-1">CA: {data.content.titleItalic.ca}</p>
               )}
             </div>
           </div>
@@ -221,7 +229,7 @@ export default function TestimonialsPage() {
 
         <div className="flex items-center justify-between">
           <h3 className="text-white/60 text-sm font-semibold">
-            📝 Testimonios ({(data.content.items || []).length})
+            Testimonios ({(data.content.items || []).length})
           </h3>
         </div>
 
@@ -273,7 +281,7 @@ export default function TestimonialsPage() {
               </div>
 
               <div className="border-l-2 border-[#d7bd77]/30 pl-3 space-y-2">
-                <p className="text-[#d7bd77] text-xs font-bold">🇪🇸 Español</p>
+                <p className="text-[#d7bd77] text-xs font-bold">ES Español</p>
                 <input
                   type="text"
                   value={item.role?.es || ''}
@@ -291,7 +299,7 @@ export default function TestimonialsPage() {
               </div>
 
               <div className="border-l-2 border-white/10 pl-3 space-y-2">
-                <p className="text-white/40 text-xs font-bold">🇨🇦 Català</p>
+                <p className="text-white/40 text-xs font-bold">CA Català</p>
                 <input
                   type="text"
                   value={item.role?.ca || ''}

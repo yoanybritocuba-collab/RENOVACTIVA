@@ -59,7 +59,7 @@ export default function ContactPage() {
   }
 
   async function saveData() {
-    setSaving(true); setError(''); setNotice('🌐 Traduciendo y guardando...')
+    setSaving(true); setError(''); setNotice('Traduciendo y guardando...')
     try {
       const contentToSave = { ...data.content }
 
@@ -70,7 +70,6 @@ export default function ContactPage() {
       }
       contentToSave.translations = translations
 
-      // Si la sección no existe, crearla
       if (!data.id) {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content`, {
           method: 'POST',
@@ -105,9 +104,16 @@ export default function ContactPage() {
         setData({ ...data, content: contentToSave })
       }
 
-      setNotice('✅ Contacto guardado y traducido correctamente')
+      try {
+        await fetch('/api/revalidate', { method: 'POST' })
+      } catch (e) {
+        console.warn('Revalidate falló:', e)
+      }
+
+      setNotice('Contacto guardado y traducido correctamente')
+      setTimeout(() => setNotice(''), 3000)
     } catch (err) {
-      setError('❌ ' + (err as Error).message)
+      setError((err as Error).message)
     } finally { setSaving(false) }
   }
 
@@ -119,7 +125,7 @@ export default function ContactPage() {
 
   return (
     <AdminSection
-      title="📞 Contacto"
+      title="Contacto"
       description="Edita la sección de contacto"
       onSave={saveData}
       saving={saving}
@@ -128,49 +134,49 @@ export default function ContactPage() {
     >
       <div className="space-y-6">
         <div>
-          <h3 className="text-white/60 text-sm font-semibold mb-4">✏️ Textos de la sección</h3>
+          <h3 className="text-white/60 text-sm font-semibold mb-4">Textos de la sección</h3>
           <div className="space-y-4">
             <div>
               <label className="block text-white/50 text-sm mb-1">Título</label>
               <input type="text" value={data.content.title || ''} onChange={(e) => updateField('title', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="Hagamos algo extraordinario." />
-              {data.content.translations?.title && <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.translations.title}</p>}
+              {data.content.translations?.title && <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.title}</p>}
             </div>
             <div>
               <label className="block text-white/50 text-sm mb-1">Subtítulo</label>
               <input type="text" value={data.content.subtitle || ''} onChange={(e) => updateField('subtitle', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="Cuéntanos tu idea." />
-              {data.content.translations?.subtitle && <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.translations.subtitle}</p>}
+              {data.content.translations?.subtitle && <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.subtitle}</p>}
             </div>
             <div>
               <label className="block text-white/50 text-sm mb-1">Texto del botón</label>
               <input type="text" value={data.content.buttonText || ''} onChange={(e) => updateField('buttonText', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="Solicitar presupuesto" />
-              {data.content.translations?.buttonText && <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.translations.buttonText}</p>}
+              {data.content.translations?.buttonText && <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.buttonText}</p>}
             </div>
           </div>
         </div>
 
         <div className="border-t border-white/10 pt-6">
-          <h3 className="text-white/60 text-sm font-semibold mb-4">📞 Información de contacto</h3>
+          <h3 className="text-white/60 text-sm font-semibold mb-4">Información de contacto</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-white/50 text-sm mb-1">📧 Email</label>
+              <label className="block text-white/50 text-sm mb-1">Email</label>
               <input type="email" value={data.content.email || ''} onChange={(e) => updateField('email', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="info@renovactiva.com" />
             </div>
             <div>
-              <label className="block text-white/50 text-sm mb-1">📱 Teléfono</label>
+              <label className="block text-white/50 text-sm mb-1">Teléfono</label>
               <input type="text" value={data.content.phone || ''} onChange={(e) => updateField('phone', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="+34 600 000 000" />
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-white/50 text-sm mb-1">📍 Dirección</label>
+              <label className="block text-white/50 text-sm mb-1">Dirección</label>
               <input type="text" value={data.content.address || ''} onChange={(e) => updateField('address', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="Carrer Exemple 123, 08001 Barcelona" />
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-white/50 text-sm mb-1">🕒 Horario</label>
+              <label className="block text-white/50 text-sm mb-1">Horario</label>
               <input type="text" value={data.content.schedule || ''} onChange={(e) => updateField('schedule', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="Lun - Vie: 9:00 - 18:00" />
             </div>

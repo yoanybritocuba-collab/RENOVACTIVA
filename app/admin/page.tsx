@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { 
   LayoutDashboard, Menu, X, Eye, EyeOff, ExternalLink, LogOut,
-  Home, FolderOpen, Wrench, Mail, Image, Star
+  Home, FolderOpen, Wrench, Mail, Image, Star, LayoutGrid, BarChart3,
+  KeyRound
 } from 'lucide-react'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
@@ -15,7 +16,14 @@ const ADMIN_PASSWORD = 'Barcelona2026'
 export default function AdminDashboard() {
   const [user, setUser] = useState<{ email?: string } | null>(null)
   const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState({ totalSections: 0, totalProjects: 0, totalServices: 0 })
+  const [stats, setStats] = useState({ 
+    totalSections: 0, 
+    totalProjects: 0, 
+    totalServices: 0, 
+    totalTestimonials: 0,
+    reviewCodesPending: 0,
+    reviewCodesUsed: 0
+  })
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -40,10 +48,32 @@ export default function AdminDashboard() {
       const data = await res.json()
       const projects = data.find((d: any) => d.section === 'projects')
       const services = data.find((d: any) => d.section === 'services')
+      const testimonials = data.find((d: any) => d.section === 'testimonials')
+
+      // ⭐ Cargar códigos de reseña
+      let reviewCodesPending = 0
+      let reviewCodesUsed = 0
+      try {
+        const codesRes = await fetch(`${SUPABASE_URL}/rest/v1/review_codes?select=usado`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
+          cache: 'no-store'
+        })
+        if (codesRes.ok) {
+          const codesData = await codesRes.json()
+          reviewCodesUsed = codesData.filter((c: any) => c.usado === true).length
+          reviewCodesPending = codesData.filter((c: any) => c.usado === false).length
+        }
+      } catch (e) {
+        console.warn('No se pudieron cargar los códigos de reseña:', e)
+      }
+
       setStats({
         totalSections: data.length,
         totalProjects: projects?.content?.items?.length || 0,
-        totalServices: services?.content?.items?.length || 0
+        totalServices: services?.content?.items?.length || 0,
+        totalTestimonials: testimonials?.content?.items?.length || 0,
+        reviewCodesPending,
+        reviewCodesUsed
       })
     } catch (err) {
       console.error('Error:', err)
@@ -139,35 +169,70 @@ export default function AdminDashboard() {
         {sidebarOpen ? <X className="size-5" /> : <Menu className="size-5" />}
       </button>
 
-      <aside className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-white/10 bg-[#0b0b0a] p-6 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 overflow-y-auto`}>
-        <Link href="/" className="font-serif text-lg text-[#d7bd77]">RENOVACTIVA</Link>
-        <p className="text-[9px] uppercase tracking-[.2em] text-white/30 mt-1">Panel de administración</p>
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-white/10 bg-[#0b0b0a] flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+        
+        <div className="p-6 pb-4 flex-shrink-0">
+          <Link href="/" className="font-serif text-lg text-[#d7bd77]">RENOVACTIVA</Link>
+          <p className="text-[9px] uppercase tracking-[.2em] text-white/30 mt-1">Panel de administración</p>
+        </div>
 
-        <nav className="mt-8 space-y-1">
-          <Link href="/admin" className="flex items-center gap-3 bg-[#d7bd77] px-4 py-3 text-[#15140f] rounded-lg">
+        <nav className="flex-1 overflow-y-auto px-4 pb-4 space-y-1">
+          <Link href="/admin" className="flex items-center gap-3 bg-[#d7bd77] px-4 py-3 text-[#15140f] rounded-lg font-medium">
             <LayoutDashboard className="size-4" /> Dashboard
           </Link>
-          <Link href="/admin/hero" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
-            <Home className="size-4" /> Hero
+
+          <div className="pt-4 pb-2 px-4">
+            <p className="text-[9px] uppercase tracking-[.2em] text-white/25">Secciones de la web</p>
+          </div>
+
+          <Link href="/admin/hero" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+            <Home className="size-4" />
+            <span>Hero</span>
           </Link>
-          <Link href="/admin/trabajos" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
-            <FolderOpen className="size-4" /> Trabajos
+
+          <Link href="/admin/services" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+            <Wrench className="size-4" />
+            <span>Servicios</span>
           </Link>
-          <Link href="/admin/services" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
-            <Wrench className="size-4" /> Servicios
+
+          <Link href="/admin/projects" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+            <LayoutGrid className="size-4" />
+            <span>Proyectos</span>
           </Link>
-          <Link href="/admin/testimonials" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
-            <Star className="size-4" /> Testimonios
+
+          <Link href="/admin/trabajos" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+            <FolderOpen className="size-4" />
+            <span>Trabajos</span>
           </Link>
-          <Link href="/admin/contact" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
-            <Mail className="size-4" /> Contacto
+
+          <Link href="/admin/stats" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+            <BarChart3 className="size-4" />
+            <span>Números</span>
           </Link>
-          <Link href="/admin/footer" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-lg transition-colors">
-            <Image className="size-4" /> Footer
+
+          <Link href="/admin/testimonials" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+            <Star className="size-4" />
+            <span>Testimonios</span>
+          </Link>
+
+          {/* ⭐ NUEVO: Reseñas */}
+          <Link href="/admin/reviews" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+            <KeyRound className="size-4" />
+            <span>Reseñas</span>
+          </Link>
+
+          <Link href="/admin/contact" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+            <Mail className="size-4" />
+            <span>Contacto</span>
+          </Link>
+
+          <Link href="/admin/footer" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+            <Image className="size-4" />
+            <span>Footer</span>
           </Link>
         </nav>
 
-        <div className="absolute bottom-6 left-6 right-6 flex flex-col gap-3">
+        <div className="p-4 pt-3 flex-shrink-0 border-t border-white/10 space-y-2">
           <button
             onClick={goToWeb}
             className="flex items-center justify-center gap-2 w-full bg-[#d7bd77]/20 border border-[#d7bd77]/40 px-4 py-2.5 text-[#d7bd77] rounded-lg hover:bg-[#d7bd77] hover:text-[#11110f] transition-colors text-sm font-medium"
@@ -197,7 +262,7 @@ export default function AdminDashboard() {
           </div>
         </header>
         <div className="p-6 lg:p-10">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             <div className="border border-white/10 bg-white/[.02] p-6 rounded-xl">
               <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Secciones</p>
               <strong className="block mt-2 font-serif text-4xl text-[#d7bd77]">{stats.totalSections}</strong>
@@ -210,6 +275,30 @@ export default function AdminDashboard() {
               <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Servicios</p>
               <strong className="block mt-2 font-serif text-4xl text-[#d7bd77]">{stats.totalServices}</strong>
             </div>
+            <div className="border border-white/10 bg-white/[.02] p-6 rounded-xl">
+              <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Testimonios</p>
+              <strong className="block mt-2 font-serif text-4xl text-[#d7bd77]">{stats.totalTestimonials}</strong>
+            </div>
+
+            {/* ⭐ NUEVO: Tarjeta de códigos de reseña */}
+            <Link 
+              href="/admin/reviews"
+              className="group border border-[#10B77F]/30 bg-[#10B77F]/[.03] hover:border-[#10B77F] hover:bg-[#10B77F]/[.08] p-6 rounded-xl transition-all duration-300"
+            >
+              <p className="text-[10px] uppercase tracking-[.16em] text-[#10B77F] flex items-center gap-1.5">
+                <KeyRound className="size-3" />
+                Reseñas
+              </p>
+              <div className="mt-2 flex items-baseline gap-2">
+                <strong className="font-serif text-4xl text-[#d7bd77] group-hover:text-[#10B77F] transition-colors">
+                  {stats.reviewCodesPending}
+                </strong>
+                <span className="text-xs text-white/40">pendientes</span>
+              </div>
+              <p className="text-[10px] text-white/40 mt-1">
+                {stats.reviewCodesUsed} usados
+              </p>
+            </Link>
           </div>
         </div>
       </section>

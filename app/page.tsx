@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { ArrowUpRight, Menu, Play, X, Shield, ChevronLeft, ChevronRight, Camera, Star, Plus, Minus, Briefcase, Award, Users, Home as HomeIcon, KeyRound, Check } from 'lucide-react'
+import { ArrowUpRight, Menu, Play, X, Shield, ChevronLeft, ChevronRight, Camera, Star, Plus, Minus, Briefcase, Award, Users, Home as HomeIcon, KeyRound, Check, TrendingUp, Heart, Target, Zap, Loader2, PartyPopper } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { useLanguage } from '@/components/language-provider'
@@ -10,6 +10,19 @@ import { MascotAssistant } from '@/components/MascotAssistant'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
+
+// ⭐ Mapa de iconos disponibles (debe coincidir con los del admin)
+const ICON_MAP: Record<string, any> = {
+  briefcase: Briefcase,
+  award: Award,
+  users: Users,
+  home: HomeIcon,
+  trending: TrendingUp,
+  star: Star,
+  heart: Heart,
+  target: Target,
+  zap: Zap,
+}
 
 export default function Home() {
   const [loading, setLoading] = useState(true)
@@ -21,6 +34,7 @@ export default function Home() {
   const [contactData, setContactData] = useState<any>(null)
   const [footerData, setFooterData] = useState<any>(null)
   const [testimonialsData, setTestimonialsData] = useState<any>(null)
+  const [statsData, setStatsData] = useState<any>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeHero, setActiveHero] = useState(0)
   
@@ -29,8 +43,20 @@ export default function Home() {
   
   const [openFaq, setOpenFaq] = useState<number | null>(0)
   
+  // ⭐ Sistema de reseñas
   const [reviewCode, setReviewCode] = useState('')
   const [reviewMessage, setReviewMessage] = useState('')
+  const [reviewError, setReviewError] = useState('')
+  const [reviewVerified, setReviewVerified] = useState(false)
+  const [reviewClientName, setReviewClientName] = useState('')
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewText, setReviewText] = useState('')
+  const [reviewRole, setReviewRole] = useState('')
+  const [reviewRoleCa, setReviewRoleCa] = useState('')
+  const [reviewTextCa, setReviewTextCa] = useState('')
+  const [verifying, setVerifying] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [reviewSuccess, setReviewSuccess] = useState(false)
   
   const { language } = useLanguage()
   const ca = language === 'ca'
@@ -42,7 +68,8 @@ export default function Home() {
           headers: {
             'apikey': SUPABASE_KEY,
             'Authorization': `Bearer ${SUPABASE_KEY}`
-          }
+          },
+          cache: 'no-store'
         })
         if (!res.ok) throw new Error('Error al cargar')
         const data = await res.json()
@@ -53,6 +80,7 @@ export default function Home() {
         const contact = data.find((d: any) => d.section === 'contact')
         const footer = data.find((d: any) => d.section === 'footer')
         const testimonials = data.find((d: any) => d.section === 'testimonials')
+        const stats = data.find((d: any) => d.section === 'stats')
 
         if (hero) setHeroData(hero.content)
         if (services) {
@@ -63,13 +91,15 @@ export default function Home() {
         if (contact) setContactData(contact.content)
         if (footer) setFooterData(footer.content)
         if (testimonials) setTestimonialsData(testimonials.content)
+        if (stats) setStatsData(stats.content)
 
         try {
           const trabajosRes = await fetch(`${SUPABASE_URL}/rest/v1/trabajos?select=*&order=orden.asc`, {
             headers: {
               'apikey': SUPABASE_KEY,
               'Authorization': `Bearer ${SUPABASE_KEY}`
-            }
+            },
+            cache: 'no-store'
           })
           if (trabajosRes.ok) {
             const trabajosData = await trabajosRes.json()
@@ -149,12 +179,23 @@ export default function Home() {
     setCurrentPhotoIndex(prev => prev > 0 ? prev - 1 : total - 1)
   }
 
-  const statsData = [
-    { icon: Briefcase, number: 150, suffix: '+', labelEs: 'Proyectos realizados', labelCa: 'Projectes realitzats' },
-    { icon: Award, number: 15, suffix: '', labelEs: 'Años de experiencia', labelCa: 'Anys d\'experiència' },
-    { icon: Users, number: 98, suffix: '%', labelEs: 'Clientes satisfechos', labelCa: 'Clients satisfets' },
-    { icon: HomeIcon, number: 250, suffix: 'K', labelEs: 'm² reformados', labelCa: 'm² reformats' },
-  ]
+  const statsItems = statsData?.items || []
+  const statsEyebrow = statsData?.eyebrow || { es: 'En números', ca: 'En números' }
+  
+  const dynamicStatsData = statsItems.length > 0
+    ? statsItems.map((item: any) => ({
+        icon: ICON_MAP[item.icon] || Star,
+        number: item.number,
+        suffix: item.suffix || '',
+        labelEs: item.label?.es || '',
+        labelCa: item.label?.ca || item.label?.es || '',
+      }))
+    : [
+        { icon: Briefcase, number: 150, suffix: '+', labelEs: 'Proyectos realizados', labelCa: 'Projectes realitzats' },
+        { icon: Award, number: 15, suffix: '', labelEs: 'Años de experiencia', labelCa: 'Anys d\'experiència' },
+        { icon: Users, number: 98, suffix: '%', labelEs: 'Clientes satisfechos', labelCa: 'Clients satisfets' },
+        { icon: HomeIcon, number: 250, suffix: 'K', labelEs: 'm² reformados', labelCa: 'm² reformats' },
+      ]
 
   const faqs = [
     {
@@ -189,14 +230,113 @@ export default function Home() {
     },
   ]
 
-  const handleReviewSubmit = (e: React.FormEvent) => {
+  // ⭐ NUEVO: Verificar código de cliente
+  const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!reviewCode.trim()) return
-    setReviewMessage(ca 
-      ? 'Gràcies! El sistema de ressenyes estarà disponible molt aviat.' 
-      : '¡Gracias! El sistema de reseñas estará disponible muy pronto.')
-    setReviewCode('')
-    setTimeout(() => setReviewMessage(''), 5000)
+    setVerifying(true)
+    setReviewError('')
+    setReviewMessage('')
+
+    try {
+      const res = await fetch('/api/reviews/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: reviewCode })
+      })
+      const data = await res.json()
+
+      if (!res.ok || !data.valid) {
+        setReviewError(data.error || (ca ? 'Codi no vàlid' : 'Código no válido'))
+        return
+      }
+
+      setReviewVerified(true)
+      setReviewClientName(data.cliente_nombre || '')
+      if (data.proyecto) setReviewRole(data.proyecto)
+    } catch (err) {
+      setReviewError(ca ? 'Error de connexió' : 'Error de conexión')
+    } finally {
+      setVerifying(false)
+    }
+  }
+
+  // ⭐ ACTUALIZADO: Enviar reseña con refresco instantáneo
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!reviewText.trim()) {
+      setReviewError(ca ? 'Escriu la teva ressenya' : 'Escribe tu reseña')
+      return
+    }
+    setSubmitting(true)
+    setReviewError('')
+
+    try {
+      const res = await fetch('/api/reviews/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: reviewCode,
+          rating: reviewRating,
+          text: reviewText,
+          role: reviewRole
+        })
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        setReviewError(data.error || (ca ? 'Error al enviar' : 'Error al enviar'))
+        return
+      }
+
+      // ⭐ ACTUALIZACIÓN INSTANTÁNEA:
+      // El endpoint nos devuelve todos los items ya actualizados.
+      // Los usamos directamente sin esperar otra petición.
+      if (data.allItems && Array.isArray(data.allItems)) {
+        setTestimonialsData((prev: any) => ({
+          ...(prev || {}),
+          items: data.allItems
+        }))
+      }
+
+      setReviewSuccess(true)
+      setReviewVerified(false)
+
+      // ⭐ Refresco de seguridad en segundo plano (por si acaso)
+      try {
+        const testRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/site_content?section=eq.testimonials&select=content`,
+          {
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`
+            },
+            cache: 'no-store'
+          }
+        )
+        if (testRes.ok) {
+          const testData = await testRes.json()
+          if (testData[0]?.content) {
+            setTestimonialsData(testData[0].content)
+          }
+        }
+      } catch (e) {
+        console.warn('Refresco secundario falló:', e)
+      }
+
+      setTimeout(() => {
+        setReviewCode('')
+        setReviewText('')
+        setReviewRole('')
+        setReviewRating(5)
+        setReviewClientName('')
+        setReviewSuccess(false)
+      }, 6000)
+    } catch (err) {
+      setReviewError(ca ? 'Error de connexió' : 'Error de conexión')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -206,7 +346,7 @@ export default function Home() {
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
             <img src="/logo.png" alt="Renovactiva" className="h-8 w-auto lg:h-10" />
             <span className="font-serif text-base tracking-[0.28em] text-[#d7bd77] lg:text-xl whitespace-nowrap">
-              Renovactiva<span className="text-white/40">-SL</span>
+              Renovactiva<span className="text-white/40"> SL</span>
             </span>
           </Link>
 
@@ -667,7 +807,7 @@ export default function Home() {
       <section className="relative border-y border-white/10 bg-[#0D0D0D] px-6 py-20 lg:px-10 lg:py-28">
         <div className="relative mx-auto max-w-[1380px]">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-            {statsData.map((stat, index) => {
+            {dynamicStatsData.map((stat: any, index: number) => {
               const IconComponent = stat.icon
               return (
                 <motion.div
@@ -773,7 +913,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* 7. DEJA TU RESEÑA */}
+      {/* 7. DEJA TU RESEÑA — ⭐ SISTEMA COMPLETO */}
       <section className="relative border-y border-white/10 bg-[#0D0D0D] px-6 py-24 lg:px-10 lg:py-32">
         <div className="relative mx-auto max-w-[700px]">
           
@@ -819,69 +959,223 @@ export default function Home() {
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
           >
-            <form onSubmit={handleReviewSubmit} className="space-y-6">
-              
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <div className="flex items-center justify-center size-10 rounded-full bg-[#10B77F]/10 border border-[#10B77F]/40">
-                  <KeyRound className="size-5 text-[#10B77F]" />
-                </div>
-                <span className="text-[11px] uppercase tracking-[0.24em] text-[#d7bd77] font-medium">
-                  {ca ? 'Codi de client' : 'Código de cliente'}
-                </span>
-              </div>
 
-              <div className="relative">
-                <input
-                  type="text"
-                  value={reviewCode}
-                  onChange={(e) => setReviewCode(e.target.value.toUpperCase())}
-                  placeholder="RNV-XXXX-XXXX"
-                  maxLength={20}
-                  className="w-full bg-[#080808] border border-[#10B77F]/40 rounded-lg px-5 py-5 text-center text-xl lg:text-2xl font-mono tracking-[0.15em] text-white placeholder:text-white/20 focus:border-[#10B77F] focus:shadow-[0_0_30px_rgba(16,183,127,0.3)] outline-none transition-all duration-500"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={!reviewCode.trim()}
-                className="group relative w-full inline-flex items-center justify-center gap-3 bg-[#d7bd77] px-6 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-[#141310] overflow-hidden rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+            {/* ⭐ ESTADO 1: ÉXITO */}
+            {reviewSuccess ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-8"
               >
-                <span className="absolute inset-0 bg-[#10B77F] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]" />
-                <span className="relative z-10">
-                  {ca ? 'Enviar codi' : 'Enviar código'}
-                </span>
-                <ArrowUpRight className="relative z-10 size-4 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
-              </button>
-
-              <AnimatePresence>
-                {reviewMessage && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="flex items-center gap-3 p-4 rounded-lg border border-[#10B77F]/50 bg-[#10B77F]/10"
-                  >
-                    <Check className="size-5 text-[#10B77F] flex-shrink-0" />
-                    <p className="text-sm text-white/90">{reviewMessage}</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <div className="pt-4 border-t border-white/10 text-center">
-                <p className="text-xs text-white/50">
-                  {ca 
-                    ? 'No tens codi? Escriu-nos a '
-                    : '¿No tienes código? Escríbenos a '}
-                  <a 
-                    href="mailto:info@renovactiva.com" 
-                    className="text-[#10B77F] hover:text-[#d7bd77] transition-colors underline-offset-4 hover:underline"
-                  >
-                    info@renovactiva.com
-                  </a>
+                <div className="flex justify-center mb-6">
+                  <div className="flex items-center justify-center size-20 rounded-full bg-[#10B77F]/20 border-2 border-[#10B77F]">
+                    <PartyPopper className="size-10 text-[#10B77F]" />
+                  </div>
+                </div>
+                <h3 className="font-serif text-3xl text-[#d7bd77] mb-3">
+                  {ca ? 'Gràcies!' : '¡Gracias!'}
+                </h3>
+                <p className="text-white/80 text-base leading-relaxed max-w-md mx-auto">
+                  {ca
+                    ? 'La teva ressenya s\'ha publicat correctament. La teva opinió ens ajuda a millorar.'
+                    : 'Tu reseña se ha publicado correctamente. Tu opinión nos ayuda a mejorar.'}
                 </p>
-              </div>
+              </motion.div>
+            ) : reviewVerified ? (
+              // ⭐ ESTADO 2: FORMULARIO DE RESEÑA (código verificado)
+              <form onSubmit={handleReviewSubmit} className="space-y-6">
+                <div className="text-center pb-2">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-bold mb-2">
+                    ✓ {ca ? 'Codi verificat' : 'Código verificado'}
+                  </p>
+                  <h3 className="font-serif text-2xl text-[#d7bd77]">
+                    {reviewClientName}
+                  </h3>
+                </div>
 
-            </form>
+                {/* Estrellas */}
+                <div className="text-center">
+                  <label className="block text-white/60 text-xs uppercase tracking-[0.2em] mb-3">
+                    {ca ? 'La teva valoració' : 'Tu valoración'}
+                  </label>
+                  <div className="flex items-center justify-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setReviewRating(star)}
+                        className="transition-transform duration-200 hover:scale-125"
+                        aria-label={`${star} ${ca ? 'estrelles' : 'estrellas'}`}
+                      >
+                        <Star
+                          className={`size-9 transition-colors duration-300 ${
+                            star <= reviewRating
+                              ? 'text-[#d7bd77] fill-[#d7bd77]'
+                              : 'text-white/20'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Texto de la reseña */}
+                <div>
+                  <label className="block text-white/60 text-xs uppercase tracking-[0.2em] mb-2">
+                    {ca ? 'La teva opinió' : 'Tu opinión'}
+                  </label>
+                  <textarea
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
+                    rows={5}
+                    required
+                    maxLength={500}
+                    placeholder={ca
+                      ? 'Explica\'ns la teva experiència amb Renovactiva...'
+                      : 'Cuéntanos tu experiencia con Renovactiva...'}
+                    className="w-full bg-[#080808] border border-[#10B77F]/40 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-[#10B77F] focus:shadow-[0_0_30px_rgba(16,183,127,0.3)] outline-none transition-all duration-500 resize-y"
+                  />
+                  <p className="text-right text-[10px] text-white/30 mt-1">
+                    {reviewText.length} / 500
+                  </p>
+                </div>
+
+                {/* Rol / Proyecto (opcional, pre-rellenado) */}
+                <div>
+                  <label className="block text-white/60 text-xs uppercase tracking-[0.2em] mb-2">
+                    {ca ? 'Tipus de projecte (opcional)' : 'Tipo de proyecto (opcional)'}
+                  </label>
+                  <input
+                    type="text"
+                    value={reviewRole}
+                    onChange={(e) => setReviewRole(e.target.value)}
+                    maxLength={80}
+                    placeholder={ca
+                      ? 'Ex: Reforma integral pis Eixample'
+                      : 'Ej: Reforma integral piso Eixample'}
+                    className="w-full bg-[#080808] border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-white/20 focus:border-[#10B77F] outline-none transition-all duration-300"
+                  />
+                </div>
+
+                {/* Errores */}
+                {reviewError && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg border border-red-500/50 bg-red-500/10">
+                    <X className="size-4 text-red-400 flex-shrink-0" />
+                    <p className="text-sm text-red-300">{reviewError}</p>
+                  </div>
+                )}
+
+                {/* Botón enviar */}
+                <button
+                  type="submit"
+                  disabled={submitting || !reviewText.trim()}
+                  className="group relative w-full inline-flex items-center justify-center gap-3 bg-[#d7bd77] px-6 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-[#141310] overflow-hidden rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+                >
+                  <span className="absolute inset-0 bg-[#10B77F] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]" />
+                  <span className="relative z-10 flex items-center gap-2">
+                    {submitting ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        {ca ? 'Enviant...' : 'Enviando...'}
+                      </>
+                    ) : (
+                      <>
+                        {ca ? 'Publicar ressenya' : 'Publicar reseña'}
+                        <ArrowUpRight className="size-4 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
+                      </>
+                    )}
+                  </span>
+                </button>
+
+                {/* Botón cancelar */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReviewVerified(false)
+                    setReviewCode('')
+                    setReviewText('')
+                    setReviewRole('')
+                    setReviewRating(5)
+                    setReviewError('')
+                  }}
+                  className="w-full text-center text-xs text-white/40 hover:text-white/70 transition-colors"
+                >
+                  {ca ? 'Cancel·lar' : 'Cancelar'}
+                </button>
+              </form>
+            ) : (
+              // ⭐ ESTADO 3: INTRODUCIR CÓDIGO
+              <form onSubmit={handleVerifyCode} className="space-y-6">
+                
+                <div className="flex items-center justify-center gap-3 mb-2">
+                  <div className="flex items-center justify-center size-10 rounded-full bg-[#10B77F]/10 border border-[#10B77F]/40">
+                    <KeyRound className="size-5 text-[#10B77F]" />
+                  </div>
+                  <span className="text-[11px] uppercase tracking-[0.24em] text-[#d7bd77] font-medium">
+                    {ca ? 'Codi de client' : 'Código de cliente'}
+                  </span>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={reviewCode}
+                    onChange={(e) => {
+                      setReviewCode(e.target.value.toUpperCase())
+                      setReviewError('')
+                    }}
+                    placeholder="RNV-XXXX-XXXX"
+                    maxLength={20}
+                    disabled={verifying}
+                    className="w-full bg-[#080808] border border-[#10B77F]/40 rounded-lg px-5 py-5 text-center text-xl lg:text-2xl font-mono tracking-[0.15em] text-white placeholder:text-white/20 focus:border-[#10B77F] focus:shadow-[0_0_30px_rgba(16,183,127,0.3)] outline-none transition-all duration-500 disabled:opacity-50"
+                  />
+                </div>
+
+                {reviewError && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg border border-red-500/50 bg-red-500/10">
+                    <X className="size-4 text-red-400 flex-shrink-0" />
+                    <p className="text-sm text-red-300">{reviewError}</p>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={!reviewCode.trim() || verifying}
+                  className="group relative w-full inline-flex items-center justify-center gap-3 bg-[#d7bd77] px-6 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-[#141310] overflow-hidden rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+                >
+                  <span className="absolute inset-0 bg-[#10B77F] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]" />
+                  <span className="relative z-10 flex items-center gap-2">
+                    {verifying ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        {ca ? 'Verificant...' : 'Verificando...'}
+                      </>
+                    ) : (
+                      <>
+                        {ca ? 'Verificar codi' : 'Verificar código'}
+                        <ArrowUpRight className="size-4 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
+                      </>
+                    )}
+                  </span>
+                </button>
+
+                <div className="pt-4 border-t border-white/10 text-center">
+                  <p className="text-xs text-white/50">
+                    {ca 
+                      ? 'No tens codi? Escriu-nos a '
+                      : '¿No tienes código? Escríbenos a '}
+                    <a 
+                      href="mailto:info@renovactiva.com" 
+                      className="text-[#10B77F] hover:text-[#d7bd77] transition-colors underline-offset-4 hover:underline"
+                    >
+                      info@renovactiva.com
+                    </a>
+                  </p>
+                </div>
+
+              </form>
+            )}
+
           </motion.div>
 
         </div>
@@ -1016,7 +1310,7 @@ export default function Home() {
               {ca ? "Explica'ns la teva idea." : 'Cuéntanos tu idea.'}
             </p>
             <motion.a
-              href="mailto:info@renovactiva.com?subject=Solicitud%20de%20presupuesto%20-%20Renovactiva&body=Hola%2C%20me%20gustar%C3%ADa%20solicitar%20un%20presupuesto%20para%20mi%20proyecto.%0A%0ANombre%3A%20%0ATel%C3%A9fono%3A%20%0ADescripci%C3%B3n%20del%20proyecto%3A%20"
+              href="mailto:info@renovactiva.com?subject=Solicitud%20de%20presupuesto%20%E2%80%94%20Renovactiva&body=Hola%20equipo%20Renovactiva%2C%0A%0AMe%20gustar%C3%ADa%20solicitar%20un%20presupuesto%20para%20mi%20proyecto.%0A%0A%C2%B7%20Nombre%3A%0A%C2%B7%20Tel%C3%A9fono%3A%0A%C2%B7%20Tipo%20de%20reforma%20(vivienda%20%2F%20oficina%20%2F%20local)%3A%0A%C2%B7%20Ciudad%20o%20zona%3A%0A%C2%B7%20Descripci%C3%B3n%20breve%3A%0A%0AGracias."
               className="group mt-7 inline-flex items-center gap-3 bg-[#000000] hover:bg-[#10B77F] text-white px-6 py-3 rounded-lg transition-colors text-[11px] uppercase tracking-[0.2em] font-medium"
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.98 }}
@@ -1050,7 +1344,7 @@ export default function Home() {
               <Link href="/" className="flex items-center gap-3 group">
                 <img src="/logo.png" alt="Renovactiva" className="h-12 w-auto transition-transform duration-500 group-hover:scale-105" />
                 <span className="font-serif text-xl tracking-[0.28em] text-[#d7bd77] transition-colors duration-500 group-hover:text-[#10B77F]">
-                  Renovactiva<span className="text-white/40">-SL</span>
+                  Renovactiva<span className="text-white/40"> SL</span>
                 </span>
               </Link>
               <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/55">
@@ -1122,8 +1416,8 @@ export default function Home() {
           >
             <p>
               {ca
-                ? (footerTrans.copyright || footerData?.copyright || '© 2025 Renovactiva-SL. Tots els drets reservats.')
-                : (footerData?.copyright || '© 2025 Renovactiva-SL. Todos los derechos reservados.')}
+                ? (footerTrans.copyright || footerData?.copyright || '© 2025 Renovactiva SL. Tots els drets reservats.')
+                : (footerData?.copyright || '© 2025 Renovactiva SL. Todos los derechos reservados.')}
             </p>
             <div className="flex gap-5">
               {footerData?.social?.instagram && (

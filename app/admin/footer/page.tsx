@@ -73,7 +73,7 @@ export default function FooterPage() {
   async function saveData() {
     setSaving(true)
     setError('')
-    setNotice('🌐 Traduciendo y guardando...')
+    setNotice('Traduciendo y guardando...')
 
     try {
       let contentToSave = { ...data.content }
@@ -118,9 +118,17 @@ export default function FooterPage() {
       if (!res.ok) throw new Error('Error al guardar')
 
       setData({ ...data, content: contentToSave })
-      setNotice('✅ Footer guardado y traducido correctamente')
+
+      try {
+        await fetch('/api/revalidate', { method: 'POST' })
+      } catch (e) {
+        console.warn('Revalidate falló:', e)
+      }
+
+      setNotice('Footer guardado y traducido correctamente')
+      setTimeout(() => setNotice(''), 3000)
     } catch (err) {
-      setError('❌ ' + (err as Error).message)
+      setError((err as Error).message)
     } finally {
       setSaving(false)
     }
@@ -144,7 +152,7 @@ export default function FooterPage() {
 
   return (
     <AdminSection
-      title="🦶 Footer"
+      title="Footer"
       description="Edita toda la información del pie de página"
       onSave={saveData}
       saving={saving}
@@ -152,9 +160,8 @@ export default function FooterPage() {
       notice={notice}
     >
       <div className="space-y-6">
-        {/* Descripción */}
         <div className="border-b border-white/10 pb-6">
-          <h3 className="text-white/60 text-sm font-semibold mb-4">📝 Descripción</h3>
+          <h3 className="text-white/60 text-sm font-semibold mb-4">Descripción</h3>
           <div>
             <label className="block text-white/50 text-sm mb-1">Descripción (ES)</label>
             <textarea
@@ -165,17 +172,16 @@ export default function FooterPage() {
               placeholder="Diseñamos y construimos espacios con intención."
             />
             {data.content.translations?.description && (
-              <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.translations.description}</p>
+              <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.description}</p>
             )}
           </div>
         </div>
 
-        {/* Contacto */}
         <div className="border-b border-white/10 pb-6">
-          <h3 className="text-white/60 text-sm font-semibold mb-4">📞 Contacto</h3>
+          <h3 className="text-white/60 text-sm font-semibold mb-4">Contacto</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-white/50 text-sm mb-1">📱 Teléfono</label>
+              <label className="block text-white/50 text-sm mb-1">Teléfono</label>
               <input
                 type="text"
                 value={data.content.contact?.phone || ''}
@@ -185,7 +191,7 @@ export default function FooterPage() {
               />
             </div>
             <div>
-              <label className="block text-white/50 text-sm mb-1">📧 Email</label>
+              <label className="block text-white/50 text-sm mb-1">Email</label>
               <input
                 type="email"
                 value={data.content.contact?.email || ''}
@@ -197,9 +203,8 @@ export default function FooterPage() {
           </div>
         </div>
 
-        {/* Dirección */}
         <div className="border-b border-white/10 pb-6">
-          <h3 className="text-white/60 text-sm font-semibold mb-4">📍 Dirección</h3>
+          <h3 className="text-white/60 text-sm font-semibold mb-4">Dirección</h3>
           <div className="space-y-4">
             <div>
               <label className="block text-white/50 text-sm mb-1">Calle</label>
@@ -211,7 +216,7 @@ export default function FooterPage() {
                 placeholder="Carrer Exemple 123"
               />
               {data.content.translations?.address?.street && (
-                <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.translations.address.street}</p>
+                <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.address.street}</p>
               )}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -225,7 +230,7 @@ export default function FooterPage() {
                   placeholder="Barcelona"
                 />
                 {data.content.translations?.address?.city && (
-                  <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.translations.address.city}</p>
+                  <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.address.city}</p>
                 )}
               </div>
               <div>
@@ -242,9 +247,8 @@ export default function FooterPage() {
           </div>
         </div>
 
-        {/* Horario */}
         <div className="border-b border-white/10 pb-6">
-          <h3 className="text-white/60 text-sm font-semibold mb-4">🕒 Horario</h3>
+          <h3 className="text-white/60 text-sm font-semibold mb-4">Horario</h3>
           <div>
             <label className="block text-white/50 text-sm mb-1">Horario de atención</label>
             <input
@@ -255,17 +259,16 @@ export default function FooterPage() {
               placeholder="Lun - Vie: 9:00 - 18:00"
             />
             {data.content.translations?.schedule && (
-              <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.translations.schedule}</p>
+              <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.schedule}</p>
             )}
           </div>
         </div>
 
-        {/* Redes sociales */}
         <div className="border-b border-white/10 pb-6">
-          <h3 className="text-white/60 text-sm font-semibold mb-4">🌐 Redes Sociales</h3>
+          <h3 className="text-white/60 text-sm font-semibold mb-4">Redes Sociales</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-white/50 text-sm mb-1">📷 Instagram</label>
+              <label className="block text-white/50 text-sm mb-1">Instagram</label>
               <input
                 type="text"
                 value={data.content.social?.instagram || ''}
@@ -275,7 +278,7 @@ export default function FooterPage() {
               />
             </div>
             <div>
-              <label className="block text-white/50 text-sm mb-1">💼 LinkedIn</label>
+              <label className="block text-white/50 text-sm mb-1">LinkedIn</label>
               <input
                 type="text"
                 value={data.content.social?.linkedin || ''}
@@ -285,7 +288,7 @@ export default function FooterPage() {
               />
             </div>
             <div>
-              <label className="block text-white/50 text-sm mb-1">🎬 YouTube</label>
+              <label className="block text-white/50 text-sm mb-1">YouTube</label>
               <input
                 type="text"
                 value={data.content.social?.youtube || ''}
@@ -295,7 +298,7 @@ export default function FooterPage() {
               />
             </div>
             <div>
-              <label className="block text-white/50 text-sm mb-1">📘 Facebook</label>
+              <label className="block text-white/50 text-sm mb-1">Facebook</label>
               <input
                 type="text"
                 value={data.content.social?.facebook || ''}
@@ -307,9 +310,8 @@ export default function FooterPage() {
           </div>
         </div>
 
-        {/* Copyright */}
         <div>
-          <h3 className="text-white/60 text-sm font-semibold mb-4">📄 Copyright</h3>
+          <h3 className="text-white/60 text-sm font-semibold mb-4">Copyright</h3>
           <div>
             <label className="block text-white/50 text-sm mb-1">Texto del copyright (ES)</label>
             <input
@@ -317,10 +319,10 @@ export default function FooterPage() {
               value={data.content.copyright || ''}
               onChange={(e) => updateField('copyright', e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm"
-              placeholder="© 2025 Renovactiva-SL. Todos los derechos reservados."
+              placeholder="© 2025 Renovactiva SL. Todos los derechos reservados."
             />
             {data.content.translations?.copyright && (
-              <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.translations.copyright}</p>
+              <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.copyright}</p>
             )}
           </div>
         </div>

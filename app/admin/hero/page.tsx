@@ -56,12 +56,11 @@ export default function HeroPage() {
   async function saveData() {
     setSaving(true)
     setError('')
-    setNotice('🌐 Traduciendo y guardando...')
+    setNotice('Traduciendo y guardando...')
 
     try {
       let contentToSave = { ...data.content }
 
-      // Traducir todos los campos de texto automáticamente
       const translations = {
         eyebrow: await translate(data.content.eyebrow || '', 'ca'),
         title: await translate(data.content.title || '', 'ca'),
@@ -88,9 +87,17 @@ export default function HeroPage() {
       if (!res.ok) throw new Error('Error al guardar')
 
       setData({ ...data, content: contentToSave })
-      setNotice('✅ Hero guardado y traducido correctamente')
+
+      try {
+        await fetch('/api/revalidate', { method: 'POST' })
+      } catch (e) {
+        console.warn('Revalidate falló:', e)
+      }
+
+      setNotice('Hero guardado y traducido correctamente')
+      setTimeout(() => setNotice(''), 3000)
     } catch (err) {
-      setError('❌ ' + (err as Error).message)
+      setError((err as Error).message)
     } finally {
       setSaving(false)
     }
@@ -107,7 +114,7 @@ export default function HeroPage() {
 
   return (
     <AdminSection
-      title="🏠 Hero"
+      title="Hero"
       description="Edita la portada principal"
       onSave={saveData}
       saving={saving}
@@ -115,9 +122,8 @@ export default function HeroPage() {
       notice={notice}
     >
       <div className="space-y-6">
-        {/* Imágenes */}
         <div className="border-b border-white/10 pb-6">
-          <h3 className="text-white/60 text-sm font-semibold mb-4">🖼️ Imágenes del Hero</h3>
+          <h3 className="text-white/60 text-sm font-semibold mb-4">Imágenes del Hero</h3>
           <ImageUploader
             images={data.content.images || []}
             onChange={(images) => setData({ ...data, content: { ...data.content, images } })}
@@ -126,9 +132,8 @@ export default function HeroPage() {
           />
         </div>
 
-        {/* Textos */}
         <div className="space-y-4">
-          <h3 className="text-white/60 text-sm font-semibold">✏️ Textos</h3>
+          <h3 className="text-white/60 text-sm font-semibold">Textos</h3>
 
           <div>
             <label className="block text-white/50 text-sm mb-1">Eyebrow (ES)</label>
@@ -140,7 +145,7 @@ export default function HeroPage() {
               placeholder="Arquitectura · Interiorismo · Construcción"
             />
             {data.content.translations?.eyebrow && (
-              <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.translations.eyebrow}</p>
+              <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.eyebrow}</p>
             )}
           </div>
 
@@ -154,7 +159,7 @@ export default function HeroPage() {
               placeholder="Espacios que trascienden."
             />
             {data.content.translations?.title && (
-              <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.translations.title}</p>
+              <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.title}</p>
             )}
           </div>
 
@@ -168,7 +173,7 @@ export default function HeroPage() {
               placeholder="Reformas de alto nivel..."
             />
             {data.content.translations?.description && (
-              <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.translations.description}</p>
+              <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.description}</p>
             )}
           </div>
 
@@ -182,7 +187,7 @@ export default function HeroPage() {
               placeholder="Hablemos de tu proyecto"
             />
             {data.content.translations?.cta && (
-              <p className="text-white/40 text-xs mt-1">🇨🇦 {data.content.translations.cta}</p>
+              <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.cta}</p>
             )}
           </div>
         </div>

@@ -5,11 +5,11 @@ import { LanguageProvider } from '@/components/language-provider'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.renovactiva.com'),
-  title: 'Renovactiva-SL | Arquitectura, interiorismo y construcción',
+  title: 'Renovactiva SL | Arquitectura, interiorismo y construcción',
   description: 'Reformas de alto nivel para viviendas, locales comerciales y oficinas en Barcelona.',
   generator: 'Renovactiva',
   applicationName: 'Renovactiva',
-  authors: [{ name: 'Renovactiva-SL' }],
+  authors: [{ name: 'Renovactiva SL' }],
   keywords: ['reformas', 'Barcelona', 'arquitectura', 'interiorismo', 'rehabilitación', 'obras', 'construcción'],
 
   // ============================================================
@@ -39,8 +39,8 @@ export const metadata: Metadata = {
     locale: 'es_ES',
     alternateLocale: ['ca_ES'],
     url: 'https://www.renovactiva.com',
-    siteName: 'Renovactiva-SL',
-    title: 'Renovactiva-SL | Arquitectura, interiorismo y construcción',
+    siteName: 'Renovactiva SL',
+    title: 'Renovactiva SL | Arquitectura, interiorismo y construcción',
     description: 'Reformas de alto nivel para viviendas, locales comerciales y oficinas en Barcelona.',
   },
 
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   // ============================================================
   twitter: {
     card: 'summary_large_image',
-    title: 'Renovactiva-SL | Arquitectura, interiorismo y construcción',
+    title: 'Renovactiva SL | Arquitectura, interiorismo y construcción',
     description: 'Reformas de alto nivel para viviendas, locales comerciales y oficinas en Barcelona.',
   },
 

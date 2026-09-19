@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Upload, X, Link as LinkIcon, Image as ImageIcon, Loader2, Video, Eye } from 'lucide-react'
+import { Upload, X, Link as LinkIcon, Image as ImageIcon, Loader2, Video, Eye, ArrowUp, ArrowDown } from 'lucide-react'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
@@ -16,7 +16,7 @@ interface ImageUploaderProps {
 }
 
 export default function ImageUploader({ 
-  images, 
+  images = [], 
   onChange, 
   folder, 
   maxImages = 20,
@@ -28,16 +28,15 @@ export default function ImageUploader({
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Función para limpiar el nombre del archivo/carpeta
   function cleanName(name: string): string {
     return name
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')  // Elimina acentos
-      .replace(/ñ/g, 'n')                // Reemplaza ñ
-      .replace(/[^a-z0-9./-]/g, '-')     // Reemplaza espacios y símbolos
-      .replace(/-+/g, '-')               // Elimina guiones duplicados
-      .replace(/^-|-$/g, '')             // Elimina guiones al inicio/final
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/ñ/g, 'n')
+      .replace(/[^a-z0-9./-]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
   }
 
   const isVideo = (url: string) => {
@@ -56,7 +55,6 @@ export default function ImageUploader({
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
         
-        // Limpiar nombre de la carpeta y del archivo
         const cleanFolder = cleanName(folder)
         const fileExt = file.name.split('.').pop() || 'jpg'
         const cleanBaseName = cleanName(file.name.replace(/\.[^/.]+$/, '')) || 'archivo'
@@ -122,7 +120,6 @@ export default function ImageUploader({
 
   return (
     <div className="space-y-4">
-      {/* Selector de modo */}
       <div className="flex gap-2">
         <button
           type="button"
@@ -148,7 +145,6 @@ export default function ImageUploader({
         </button>
       </div>
 
-      {/* Input según modo */}
       {mode === 'upload' ? (
         <div>
           <input
@@ -190,9 +186,6 @@ export default function ImageUploader({
                 <p className="text-white/40 text-xs">
                   Máximo {maxImages} archivos · 50MB cada uno
                 </p>
-                <p className="text-white/30 text-[10px]">
-                  Acepta cualquier nombre (acentos, ñ, espacios, etc.)
-                </p>
               </>
             )}
           </label>
@@ -204,7 +197,7 @@ export default function ImageUploader({
             value={urlInput}
             onChange={(e) => setUrlInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addUrl())}
-            placeholder="https://ejemplo.com/foto.jpg o video.mp4"
+            placeholder="https://ejemplo.com/foto.jpg"
             className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/30 focus:border-[#d7bd77] outline-none text-sm"
           />
           <button
@@ -218,12 +211,11 @@ export default function ImageUploader({
         </div>
       )}
 
-      {/* Galería de archivos */}
       {images.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
             <p className="text-white/60 text-sm">
-              📁 {images.length} archivo{images.length !== 1 ? 's' : ''} de {maxImages}
+              {images.length} archivo{images.length !== 1 ? 's' : ''} de {maxImages}
             </p>
             <p className="text-white/30 text-xs">Arrastra para reordenar</p>
           </div>
@@ -264,13 +256,11 @@ export default function ImageUploader({
                   )}
                 </div>
 
-                {/* Indicadores */}
                 <span className="absolute top-1 left-1 bg-black/70 text-white/80 text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1">
                   {isVideo(url) ? <Video className="size-3" /> : <ImageIcon className="size-3" />}
                   #{i + 1}
                 </span>
 
-                {/* Acciones al pasar el ratón */}
                 <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 rounded-lg">
                   <div className="flex gap-2">
                     <a
@@ -296,17 +286,19 @@ export default function ImageUploader({
                       type="button"
                       onClick={() => moveUp(i)}
                       disabled={i === 0}
-                      className="px-2 py-0.5 bg-white/10 rounded text-[10px] text-white hover:bg-white/20 disabled:opacity-30"
+                      className="p-1.5 bg-white/10 rounded text-white hover:bg-white/20 disabled:opacity-30"
+                      title="Mover arriba"
                     >
-                      ←
+                      <ArrowUp className="size-3" />
                     </button>
                     <button
                       type="button"
                       onClick={() => moveDown(i)}
                       disabled={i === images.length - 1}
-                      className="px-2 py-0.5 bg-white/10 rounded text-[10px] text-white hover:bg-white/20 disabled:opacity-30"
+                      className="p-1.5 bg-white/10 rounded text-white hover:bg-white/20 disabled:opacity-30"
+                      title="Mover abajo"
                     >
-                      →
+                      <ArrowDown className="size-3" />
                     </button>
                   </div>
                 </div>
