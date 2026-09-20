@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { LanguageProvider } from '@/components/language-provider'
+import { FloatingNav } from '@/components/FloatingNav'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.renovactiva.com'),
@@ -98,6 +99,7 @@ export default function RootLayout({
       <body className="antialiased">
         <LanguageProvider>
           {children}
+          <FloatingNav />
         </LanguageProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
