@@ -7,128 +7,102 @@ import { Send, X, RotateCcw, Phone, MessageCircle, Mail } from 'lucide-react'
 
 type MascotLang = 'es' | 'ca'
 
-// ============================================================
-// CONFIGURACIÓN
-// ============================================================
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '34722454020'
 const EMAIL = 'info@renovactiva.com'
 
 // ============================================================
 // PLANTILLAS
 // ============================================================
-const WA_TEMPLATE_ES = `Hola, vengo de la web de Renovactiva.
+const WA_TEMPLATE_ES = `Hola, soy {{nombre}}.
 
-Soy {{nombre}}.
 Quiero reformar: {{proyecto}}.
 Zona: {{zona}}.
 
-Me gustaría que me contacten para organizar una visita y presupuesto.
+Me gustaría agendar una visita técnica para que valoren el espacio y me preparen un presupuesto detallado.
 
 Gracias.`
 
-const WA_TEMPLATE_CA = `Hola, vinc de la web de Renovactiva.
+const WA_TEMPLATE_CA = `Hola, sóc {{nombre}}.
 
-Sóc {{nombre}}.
 Vull reformar: {{proyecto}}.
 Zona: {{zona}}.
 
-M'agradaria que em contactessin per organitzar una visita i pressupost.
+M'agradaria agendar una visita tècnica perquè valorin l'espai i em preparin un pressupost detallat.
 
 Gràcies.`
 
-const EMAIL_SUBJECT_ES = 'Solicitud de presupuesto — Renovactiva'
+const EMAIL_SUBJECT_ES = 'Solicitud de visita técnica — Renovactiva'
 const EMAIL_BODY_TEMPLATE_ES = `Hola equipo Renovactiva,
 
-Vengo de la web y me gustaría solicitar una visita para
-presupuestar mi proyecto.
+Soy {{nombre}}.
 
-· Nombre: {{nombre}}
-· Teléfono: {{telefono}}
-· Qué quiero reformar: {{proyecto}}
-· Zona: {{zona}}
+Quiero reformar: {{proyecto}}.
+Zona: {{zona}}.
 
-Me gustaría que me contactaran por teléfono o email para
-organizar una cita.
+Me gustaría agendar una visita técnica para valorar el espacio y recibir un presupuesto detallado.
 
 Gracias.`
 
-const EMAIL_SUBJECT_CA = 'Sol·licitud de pressupost — Renovactiva'
+const EMAIL_SUBJECT_CA = 'Sol·licitud de visita tècnica — Renovactiva'
 const EMAIL_BODY_TEMPLATE_CA = `Hola equip Renovactiva,
 
-Vinc de la web i m'agradaria sol·licitar una visita per
-pressupostar el meu projecte.
+Sóc {{nombre}}.
 
-· Nom: {{nombre}}
-· Telèfon: {{telefono}}
-· Què vull reformar: {{proyecto}}
-· Zona: {{zona}}
+Vull reformar: {{proyecto}}.
+Zona: {{zona}}.
 
-M'agradaria que em contactessin per telèfon o correu per
-organitzar una cita.
+M'agradaria agendar una visita tècnica per valorar l'espai i rebre un pressupost detallat.
 
 Gràcies.`
 
 // ============================================================
-// LISTAS DE PROYECTOS Y ZONAS
+// PARSER DEL BLOQUE <<<DATA...>>>
 // ============================================================
-const PROJECT_KEYWORDS: { kw: string; label: string }[] = [
-  { kw: 'baño', label: 'Baño' },
-  { kw: 'bany', label: 'Baño' },
-  { kw: 'baños', label: 'Baño' },
-  { kw: 'aseo', label: 'Aseo' },
-  { kw: 'cocina', label: 'Cocina' },
-  { kw: 'cuina', label: 'Cocina' },
-  { kw: 'terraza', label: 'Terraza' },
-  { kw: 'terrassa', label: 'Terraza' },
-  { kw: 'salon', label: 'Salón' },
-  { kw: 'salón', label: 'Salón' },
-  { kw: 'sala', label: 'Salón' },
-  { kw: 'dormitorio', label: 'Dormitorio' },
-  { kw: 'habitacion', label: 'Habitación' },
-  { kw: 'habitación', label: 'Habitación' },
-  { kw: 'habitació', label: 'Habitación' },
-  { kw: 'pasillo', label: 'Pasillo' },
-  { kw: 'piso', label: 'Piso' },
-  { kw: 'pis', label: 'Piso' },
-  { kw: 'casa', label: 'Casa' },
-  { kw: 'atico', label: 'Ático' },
-  { kw: 'ático', label: 'Ático' },
-  { kw: 'local', label: 'Local comercial' },
-  { kw: 'oficina', label: 'Oficina' },
-  { kw: 'finca', label: 'Finca' },
-  { kw: 'vivienda', label: 'Vivienda' },
-  { kw: 'comunidad', label: 'Comunidad de propietarios' },
-  { kw: 'reforma integral', label: 'Reforma integral' },
-  { kw: 'reforma completa', label: 'Reforma integral' },
-]
-
-const ZONE_KEYWORDS = [
-  'Barcelona', 'Eixample', 'Gràcia', 'Gracia', 'Sants', 'Sarrià', 'Sarria',
-  'Poblenou', 'Born', 'Gòtic', 'Gotic', 'Raval', 'Horta', 'Sant Andreu',
-  'Les Corts', 'Nou Barris', 'Ciutat Vella', 'Sant Martí', 'Sant Marti',
-  'Guinardó', 'Guinardo', 'Sagrada Familia', 'Sagrada Família',
-  'Vallcarca', 'Barceloneta', 'Poble Sec', 'Badalona', 'Hospitalet',
-  'L\'Hospitalet', 'Cornellà', 'Cornella', 'Sant Cugat', 'Terrassa',
-  'Sabadell', 'Mataró', 'Mataro', 'Granollers', 'Viladecans',
-  'Castelldefels', 'Gavà', 'Gava', 'Esplugues', 'Molins', 'Rubí', 'Rubi',
-  'Vilanova', 'Sitges', 'Manresa', 'Vic', 'Igualada',
-]
-
-// ============================================================
-// EXTRAER DATOS DE LA CONVERSACIÓN
-// Solo lee los últimos 20 mensajes para no arrastrar historial viejo
-// ============================================================
-type ExtractedData = {
+type SavedData = {
   nombre: string
-  telefono: string
-  zona: string
   proyecto: string
+  zona: string
 }
 
-function extractFromConversation(messages: any[], lang: MascotLang): ExtractedData {
-  // Solo los últimos 20 mensajes
-  const recentMessages = messages.slice(-20)
+const EMPTY_DATA: SavedData = {
+  nombre: 'a completar',
+  proyecto: 'a completar',
+  zona: 'a completar',
+}
 
+function parseDataBlock(text: string): { cleanText: string; data: Partial<SavedData> } {
+  const data: Partial<SavedData> = {}
+  let cleanText = text
+
+  const blockRegex = /<<<DATA\s*([\s\S]*?)\s*>>>/i
+  const match = text.match(blockRegex)
+
+  if (match) {
+    const blockContent = match[1]
+    const lines = blockContent.split('\n')
+    for (const line of lines) {
+      const cleanLine = line.trim()
+      if (!cleanLine) continue
+      const kvMatch = cleanLine.match(/^(nombre|proyecto|zona)\s*:\s*(.+)$/i)
+      if (kvMatch) {
+        const key = kvMatch[1].toLowerCase() as keyof SavedData
+        const value = kvMatch[2].trim()
+        if (value && value.toLowerCase() !== 'a completar') {
+          data[key] = value
+        }
+      }
+    }
+    cleanText = text.replace(blockRegex, '').trim()
+  }
+
+  return { cleanText, data }
+}
+
+// ============================================================
+// FALLBACK regex
+// ============================================================
+function extractFallback(messages: any[]): Partial<SavedData> {
+  const recentMessages = messages.slice(-20)
   const userText = recentMessages
     .filter((m: any) => m.role === 'user')
     .map((m: any) =>
@@ -136,106 +110,26 @@ function extractFromConversation(messages: any[], lang: MascotLang): ExtractedDa
     )
     .join(' · ')
 
-  const lowerText = userText.toLowerCase()
+  const data: Partial<SavedData> = {}
 
-  // === NOMBRE ===
-  let nombre = ''
-  const nombrePatterns = [
-    /(?:me llamo|mi nombre es|soy)\s+([A-Za-zÀ-ÿ]{2,20})/i,
-    /(?:em dic|el meu nom és|sóc)\s+([A-Za-zÀ-ÿ]{2,20})/i,
-  ]
-  for (const p of nombrePatterns) {
-    const m = userText.match(p)
-    if (m && m[1] && m[1].length >= 2) {
-      const exclude = ['mi', 'el', 'la', 'un', 'una', 'de', 'y', 'o', 'es', 'tu', 'un', 'nou', 'nova']
-      if (!exclude.includes(m[1].toLowerCase())) {
-        nombre = m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase()
-        break
-      }
-    }
-  }
-  // Patrón "yoany telefono X"
-  if (!nombre) {
-    const m = userText.match(/([A-Za-zÀ-ÿ]{2,20})\s+(?:telefono|teléfono|tlf|tel|móvil|movil|cel)/i)
-    if (m && m[1]) {
-      const exclude = ['mi', 'el', 'la', 'un', 'una', 'de', 'y', 'o', 'es', 'tu']
-      if (!exclude.includes(m[1].toLowerCase())) {
-        nombre = m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase()
-      }
+  const nombreMatch = userText.match(/(?:me llamo|mi nombre es|soy)\s+([A-Za-zÀ-ÿ]{2,20})/i)
+  if (nombreMatch && nombreMatch[1]) {
+    const exclude = ['mi', 'el', 'la', 'un', 'una', 'de', 'y', 'o', 'es', 'tu']
+    if (!exclude.includes(nombreMatch[1].toLowerCase())) {
+      data.nombre = nombreMatch[1].charAt(0).toUpperCase() + nombreMatch[1].slice(1).toLowerCase()
     }
   }
 
-  // === TELÉFONO ===
-  let telefono = ''
-  const telRegex = /(?:\+?34[\s.\-]?)?([6789]\d[\s.\-]?\d[\s.\-]?\d[\s.\-]?\d[\s.\-]?\d[\s.\-]?\d[\s.\-]?\d[\s.\-]?\d)/g
-  const telMatches = userText.match(telRegex)
-  if (telMatches) {
-    for (const t of telMatches) {
-      const digits = t.replace(/\D/g, '')
-      if (digits.length >= 9 && digits.length <= 11) {
-        telefono = t.trim()
-        break
-      }
-    }
-  }
-
-  // === PROYECTO ===
-  const foundProjects: { label: string; index: number }[] = []
-  for (const { kw, label } of PROJECT_KEYWORDS) {
-    const idx = lowerText.indexOf(kw.toLowerCase())
-    if (idx !== -1) {
-      if (!foundProjects.some(p => p.label === label)) {
-        foundProjects.push({ label, index: idx })
-      }
-    }
-  }
-  foundProjects.sort((a, b) => a.index - b.index)
-  const proyectosUnicos = foundProjects.map(p => p.label)
-
-  let proyecto = proyectosUnicos.join(', ')
-  if (!proyecto) {
-    proyecto = lang === 'ca' ? 'Reforma (a concretar)' : 'Reforma (a concretar)'
-  }
-
-  // === ZONA ===
-  let zona = ''
-  // Patrón "zona X" / "barrio X"
-  const zonaPattern = /(?:zona|barrio|barri)\s+([A-Za-zÀ-ÿ\s]{3,30})/i
-  const zonaMatch = userText.match(zonaPattern)
-  if (zonaMatch && zonaMatch[1]) {
-    const candidate = zonaMatch[1].trim()
-    if (!/^(mi|el|la|un|una)\s/i.test(candidate)) {
-      zona = candidate
-    }
-  }
-  // Barrios conocidos
-  if (!zona) {
-    for (const zone of ZONE_KEYWORDS) {
-      if (lowerText.includes(zone.toLowerCase())) {
-        zona = zone
-        break
-      }
-    }
-  }
-
-  return { nombre, telefono, zona, proyecto }
+  return data
 }
 
-// ============================================================
-// RELLENAR PLANTILLA
-// ============================================================
-function fillTemplate(template: string, data: ExtractedData, isCa: boolean): string {
-  const sinDatos = isCa ? '(a completar)' : '(a completar)'
+function fillTemplate(template: string, data: SavedData): string {
   return template
-    .replace(/{{nombre}}/g, data.nombre || sinDatos)
-    .replace(/{{telefono}}/g, data.telefono || sinDatos)
-    .replace(/{{proyecto}}/g, data.proyecto || sinDatos)
-    .replace(/{{zona}}/g, data.zona || sinDatos)
+    .replace(/{{nombre}}/g, data.nombre || 'a completar')
+    .replace(/{{proyecto}}/g, data.proyecto || 'a completar')
+    .replace(/{{zona}}/g, data.zona || 'a completar')
 }
 
-// ============================================================
-// HELPERS DE ENLACES
-// ============================================================
 function getMailHref(email: string, subject: string, body: string): string {
   const subjectEnc = encodeURIComponent(subject)
   const bodyEnc = encodeURIComponent(body)
@@ -249,10 +143,7 @@ function getMailHref(email: string, subject: string, body: string): string {
   return `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subjectEnc}&body=${bodyEnc}`
 }
 
-// ============================================================
-// RENDERIZAR MENSAJES CON ENLACES CLICABLES
-// ============================================================
-function renderMessageWithLinks(text: string, lang: MascotLang) {
+function renderMessageWithLinks(text: string) {
   const telHref = `tel:+${WHATSAPP_NUMBER}`
   const genericWaHref = `https://wa.me/${WHATSAPP_NUMBER}`
   const genericMailHref = `mailto:${EMAIL}`
@@ -272,23 +163,11 @@ function renderMessageWithLinks(text: string, lang: MascotLang) {
     const matched = match[0]
 
     if (matched.includes('📞')) {
-      parts.push(
-        <a key={`tel-${key++}`} href={telHref} className="mascot-link mascot-link-phone">
-          {matched}
-        </a>
-      )
+      parts.push(<a key={`tel-${key++}`} href={telHref} className="mascot-link mascot-link-phone">{matched}</a>)
     } else if (matched.includes('💬')) {
-      parts.push(
-        <a key={`wa-${key++}`} href={genericWaHref} target="_blank" rel="noopener noreferrer" className="mascot-link mascot-link-wa">
-          {matched}
-        </a>
-      )
+      parts.push(<a key={`wa-${key++}`} href={genericWaHref} target="_blank" rel="noopener noreferrer" className="mascot-link mascot-link-wa">{matched}</a>)
     } else if (matched.includes('📧')) {
-      parts.push(
-        <a key={`mail-${key++}`} href={genericMailHref} className="mascot-link mascot-link-mail">
-          {matched}
-        </a>
-      )
+      parts.push(<a key={`mail-${key++}`} href={genericMailHref} className="mascot-link mascot-link-mail">{matched}</a>)
     }
 
     lastIndex = match.index + matched.length
@@ -300,6 +179,15 @@ function renderMessageWithLinks(text: string, lang: MascotLang) {
 
   if (parts.length === 0) return text
   return <>{parts}</>
+}
+
+function getGreetingText(lang: MascotLang): string {
+  const hour = new Date().getHours()
+  const isCa = lang === 'ca'
+
+  if (hour >= 6 && hour < 12) return isCa ? 'Bon dia' : 'Buenos días'
+  if (hour >= 12 && hour < 20) return isCa ? 'Bona tarda' : 'Buenas tardes'
+  return isCa ? 'Bona nit' : 'Buenas noches'
 }
 
 // ============================================================
@@ -322,6 +210,8 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
   const [nearCursor, setNearCursor] = useState(false)
   const [showHoverCartel, setShowHoverCartel] = useState(false)
 
+  const [savedData, setSavedData] = useState<SavedData>(EMPTY_DATA)
+
   const [pos, setPos] = useState<{ x: number; y: number }>({ x: -1, y: -1 })
   const [isDragging, setIsDragging] = useState(false)
   const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null)
@@ -335,12 +225,8 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
 
   const texts = {
     es: {
-      greetMorning: 'Buenos días',
-      greetAfternoon: 'Buenas tardes',
-      greetEvening: 'Buenas noches',
       help: '¿En qué te puedo ayudar?',
       linger: 'Me quedo por aquí si necesitas algo',
-      chatIntro: 'Soy Nova, la asistente de Renovactiva. ¿En qué te puedo ayudar?',
       farewell: 'Gracias por confiar en Renovactiva. Aquí estoy si necesitas algo más.',
       hoverCartel: '¿En qué puedo ayudarte?',
       newChat: 'Nuevo chat',
@@ -353,12 +239,8 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
       role: 'Asistente de Renovactiva',
     },
     ca: {
-      greetMorning: 'Bon dia',
-      greetAfternoon: 'Bona tarda',
-      greetEvening: 'Bona nit',
       help: 'En què et puc ajudar?',
       linger: 'Em quedo per aquí si necessites res',
-      chatIntro: "Sóc la Nova, l'assistent de Renovactiva. En què et puc ajudar?",
       farewell: 'Gràcies per confiar en Renovactiva. Aquí estic si necessites res més.',
       hoverCartel: 'En què puc ajudar-te?',
       newChat: 'Nou xat',
@@ -430,12 +312,20 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
     addTimeout(tick, 200)
   }
 
+  // ⭐ NUEVO SALUDO: "¿Con quién tengo el gusto de hablar?"
+  const buildChatIntro = () => {
+    const greeting = getGreetingText(lang)
+    if (isCa) {
+      return `${greeting}, sóc la Nova, l'assistent de Renovactiva. Amb qui tinc el gust de parlar?`
+    }
+    return `${greeting}, soy Nova, la asistente de Renovactiva. ¿Con quién tengo el gusto de hablar?`
+  }
+
   useEffect(() => {
     cancelledRef.current = false
     clearAllTimeouts()
 
-    const hour = new Date().getHours()
-    const greetingText = hour < 12 ? t.greetMorning : hour < 20 ? t.greetAfternoon : t.greetEvening
+    const greetingText = getGreetingText(lang)
 
     setPhase('greeting')
     setBubbleText('')
@@ -502,6 +392,34 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
   })
 
   useEffect(() => {
+    const lastAssistantMsg = [...messages].reverse().find((m: any) => m.role === 'assistant')
+    if (!lastAssistantMsg) return
+
+    const fullText = lastAssistantMsg.parts
+      ?.map((p: any) => (p.type === 'text' ? p.text : ''))
+      .join('') || ''
+
+    const { data } = parseDataBlock(fullText)
+
+    if (Object.keys(data).length > 0) {
+      setSavedData(prev => ({
+        nombre: data.nombre ?? prev.nombre,
+        proyecto: data.proyecto ?? prev.proyecto,
+        zona: data.zona ?? prev.zona,
+      }))
+    }
+  }, [messages])
+
+  useEffect(() => {
+    if (savedData.nombre === 'a completar' && messages.length > 4) {
+      const fallback = extractFallback(messages)
+      if (fallback.nombre) {
+        setSavedData(prev => ({ ...prev, nombre: fallback.nombre! }))
+      }
+    }
+  }, [messages, savedData.nombre])
+
+  useEffect(() => {
     if (messages.length > 0 && !hasChatted) {
       setHasChatted(true)
     }
@@ -547,10 +465,10 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
       setIntroDone(false)
       setIntroTyped('')
       addTimeout(() => {
-        typeIntroInChat(t.chatIntro, () => setIntroDone(true), 25)
+        typeIntroInChat(buildChatIntro(), () => setIntroDone(true), 25)
       }, 400)
     } else {
-      setIntroTyped(t.chatIntro)
+      setIntroTyped(buildChatIntro())
       setIntroDone(true)
     }
   }
@@ -586,12 +504,13 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
     setIntroTyped('')
     setHasOpenedOnce(false)
     setIsDeepSleep(false)
+    setSavedData(EMPTY_DATA)
     cancelledRef.current = true
     clearAllTimeouts()
     cancelledRef.current = false
     addTimeout(() => {
       setIntroTyped('')
-      typeIntroInChat(t.chatIntro, () => setIntroDone(true), 25)
+      typeIntroInChat(buildChatIntro(), () => setIntroDone(true), 25)
     }, 400)
   }
 
@@ -660,13 +579,8 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
     }
   }
 
-  // ============================================================
-  // DATOS DINÁMICOS — solo de los últimos 20 mensajes
-  // ============================================================
-  const extracted = extractFromConversation(messages, lang)
-
-  const waBody = fillTemplate(isCa ? WA_TEMPLATE_CA : WA_TEMPLATE_ES, extracted, isCa)
-  const emailBody = fillTemplate(isCa ? EMAIL_BODY_TEMPLATE_CA : EMAIL_BODY_TEMPLATE_ES, extracted, isCa)
+  const waBody = fillTemplate(isCa ? WA_TEMPLATE_CA : WA_TEMPLATE_ES, savedData)
+  const emailBody = fillTemplate(isCa ? EMAIL_BODY_TEMPLATE_CA : EMAIL_BODY_TEMPLATE_ES, savedData)
   const emailSubject = isCa ? EMAIL_SUBJECT_CA : EMAIL_SUBJECT_ES
 
   const waHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waBody)}`
@@ -719,16 +633,18 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
 
             {messages.map((message) => {
               const isUser = message.role === 'user'
-              const fullText = message.parts
+              const rawText = message.parts
                 .map((part) => (part.type === 'text' ? part.text : ''))
                 .join('')
+
+              const fullText = isUser ? rawText : parseDataBlock(rawText).cleanText
 
               return (
                 <div className={`mascot-message ${isUser ? 'from-user' : 'from-nova'}`} key={message.id}>
                   {isUser ? (
                     <span>{fullText}</span>
                   ) : (
-                    <span>{renderMessageWithLinks(fullText, lang)}</span>
+                    <span>{renderMessageWithLinks(fullText)}</span>
                   )}
                 </div>
               )
@@ -747,7 +663,7 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
               <Phone size={14} />
               <span>{isCa ? 'Trucar' : 'Llamar'}</span>
             </a>
-            <a href={waHref} target="_blank" rel="noopener noreferrer" className="mascot-quick-btn mascot-quick-wa" aria-label={isCa ? 'Obrir WhatsApp' : 'Abrir WhatsApp'} title="WhatsApp">
+            <a href={waHref} target="_blank" rel="noopener noreferrer" className="mascot-quick-btn mascot-quick-wa" aria-label="WhatsApp" title="WhatsApp">
               <MessageCircle size={14} />
               <span>WhatsApp</span>
             </a>
