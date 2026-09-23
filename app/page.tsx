@@ -7,11 +7,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { useLanguage } from '@/components/language-provider'
 import { MascotAssistant } from '@/components/MascotAssistant'
+import { WhatsAppFooterButton } from '@/components/WhatsAppFooterButton'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
 
-// ⭐ Mapa de iconos disponibles (debe coincidir con los del admin)
 const ICON_MAP: Record<string, any> = {
   briefcase: Briefcase,
   award: Award,
@@ -37,13 +37,12 @@ export default function Home() {
   const [statsData, setStatsData] = useState<any>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeHero, setActiveHero] = useState(0)
-  
+
   const [selectedProject, setSelectedProject] = useState<any>(null)
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
-  
+
   const [openFaq, setOpenFaq] = useState<number | null>(0)
-  
-  // ⭐ Sistema de reseñas
+
   const [reviewCode, setReviewCode] = useState('')
   const [reviewMessage, setReviewMessage] = useState('')
   const [reviewError, setReviewError] = useState('')
@@ -52,12 +51,10 @@ export default function Home() {
   const [reviewRating, setReviewRating] = useState(5)
   const [reviewText, setReviewText] = useState('')
   const [reviewRole, setReviewRole] = useState('')
-  const [reviewRoleCa, setReviewRoleCa] = useState('')
-  const [reviewTextCa, setReviewTextCa] = useState('')
   const [verifying, setVerifying] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [reviewSuccess, setReviewSuccess] = useState(false)
-  
+
   const { language } = useLanguage()
   const ca = language === 'ca'
 
@@ -164,7 +161,7 @@ export default function Home() {
   const titleText = ca
     ? (heroTrans.title || heroData?.title || 'Espais que trascendeixen.')
     : (heroData?.title || 'Espacios que trascienden.')
-  
+
   const titleWords = titleText.split(' ')
 
   const nextPhoto = () => {
@@ -181,7 +178,7 @@ export default function Home() {
 
   const statsItems = statsData?.items || []
   const statsEyebrow = statsData?.eyebrow || { es: 'En números', ca: 'En números' }
-  
+
   const dynamicStatsData = statsItems.length > 0
     ? statsItems.map((item: any) => ({
         icon: ICON_MAP[item.icon] || Star,
@@ -230,7 +227,6 @@ export default function Home() {
     },
   ]
 
-  // ⭐ NUEVO: Verificar código de cliente
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!reviewCode.trim()) return
@@ -261,7 +257,6 @@ export default function Home() {
     }
   }
 
-  // ⭐ ACTUALIZADO: Enviar reseña con refresco instantáneo
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!reviewText.trim()) {
@@ -289,9 +284,6 @@ export default function Home() {
         return
       }
 
-      // ⭐ ACTUALIZACIÓN INSTANTÁNEA:
-      // El endpoint nos devuelve todos los items ya actualizados.
-      // Los usamos directamente sin esperar otra petición.
       if (data.allItems && Array.isArray(data.allItems)) {
         setTestimonialsData((prev: any) => ({
           ...(prev || {}),
@@ -302,7 +294,6 @@ export default function Home() {
       setReviewSuccess(true)
       setReviewVerified(false)
 
-      // ⭐ Refresco de seguridad en segundo plano (por si acaso)
       try {
         const testRes = await fetch(
           `${SUPABASE_URL}/rest/v1/site_content?section=eq.testimonials&select=content`,
@@ -537,7 +528,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 2. SERVICIOS — LISTA EDITORIAL */}
+      {/* 2. SERVICIOS */}
       <section id="servicios" className="relative border-y border-white/10 bg-[#0D0D0D] px-6 py-24 lg:px-10 lg:py-32">
         <div className="relative mx-auto max-w-[1380px]">
           
@@ -711,7 +702,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 4. PROYECTOS — GALERÍA + MODAL PICASA */}
+      {/* 4. PROYECTOS */}
       <section id="proyectos" className="relative mx-auto max-w-[1380px] px-6 py-24 lg:px-10 lg:py-36 bg-[#080808]">
         <div className="mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
@@ -913,7 +904,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* 7. DEJA TU RESEÑA — ⭐ SISTEMA COMPLETO */}
+      {/* 7. DEJA TU RESEÑA */}
       <section className="relative border-y border-white/10 bg-[#0D0D0D] px-6 py-24 lg:px-10 lg:py-32">
         <div className="relative mx-auto max-w-[700px]">
           
@@ -960,7 +951,6 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
           >
 
-            {/* ⭐ ESTADO 1: ÉXITO */}
             {reviewSuccess ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -982,7 +972,6 @@ export default function Home() {
                 </p>
               </motion.div>
             ) : reviewVerified ? (
-              // ⭐ ESTADO 2: FORMULARIO DE RESEÑA (código verificado)
               <form onSubmit={handleReviewSubmit} className="space-y-6">
                 <div className="text-center pb-2">
                   <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-bold mb-2">
@@ -993,7 +982,6 @@ export default function Home() {
                   </h3>
                 </div>
 
-                {/* Estrellas */}
                 <div className="text-center">
                   <label className="block text-white/60 text-xs uppercase tracking-[0.2em] mb-3">
                     {ca ? 'La teva valoració' : 'Tu valoración'}
@@ -1019,7 +1007,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Texto de la reseña */}
                 <div>
                   <label className="block text-white/60 text-xs uppercase tracking-[0.2em] mb-2">
                     {ca ? 'La teva opinió' : 'Tu opinión'}
@@ -1040,7 +1027,6 @@ export default function Home() {
                   </p>
                 </div>
 
-                {/* Rol / Proyecto (opcional, pre-rellenado) */}
                 <div>
                   <label className="block text-white/60 text-xs uppercase tracking-[0.2em] mb-2">
                     {ca ? 'Tipus de projecte (opcional)' : 'Tipo de proyecto (opcional)'}
@@ -1057,7 +1043,6 @@ export default function Home() {
                   />
                 </div>
 
-                {/* Errores */}
                 {reviewError && (
                   <div className="flex items-center gap-2 p-3 rounded-lg border border-red-500/50 bg-red-500/10">
                     <X className="size-4 text-red-400 flex-shrink-0" />
@@ -1065,7 +1050,6 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* Botón enviar */}
                 <button
                   type="submit"
                   disabled={submitting || !reviewText.trim()}
@@ -1087,7 +1071,6 @@ export default function Home() {
                   </span>
                 </button>
 
-                {/* Botón cancelar */}
                 <button
                   type="button"
                   onClick={() => {
@@ -1104,7 +1087,6 @@ export default function Home() {
                 </button>
               </form>
             ) : (
-              // ⭐ ESTADO 3: INTRODUCIR CÓDIGO
               <form onSubmit={handleVerifyCode} className="space-y-6">
                 
                 <div className="flex items-center justify-center gap-3 mb-2">
@@ -1377,6 +1359,8 @@ export default function Home() {
                 >
                   {footerData?.contact?.email || 'info@renovactiva.com'}
                 </a>
+                {/* Botón WhatsApp con efecto radar */}
+                <WhatsAppFooterButton lang={ca ? 'ca' : 'es'} />
               </div>
               <div>
                 <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77]">
@@ -1437,7 +1421,7 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* MODAL GALERÍA — PICASA */}
+      {/* MODAL GALERÍA */}
       <AnimatePresence>
         {selectedProject && (
           <motion.div
@@ -1553,7 +1537,7 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* 🤖 ROBOT RENOV CON CHAT IA */}
+      {/* 🤖 CHAT */}
       <MascotAssistant lang={ca ? 'ca' : 'es'} />
     </main>
   )

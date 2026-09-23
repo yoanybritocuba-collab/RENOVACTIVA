@@ -549,3 +549,210 @@ body {
     filter: none;
   }
 }
+/* ============================================================
+   ENLACES CLICABLES EN EL CHAT
+   ============================================================ */
+.mascot-link {
+  color: #d7bd77;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(215, 189, 119, 0.5);
+  transition: all 0.2s ease;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mascot-link:hover {
+  color: #10B77F;
+  border-bottom-color: #10B77F;
+  border-bottom-style: solid;
+}
+
+.mascot-link-phone:hover {
+  color: #10B77F;
+}
+
+.mascot-link-wa:hover {
+  color: #25D366;
+  border-bottom-color: #25D366;
+}
+
+.mascot-link-mail:hover {
+  color: #10B77F;
+  border-bottom-color: #10B77F;
+}
+
+/* ============================================================
+   BOTONES RÁPIDOS DE CONTACTO EN EL CHAT
+   ============================================================ */
+.mascot-quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  padding: 8px 12px 4px;
+  border-top: 1px solid rgba(215, 189, 119, 0.15);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.mascot-quick-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 6px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  text-decoration: none;
+  color: #d7bd77;
+  background: rgba(215, 189, 119, 0.08);
+  border: 1px solid rgba(215, 189, 119, 0.25);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.mascot-quick-btn:hover {
+  background: rgba(215, 189, 119, 0.18);
+  border-color: rgba(215, 189, 119, 0.6);
+  color: #f3f0e9;
+  transform: translateY(-1px);
+}
+
+.mascot-quick-btn.mascot-quick-wa:hover {
+  background: rgba(37, 211, 102, 0.18);
+  border-color: rgba(37, 211, 102, 0.6);
+  color: #25D366;
+}
+
+.mascot-quick-btn svg {
+  flex-shrink: 0;
+}
+
+/* En móvil muy pequeño, ocultar texto y dejar solo iconos */
+@media (max-width: 380px) {
+  .mascot-quick-btn span {
+    display: none;
+  }
+  .mascot-quick-btn {
+    padding: 10px;
+  }
+}
+/* ============================================================
+   BOTÓN WHATSAPP CON EFECTO RADAR
+   ============================================================ */
+.whatsapp-button {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Ondas expansivas del radar */
+.whatsapp-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background-color: #25D366;
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 0.6;
+  animation: whatsapp-radar 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.whatsapp-pulse-1 {
+  animation-delay: 0s;
+}
+
+.whatsapp-pulse-2 {
+  animation-delay: 0.8s;
+}
+
+.whatsapp-pulse-3 {
+  animation-delay: 1.6s;
+}
+
+@keyframes whatsapp-radar {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.7;
+  }
+  70% {
+    opacity: 0.15;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+/* Evita la animación si el usuario prefiere reducir movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .whatsapp-pulse {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* En móvil, ondas un poco más contenidas */
+@media (max-width: 768px) {
+  .whatsapp-pulse {
+    animation-duration: 3s;
+  }
+}
+/* ============================================================
+   BOTÓN WHATSAPP EN EL FOOTER CON EFECTO RADAR
+   ============================================================ */
+.whatsapp-footer-button {
+  position: relative;
+  isolation: isolate;
+}
+
+.whatsapp-footer-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background-color: #25D366;
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 0.5;
+  animation: whatsapp-footer-radar 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.whatsapp-footer-pulse-1 {
+  animation-delay: 0s;
+}
+
+.whatsapp-footer-pulse-2 {
+  animation-delay: 0.8s;
+}
+
+.whatsapp-footer-pulse-3 {
+  animation-delay: 1.6s;
+}
+
+@keyframes whatsapp-footer-radar {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.5;
+  }
+  70% {
+    opacity: 0.1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .whatsapp-footer-pulse {
+    animation: none;
+    opacity: 0;
+  }
+}

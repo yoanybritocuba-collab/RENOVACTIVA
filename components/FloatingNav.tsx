@@ -3,15 +3,15 @@
 import { useRouter, usePathname } from 'next/navigation'
 import { ArrowLeft, Home } from 'lucide-react'
 import { useEffect, useRef } from 'react'
+import { WhatsAppButton } from './WhatsAppButton'
 
 export function FloatingNav() {
   const router = useRouter()
   const pathname = usePathname()
   const backPressesRef = useRef(0)
 
-  // ⭐ Sistema anti-salida: en el home, atrapar el botón "atrás" 3 veces
+  // Sistema anti-salida: en el home, atrapar el botón "atrás" 3 veces
   useEffect(() => {
-    // Solo aplicamos la trampa cuando estamos en el home
     const isHome = pathname === '/'
 
     if (!isHome) {
@@ -19,25 +19,20 @@ export function FloatingNav() {
       return
     }
 
-    // Empujamos un estado "falso" para poder interceptar el botón atrás
     if (typeof window !== 'undefined') {
       window.history.pushState({ trap: true }, '', window.location.href)
     }
 
     function handlePopState() {
-      // Re-empujamos el estado para que el usuario no salga
       if (typeof window !== 'undefined') {
         window.history.pushState({ trap: true }, '', window.location.href)
       }
 
       backPressesRef.current += 1
 
-      // Aviso visual (puedes personalizar con un toast)
       if (backPressesRef.current < 3) {
-        // Mostrar aviso flotante breve
         showWarning()
       } else {
-        // A la 3ª vez, dejamos que salga
         backPressesRef.current = 0
         if (typeof window !== 'undefined') {
           window.history.back()
@@ -55,7 +50,6 @@ export function FloatingNav() {
   }, [pathname])
 
   function showWarning() {
-    // Crear aviso flotante temporal
     const existing = document.getElementById('leave-warning')
     if (existing) existing.remove()
 
@@ -64,7 +58,7 @@ export function FloatingNav() {
     el.textContent = 'Pulsa atrás de nuevo para salir (3 veces)'
     el.style.cssText = `
       position: fixed;
-      bottom: 80px;
+      bottom: 100px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(0,0,0,0.85);
@@ -80,7 +74,6 @@ export function FloatingNav() {
       animation: fadeInOut 2s ease;
     `
 
-    // Añadir estilos de animación una sola vez
     if (!document.getElementById('leave-warning-style')) {
       const style = document.createElement('style')
       style.id = 'leave-warning-style'
@@ -112,8 +105,8 @@ export function FloatingNav() {
   }
 
   return (
-    <div className="fixed bottom-5 left-5 z-[90] flex flex-col gap-2.5">
-      {/* Botón Volver */}
+    <div className="fixed bottom-5 left-5 z-[90] flex flex-col gap-2.5 items-start">
+      {/* Botón Volver (arriba) */}
       <button
         onClick={goBack}
         aria-label="Volver atrás"
@@ -123,7 +116,7 @@ export function FloatingNav() {
         <ArrowLeft className="size-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
       </button>
 
-      {/* Botón Home */}
+      {/* Botón Home (medio) */}
       <button
         onClick={goHome}
         aria-label="Ir al inicio"
@@ -132,6 +125,9 @@ export function FloatingNav() {
       >
         <Home className="size-4 transition-transform duration-300 group-hover:scale-110" />
       </button>
+
+      {/* Botón WhatsApp (abajo) con efecto radar */}
+      <WhatsAppButton />
     </div>
   )
 }
