@@ -10,8 +10,8 @@ import { MascotAssistant } from '@/components/MascotAssistant'
 import { WhatsAppFooterButton } from '@/components/WhatsAppFooterButton'
 import { getPresupuestoMailHref, getResenaMailHref, getFooterMailHref } from '@/lib/mailHref'
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://izvllvunpjryeowponti.supabase.co'
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
 
 const ICON_MAP: Record<string, any> = {
   briefcase: Briefcase,
@@ -59,9 +59,6 @@ export default function Home() {
   const { language } = useLanguage()
   const ca = language === 'ca'
 
-  // ============================================================
-  // SCROLL SUAVE A LAS SECCIONES
-  // ============================================================
   function scrollToSection(id: string) {
     if (typeof window === 'undefined') return
     const el = document.getElementById(id)
