@@ -1,7 +1,19 @@
 'use client'
 
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '34722454020'
-const WHATSAPP_MESSAGE = 'Hola, vengo de la web de Renovactiva y me gustaría información sobre una reforma.'
+
+// ============================================================
+// MENSAJE PREDEFINIDO (mismo formato que Nova, sin datos)
+// El cliente solo tiene que escribir su nombre al principio
+// ============================================================
+const WHATSAPP_MESSAGE = `Hola, soy 
+
+Quiero reformar:
+Zona:
+
+Me gustaría agendar una visita técnica para que valoren el espacio y me preparen un presupuesto detallado.
+
+Gracias.`
 
 export function WhatsAppButton() {
   const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`

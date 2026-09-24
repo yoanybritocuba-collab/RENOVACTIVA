@@ -11,7 +11,7 @@ const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '34722454020'
 const EMAIL = 'info@renovactiva.com'
 
 // ============================================================
-// PLANTILLAS
+// PLANTILLAS (con datos del cliente)
 // ============================================================
 const WA_TEMPLATE_ES = `Hola, soy {{nombre}}.
 
@@ -65,9 +65,9 @@ type SavedData = {
 }
 
 const EMPTY_DATA: SavedData = {
-  nombre: 'a completar',
-  proyecto: 'a completar',
-  zona: 'a completar',
+  nombre: '',
+  proyecto: '',
+  zona: '',
 }
 
 function parseDataBlock(text: string): { cleanText: string; data: Partial<SavedData> } {
@@ -125,9 +125,9 @@ function extractFallback(messages: any[]): Partial<SavedData> {
 
 function fillTemplate(template: string, data: SavedData): string {
   return template
-    .replace(/{{nombre}}/g, data.nombre || 'a completar')
-    .replace(/{{proyecto}}/g, data.proyecto || 'a completar')
-    .replace(/{{zona}}/g, data.zona || 'a completar')
+    .replace(/{{nombre}}/g, data.nombre || '')
+    .replace(/{{proyecto}}/g, data.proyecto || '')
+    .replace(/{{zona}}/g, data.zona || '')
 }
 
 function getMailHref(email: string, subject: string, body: string): string {
@@ -312,7 +312,6 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
     addTimeout(tick, 200)
   }
 
-  // ⭐ NUEVO SALUDO: "¿Con quién tengo el gusto de hablar?"
   const buildChatIntro = () => {
     const greeting = getGreetingText(lang)
     if (isCa) {
@@ -411,7 +410,7 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
   }, [messages])
 
   useEffect(() => {
-    if (savedData.nombre === 'a completar' && messages.length > 4) {
+    if (!savedData.nombre && messages.length > 4) {
       const fallback = extractFallback(messages)
       if (fallback.nombre) {
         setSavedData(prev => ({ ...prev, nombre: fallback.nombre! }))

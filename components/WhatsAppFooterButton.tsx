@@ -1,8 +1,28 @@
 'use client'
 
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '34722454020'
-const WHATSAPP_MESSAGE_ES = 'Hola, vengo de la web de Renovactiva y me gustaría información sobre una reforma.'
-const WHATSAPP_MESSAGE_CA = 'Hola, vinc de la web de Renovactiva i m\'agradaria informació sobre una reforma.'
+
+// ============================================================
+// MENSAJE PREDEFINIDO (mismo formato que Nova, sin datos)
+// El cliente solo tiene que escribir su nombre al principio
+// ============================================================
+const WHATSAPP_MESSAGE_ES = `Hola, soy 
+
+Quiero reformar:
+Zona:
+
+Me gustaría agendar una visita técnica para que valoren el espacio y me preparen un presupuesto detallado.
+
+Gracias.`
+
+const WHATSAPP_MESSAGE_CA = `Hola, sóc 
+
+Vull reformar:
+Zona:
+
+M'agradaria agendar una visita tècnica perquè valorin l'espai i em preparin un pressupost detallat.
+
+Gràcies.`
 
 export function WhatsAppFooterButton({ lang = 'es' }: { lang?: 'es' | 'ca' }) {
   const isCa = lang === 'ca'
