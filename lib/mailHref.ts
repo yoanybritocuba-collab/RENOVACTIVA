@@ -18,53 +18,42 @@ export function getMailHref(email: string, subject: string, body: string): strin
 }
 
 // ============================================================
-// PLANTILLAS DE CORREO (para los botones de la web)
+// CONFIGURACIÓN
 // ============================================================
 export const EMAIL = 'info@renovactiva.com'
 
-// --- Botón "Solicitar presupuesto" (banda dorada) ---
+// ============================================================
+// PLANTILLA 1: Botón "Solicitar presupuesto" (banda dorada)
+// El cursor caerá justo después de "Mi nombre es: "
+// ============================================================
 export function getPresupuestoMailHref(): string {
   const subject = 'Solicitud de presupuesto — Renovactiva'
-  const body = `Hola equipo Renovactiva,
+  const body = `Mi nombre es: 
 
-Me gustaría solicitar un presupuesto para mi proyecto.
+Hola equipo Renovactiva,
 
-· Nombre:
-· Teléfono:
-· Tipo de reforma:
-· Zona:
-· Descripción breve:
+Me gustaría solicitar un presupuesto para un proyecto de reforma.
 
-Gracias.`
+Quedo a la espera de su respuesta para agendar una visita técnica sin compromiso.
+
+Muchas gracias por su atención.`
   return getMailHref(EMAIL, subject, body)
 }
 
-// --- Enlace "Escríbenos a info@" (sección reseña) ---
-export function getResenaMailHref(): string {
-  const subject = 'Consulta sobre código de reseña — Renovactiva'
-  const body = `Hola equipo Renovactiva,
-
-Me gustaría recibir un código de cliente para dejar mi reseña.
-
-· Nombre:
-· Teléfono:
-· Proyecto realizado con vosotros:
-
-Gracias.`
-  return getMailHref(EMAIL, subject, body)
-}
-
-// --- Correo del footer ---
+// ============================================================
+// PLANTILLA 2: Correo del footer
+// El cursor caerá justo después de "Mi nombre es: "
+// ============================================================
 export function getFooterMailHref(): string {
   const subject = 'Consulta — Renovactiva'
-  const body = `Hola equipo Renovactiva,
+  const body = `Mi nombre es: 
 
-Me gustaría haceros una consulta.
+Hola equipo Renovactiva,
 
-· Nombre:
-· Teléfono:
-· Mensaje:
+Me gustaría hacerles una consulta.
 
-Gracias.`
+Quedo a la espera de su respuesta.
+
+Muchas gracias por su atención.`
   return getMailHref(EMAIL, subject, body)
 }

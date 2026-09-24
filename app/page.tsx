@@ -8,7 +8,7 @@ import { LanguageSwitcher } from '@/components/language-switcher'
 import { useLanguage } from '@/components/language-provider'
 import { MascotAssistant } from '@/components/MascotAssistant'
 import { WhatsAppFooterButton } from '@/components/WhatsAppFooterButton'
-import { getPresupuestoMailHref, getResenaMailHref, getFooterMailHref } from '@/lib/mailHref'
+import { getPresupuestoMailHref, getFooterMailHref } from '@/lib/mailHref'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
@@ -1157,14 +1157,8 @@ export default function Home() {
                 <div className="pt-4 border-t border-white/10 text-center">
                   <p className="text-xs text-white/50">
                     {ca 
-                      ? 'No tens codi? Escriu-nos a '
-                      : '¿No tienes código? Escríbenos a '}
-                    <a 
-                      href={getResenaMailHref()}
-                      className="text-[#10B77F] hover:text-[#d7bd77] transition-colors underline-offset-4 hover:underline"
-                    >
-                      info@renovactiva.com
-                    </a>
+                      ? 'No tens codi? Contacta amb nosaltres per WhatsApp o telèfon.'
+                      : '¿No tienes código? Contacta con nosotros por WhatsApp o teléfono.'}
                   </p>
                 </div>
 
