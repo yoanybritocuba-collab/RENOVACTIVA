@@ -12,7 +12,7 @@ export function FloatingNav() {
   const lastPressTimeRef = useRef(0)
 
   // ============================================================
-  // Sistema anti-salida: 3 pulsaciones para salir (con reset)
+  // Sistema anti-salida: 3 pulsaciones en la HOME para salir
   // ============================================================
   useEffect(() => {
     const isHome = pathname === '/'
@@ -27,11 +27,9 @@ export function FloatingNav() {
     }
 
     function handlePopState() {
-      // Volvemos a empujar estado para que no salga
       if (typeof window !== 'undefined') {
         window.history.pushState({ trap: true }, '', window.location.href)
       }
-
       handleBackPress()
     }
 
@@ -44,13 +42,13 @@ export function FloatingNav() {
   }, [pathname])
 
   // ============================================================
-  // Lógica central del contador
+  // Lógica central del contador (3 pulsaciones)
   // ============================================================
   function handleBackPress() {
     const now = Date.now()
     const elapsed = now - lastPressTimeRef.current
 
-    // Si han pasado más de 2 segundos, resetear contador
+    // Si han pasado más de 2 segundos → resetear contador
     if (elapsed > 2000) {
       backPressesRef.current = 0
     }
@@ -58,10 +56,9 @@ export function FloatingNav() {
     lastPressTimeRef.current = now
     backPressesRef.current += 1
 
-    // Si llegamos a 3 pulsaciones → salir de verdad
+    // Si llegamos a 3 → salir de la web
     if (backPressesRef.current >= 3) {
       backPressesRef.current = 0
-      // Salir de la web (volver al histórico real)
       if (typeof window !== 'undefined') {
         window.history.go(-3)
       }
@@ -124,17 +121,43 @@ export function FloatingNav() {
   // Botón Volver (flotante)
   // ============================================================
   function goBack() {
-    // Si NO estamos en la home → comportamiento normal (volver)
-    if (pathname !== '/') {
-      router.back()
+    const now = Date.now()
+    const elapsed = now - lastPressTimeRef.current
+
+    // Si han pasado más de 2 segundos → resetear contador
+    if (elapsed > 2000) {
+      backPressesRef.current = 0
+    }
+
+    lastPressTimeRef.current = now
+    backPressesRef.current += 1
+
+    // Si llega a 3 pulsaciones seguidas → salir de la web
+    if (backPressesRef.current >= 3) {
+      backPressesRef.current = 0
+      if (typeof window !== 'undefined') {
+        router.back()
+        setTimeout(() => {
+          window.history.back()
+          window.history.back()
+        }, 50)
+      }
       return
     }
 
-    // Si estamos en la home → aplicar lógica de 3 pulsaciones
-    handleBackPress()
+    // 1ª o 2ª pulsación → volver a la página anterior dentro de la web
+    if (typeof window !== 'undefined') {
+      router.back()
+    }
   }
 
+  // ============================================================
+  // Botón Home
+  // ============================================================
   function goHome() {
+    // Resetear contador al ir a home
+    backPressesRef.current = 0
+    lastPressTimeRef.current = 0
     router.push('/')
   }
 
