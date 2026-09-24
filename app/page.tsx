@@ -8,9 +8,10 @@ import { LanguageSwitcher } from '@/components/language-switcher'
 import { useLanguage } from '@/components/language-provider'
 import { MascotAssistant } from '@/components/MascotAssistant'
 import { WhatsAppFooterButton } from '@/components/WhatsAppFooterButton'
+import { getPresupuestoMailHref, getResenaMailHref, getFooterMailHref } from '@/lib/mailHref'
 
-const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://izvllvunpjryeowponti.supabase.co'
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
 const ICON_MAP: Record<string, any> = {
   briefcase: Briefcase,
@@ -57,6 +58,19 @@ export default function Home() {
 
   const { language } = useLanguage()
   const ca = language === 'ca'
+
+  // ============================================================
+  // SCROLL SUAVE A LAS SECCIONES
+  // ============================================================
+  function scrollToSection(id: string) {
+    if (typeof window === 'undefined') return
+    const el = document.getElementById(id)
+    if (el) {
+      const headerHeight = 80
+      const top = el.getBoundingClientRect().top + window.scrollY - headerHeight
+      window.scrollTo({ top, behavior: 'smooth' })
+    }
+  }
 
   useEffect(() => {
     async function loadData() {
@@ -177,7 +191,6 @@ export default function Home() {
   }
 
   const statsItems = statsData?.items || []
-  const statsEyebrow = statsData?.eyebrow || { es: 'En números', ca: 'En números' }
 
   const dynamicStatsData = statsItems.length > 0
     ? statsItems.map((item: any) => ({
@@ -342,10 +355,10 @@ export default function Home() {
           </Link>
 
           <nav className="hidden lg:flex items-center gap-8 text-[11px] uppercase tracking-[0.24em] text-white/70">
-            <a href="#servicios" className="transition-colors hover:text-[#d7bd77]">{ca ? 'Serveis' : 'Servicios'}</a>
-            <a href="#metodo" className="transition-colors hover:text-[#d7bd77]">{ca ? 'El nostre mètode' : 'Nuestro método'}</a>
-            <a href="#proyectos" className="transition-colors hover:text-[#d7bd77]">{ca ? 'Projectes' : 'Proyectos'}</a>
-            <a href="#contacto" className="transition-colors hover:text-[#d7bd77]">{ca ? 'Contacte' : 'Contacto'}</a>
+            <button type="button" onClick={() => scrollToSection('servicios')} className="transition-colors hover:text-[#d7bd77] cursor-pointer">{ca ? 'Serveis' : 'Servicios'}</button>
+            <button type="button" onClick={() => scrollToSection('metodo')} className="transition-colors hover:text-[#d7bd77] cursor-pointer">{ca ? 'El nostre mètode' : 'Nuestro método'}</button>
+            <button type="button" onClick={() => scrollToSection('proyectos')} className="transition-colors hover:text-[#d7bd77] cursor-pointer">{ca ? 'Projectes' : 'Proyectos'}</button>
+            <button type="button" onClick={() => scrollToSection('contacto')} className="transition-colors hover:text-[#d7bd77] cursor-pointer">{ca ? 'Contacte' : 'Contacto'}</button>
           </nav>
 
           <div className="flex items-center gap-2 lg:gap-4 flex-shrink-0">
@@ -370,10 +383,10 @@ export default function Home() {
         {menuOpen && (
           <div className="border-t border-white/10 bg-[#080808]/95 px-6 py-6 lg:hidden">
             <nav className="flex flex-col gap-5 text-sm uppercase tracking-[0.18em] text-white/70">
-              <a href="#servicios" onClick={() => setMenuOpen(false)}>{ca ? 'Serveis' : 'Servicios'}</a>
-              <a href="#metodo" onClick={() => setMenuOpen(false)}>{ca ? 'El nostre mètode' : 'Nuestro método'}</a>
-              <a href="#proyectos" onClick={() => setMenuOpen(false)}>{ca ? 'Projectes' : 'Proyectos'}</a>
-              <a href="#contacto" onClick={() => setMenuOpen(false)}>{ca ? 'Contacte' : 'Contacto'}</a>
+              <button type="button" onClick={() => { setMenuOpen(false); setTimeout(() => scrollToSection('servicios'), 150) }} className="text-left cursor-pointer">{ca ? 'Serveis' : 'Servicios'}</button>
+              <button type="button" onClick={() => { setMenuOpen(false); setTimeout(() => scrollToSection('metodo'), 150) }} className="text-left cursor-pointer">{ca ? 'El nostre mètode' : 'Nuestro método'}</button>
+              <button type="button" onClick={() => { setMenuOpen(false); setTimeout(() => scrollToSection('proyectos'), 150) }} className="text-left cursor-pointer">{ca ? 'Projectes' : 'Proyectos'}</button>
+              <button type="button" onClick={() => { setMenuOpen(false); setTimeout(() => scrollToSection('contacto'), 150) }} className="text-left cursor-pointer">{ca ? 'Contacte' : 'Contacto'}</button>
               <Link 
                 href="/admin" 
                 onClick={() => setMenuOpen(false)}
@@ -479,9 +492,10 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 3.2, ease: [0.22, 1, 0.36, 1] }}
               >
-                <motion.a
-                  href="#contacto"
-                  className="group relative inline-flex items-center gap-5 bg-[#d7bd77] px-6 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-[#141310] overflow-hidden"
+                <motion.button
+                  type="button"
+                  onClick={() => scrollToSection('contacto')}
+                  className="group relative inline-flex items-center gap-5 bg-[#d7bd77] px-6 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-[#141310] overflow-hidden cursor-pointer"
                   whileHover={{ scale: 1.03 }}
                   transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 >
@@ -492,19 +506,20 @@ export default function Home() {
                       : (heroData?.cta || 'Hablemos de tu proyecto')}
                   </span>
                   <ArrowUpRight className="relative z-10 size-4 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
-                </motion.a>
+                </motion.button>
               </motion.div>
 
-              <motion.a 
-                href="#proyectos" 
-                className="group inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/95 hover:text-[#10B77F] transition-colors text-hero-eyebrow"
+              <motion.button 
+                type="button"
+                onClick={() => scrollToSection('proyectos')}
+                className="group inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/95 hover:text-[#10B77F] transition-colors text-hero-eyebrow cursor-pointer"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 3.5, ease: [0.22, 1, 0.36, 1] }}
               >
                 <Play className="size-4 fill-current transition-transform duration-300 group-hover:scale-110" /> 
                 {ca ? 'Veure projectes' : 'Ver proyectos'}
-              </motion.a>
+              </motion.button>
             </div>
 
             <motion.div
@@ -636,13 +651,14 @@ export default function Home() {
             viewport={{ once: true, amount: 0.5 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            <Link 
-              href="#contacto"
-              className="inline-flex items-center gap-3 border-b-2 border-[#10B77F] pb-2 text-[11px] uppercase tracking-[0.24em] text-[#10B77F] transition-all duration-500 hover:border-[#d7bd77] hover:text-[#d7bd77]"
+            <button 
+              type="button"
+              onClick={() => scrollToSection('contacto')}
+              className="inline-flex items-center gap-3 border-b-2 border-[#10B77F] pb-2 text-[11px] uppercase tracking-[0.24em] text-[#10B77F] transition-all duration-500 hover:border-[#d7bd77] hover:text-[#d7bd77] cursor-pointer"
             >
               {ca ? 'Parlem del teu projecte' : 'Hablemos de tu proyecto'}
               <ArrowUpRight className="size-4" />
-            </Link>
+            </button>
           </motion.div>
         </div>
       </section>
@@ -1147,7 +1163,7 @@ export default function Home() {
                       ? 'No tens codi? Escriu-nos a '
                       : '¿No tienes código? Escríbenos a '}
                     <a 
-                      href="mailto:info@renovactiva.com" 
+                      href={getResenaMailHref()}
                       className="text-[#10B77F] hover:text-[#d7bd77] transition-colors underline-offset-4 hover:underline"
                     >
                       info@renovactiva.com
@@ -1292,7 +1308,7 @@ export default function Home() {
               {ca ? "Explica'ns la teva idea." : 'Cuéntanos tu idea.'}
             </p>
             <motion.a
-              href="mailto:info@renovactiva.com?subject=Solicitud%20de%20presupuesto%20%E2%80%94%20Renovactiva&body=Hola%20equipo%20Renovactiva%2C%0A%0AMe%20gustar%C3%ADa%20solicitar%20un%20presupuesto%20para%20mi%20proyecto.%0A%0A%C2%B7%20Nombre%3A%0A%C2%B7%20Tel%C3%A9fono%3A%0A%C2%B7%20Tipo%20de%20reforma%20(vivienda%20%2F%20oficina%20%2F%20local)%3A%0A%C2%B7%20Ciudad%20o%20zona%3A%0A%C2%B7%20Descripci%C3%B3n%20breve%3A%0A%0AGracias."
+              href={getPresupuestoMailHref()}
               className="group mt-7 inline-flex items-center gap-3 bg-[#000000] hover:bg-[#10B77F] text-white px-6 py-3 rounded-lg transition-colors text-[11px] uppercase tracking-[0.2em] font-medium"
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.98 }}
@@ -1354,12 +1370,11 @@ export default function Home() {
                   {footerData?.contact?.phone || '+34 600 000 000'}
                 </a>
                 <a 
-                  href={`mailto:${footerData?.contact?.email || 'info@renovactiva.com'}`}
+                  href={getFooterMailHref()}
                   className="block link-underline hover:text-[#10B77F] transition-colors"
                 >
                   {footerData?.contact?.email || 'info@renovactiva.com'}
                 </a>
-                {/* Botón WhatsApp con efecto radar */}
                 <WhatsAppFooterButton lang={ca ? 'ca' : 'es'} />
               </div>
               <div>
