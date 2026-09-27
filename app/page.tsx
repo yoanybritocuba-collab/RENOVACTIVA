@@ -6,7 +6,7 @@ import { ArrowUpRight, Menu, Play, X, Shield, ChevronLeft, ChevronRight, Camera,
 import { motion, AnimatePresence } from 'framer-motion'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { useLanguage } from '@/components/language-provider'
-import { MascotAssistant } from '@/components/MascotAssistant'
+// import { MascotAssistant } from '@/components/MascotAssistant'  // 🚫 PAUSADO hasta nueva actualización
 import { WhatsAppFooterButton } from '@/components/WhatsAppFooterButton'
 import { getPresupuestoMailHref, getFooterMailHref } from '@/lib/mailHref'
 
@@ -449,16 +449,17 @@ export default function Home() {
               </p>
             </motion.div>
 
-            <h1 className="max-w-3xl font-serif text-4xl leading-[0.98] tracking-[-0.03em] sm:text-5xl md:text-6xl lg:text-[104px] text-hero-title">
+            {/* TÍTULO CON ANIMACIÓN SIN CORTAR LAS LETRAS */}
+            <h1 className="max-w-3xl font-serif text-4xl leading-[1.15] tracking-[-0.03em] sm:text-5xl md:text-6xl lg:text-[104px] text-hero-title pb-4">
               {titleWords.map((word: string, index: number) => (
                 <span 
                   key={index}
-                  className="inline-block overflow-hidden align-bottom"
+                  className="inline-block align-bottom"
                   style={{ marginRight: '0.25em' }}
                 >
                   <motion.span
                     className="inline-block"
-                    initial={{ y: '100%', opacity: 0 }}
+                    initial={{ y: '30%', opacity: 0 }}
                     animate={{ y: '0%', opacity: 1 }}
                     transition={{
                       duration: 1.1,
@@ -1543,8 +1544,8 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* 🤖 CHAT */}
-      <MascotAssistant lang={ca ? 'ca' : 'es'} />
+      {/* 🤖 CHAT — PAUSADO HASTA NUEVA ACTUALIZACIÓN */}
+      {/* <MascotAssistant lang={ca ? 'ca' : 'es'} /> */}
     </main>
   )
 }

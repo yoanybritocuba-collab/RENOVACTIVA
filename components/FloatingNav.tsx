@@ -3,7 +3,6 @@
 import { useRouter, usePathname } from 'next/navigation'
 import { ArrowLeft, Home } from 'lucide-react'
 import { useEffect, useRef } from 'react'
-import { WhatsAppButton } from './WhatsAppButton'
 
 export function FloatingNav() {
   const router = useRouter()
@@ -21,7 +20,6 @@ export function FloatingNav() {
       return
     }
 
-    // Interceptar el botón "atrás" del navegador / móvil
     if (typeof window !== 'undefined') {
       window.history.pushState({ trap: true }, '', window.location.href)
     }
@@ -41,14 +39,10 @@ export function FloatingNav() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname])
 
-  // ============================================================
-  // Lógica central del contador (3 pulsaciones)
-  // ============================================================
   function handleBackPress() {
     const now = Date.now()
     const elapsed = now - lastPressTimeRef.current
 
-    // Si han pasado más de 2 segundos → resetear contador
     if (elapsed > 2000) {
       backPressesRef.current = 0
     }
@@ -56,7 +50,6 @@ export function FloatingNav() {
     lastPressTimeRef.current = now
     backPressesRef.current += 1
 
-    // Si llegamos a 3 → salir de la web
     if (backPressesRef.current >= 3) {
       backPressesRef.current = 0
       if (typeof window !== 'undefined') {
@@ -65,7 +58,6 @@ export function FloatingNav() {
       return
     }
 
-    // Si no, mostrar aviso
     showWarning(backPressesRef.current)
   }
 
@@ -117,14 +109,10 @@ export function FloatingNav() {
     setTimeout(() => el.remove(), 2000)
   }
 
-  // ============================================================
-  // Botón Volver (flotante)
-  // ============================================================
   function goBack() {
     const now = Date.now()
     const elapsed = now - lastPressTimeRef.current
 
-    // Si han pasado más de 2 segundos → resetear contador
     if (elapsed > 2000) {
       backPressesRef.current = 0
     }
@@ -132,7 +120,6 @@ export function FloatingNav() {
     lastPressTimeRef.current = now
     backPressesRef.current += 1
 
-    // Si llega a 3 pulsaciones seguidas → salir de la web
     if (backPressesRef.current >= 3) {
       backPressesRef.current = 0
       if (typeof window !== 'undefined') {
@@ -145,17 +132,12 @@ export function FloatingNav() {
       return
     }
 
-    // 1ª o 2ª pulsación → volver a la página anterior dentro de la web
     if (typeof window !== 'undefined') {
       router.back()
     }
   }
 
-  // ============================================================
-  // Botón Home
-  // ============================================================
   function goHome() {
-    // Resetear contador al ir a home
     backPressesRef.current = 0
     lastPressTimeRef.current = 0
     router.push('/')
@@ -182,9 +164,6 @@ export function FloatingNav() {
       >
         <Home className="size-4 transition-transform duration-300 group-hover:scale-110" />
       </button>
-
-      {/* Botón WhatsApp (abajo) con efecto radar */}
-      <WhatsAppButton />
     </div>
   )
 }
