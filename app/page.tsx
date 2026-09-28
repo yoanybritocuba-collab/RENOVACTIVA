@@ -1,12 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { ArrowUpRight, Menu, Play, X, Shield, ChevronLeft, ChevronRight, Camera, Star, Plus, Minus, Briefcase, Award, Users, Home as HomeIcon, KeyRound, Check, TrendingUp, Heart, Target, Zap, Loader2, PartyPopper } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { ArrowUpRight, Menu, Play, X, Shield, ChevronLeft, ChevronRight, Camera, Star, Plus, Minus, Briefcase, Award, Users, Home as HomeIcon, KeyRound, TrendingUp, Heart, Target, Zap, Loader2, PartyPopper } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { useLanguage } from '@/components/language-provider'
-// import { MascotAssistant } from '@/components/MascotAssistant'  // 🚫 PAUSADO hasta nueva actualización
+// import { MascotAssistant } from '@/components/MascotAssistant'  // 🚫 PAUSADO
 import { WhatsAppFooterButton } from '@/components/WhatsAppFooterButton'
 import { getPresupuestoMailHref, getFooterMailHref } from '@/lib/mailHref'
 
@@ -43,6 +43,18 @@ export default function Home() {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
 
   const [openFaq, setOpenFaq] = useState<number | null>(0)
+
+  // ⭐ Página actual de reseñas (en PC, de 3 en 3)
+  const [testimonialPage, setTestimonialPage] = useState(0)
+  // ⭐ En móvil: índice de la tarjeta actual (de 1 en 1)
+  const [mobileTestimonialIndex, setMobileTestimonialIndex] = useState(0)
+
+  // ⭐ Refs
+  const testimonialGridRef = useRef<HTMLDivElement>(null)
+  const mobileCarouselRef = useRef<HTMLDivElement>(null)
+  const wheelLockRef = useRef(false)
+  const isHoveringRef = useRef(false)
+  const touchStartRef = useRef<{ x: number; y: number; active: boolean } | null>(null)
 
   const [reviewCode, setReviewCode] = useState('')
   const [reviewMessage, setReviewMessage] = useState('')
@@ -134,6 +146,105 @@ export default function Home() {
     return () => clearInterval(timer)
   }, [])
 
+  // ============================================================
+  // ⭐ SISTEMA DE RESEÑAS
+  // PC: rueda del ratón SOBRE las 3 tarjetas → cambia de grupo
+  // Móvil: swipe horizontal SOBRE el carrusel → cambia 1 a 1
+  // ============================================================
+  useEffect(() => {
+    const totalItems = testimonialsData?.items?.length || 0
+    if (totalItems === 0) return
+
+    const onMouseMove = (e: MouseEvent) => {
+      const grid = testimonialGridRef.current
+      if (!grid) {
+        isHoveringRef.current = false
+        return
+      }
+      const rect = grid.getBoundingClientRect()
+      isHoveringRef.current =
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom
+    }
+
+    const onWheel = (e: WheelEvent) => {
+      if (!isHoveringRef.current) return
+
+      const totalPages = Math.max(1, Math.ceil(totalItems / 3))
+      if (totalPages <= 1) return
+
+      e.preventDefault()
+      e.stopPropagation()
+
+      if (wheelLockRef.current) return
+      if (Math.abs(e.deltaY) < 10) return
+
+      wheelLockRef.current = true
+
+      setTestimonialPage((prev) => {
+        if (e.deltaY > 0) return (prev + 1) % totalPages
+        return (prev - 1 + totalPages) % totalPages
+      })
+
+      setTimeout(() => {
+        wheelLockRef.current = false
+      }, 450)
+    }
+
+    const onTouchStart = (e: TouchEvent) => {
+      const carousel = mobileCarouselRef.current
+      if (!carousel) return
+      const rect = carousel.getBoundingClientRect()
+      const touch = e.touches[0]
+      const isInside =
+        touch.clientX >= rect.left &&
+        touch.clientX <= rect.right &&
+        touch.clientY >= rect.top &&
+        touch.clientY <= rect.bottom
+
+      if (isInside) {
+        touchStartRef.current = { x: touch.clientX, y: touch.clientY, active: true }
+      } else {
+        touchStartRef.current = null
+      }
+    }
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!touchStartRef.current || !touchStartRef.current.active) {
+        touchStartRef.current = null
+        return
+      }
+
+      const touch = e.changedTouches[0]
+      const dx = touch.clientX - touchStartRef.current.x
+      const dy = touch.clientY - touchStartRef.current.y
+
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if (dx > 0) {
+          setMobileTestimonialIndex((prev) => (prev - 1 + totalItems) % totalItems)
+        } else {
+          setMobileTestimonialIndex((prev) => (prev + 1) % totalItems)
+        }
+      }
+
+      touchStartRef.current = null
+    }
+
+    document.addEventListener('mousemove', onMouseMove, { passive: true })
+    document.addEventListener('wheel', onWheel, { passive: false })
+    document.addEventListener('touchstart', onTouchStart, { passive: true })
+    document.addEventListener('touchend', onTouchEnd, { passive: true })
+
+    return () => {
+      document.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('wheel', onWheel)
+      document.removeEventListener('touchstart', onTouchStart)
+      document.removeEventListener('touchend', onTouchEnd)
+    }
+  }, [testimonialsData])
+
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (!selectedProject) return
@@ -168,6 +279,14 @@ export default function Home() {
   const servicesTrans = servicesSection?.translations || {}
   const testimonialsTrans = testimonialsData?.translations || {}
   const testimonialsItems = testimonialsData?.items || []
+
+  const totalTestimonialPages = Math.max(1, Math.ceil(testimonialsItems.length / 3))
+  const visibleTestimonials = testimonialsItems.slice(
+    testimonialPage * 3,
+    testimonialPage * 3 + 3
+  )
+
+  const currentMobileTestimonial = testimonialsItems[mobileTestimonialIndex] || null
 
   const titleText = ca
     ? (heroTrans.title || heroData?.title || 'Espais que trascendeixen.')
@@ -449,7 +568,6 @@ export default function Home() {
               </p>
             </motion.div>
 
-            {/* TÍTULO CON ANIMACIÓN SIN CORTAR LAS LETRAS */}
             <h1 className="max-w-3xl font-serif text-4xl leading-[1.15] tracking-[-0.03em] sm:text-5xl md:text-6xl lg:text-[104px] text-hero-title pb-4">
               {titleWords.map((word: string, index: number) => (
                 <span 
@@ -842,8 +960,8 @@ export default function Home() {
 
       {/* 6. TESTIMONIOS */}
       {testimonialsItems.length > 0 && (
-        <section className="relative mx-auto max-w-[1380px] px-6 py-24 lg:px-10 lg:py-36 bg-[#080808]">
-          <div className="mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+        <section className="relative mx-auto max-w-[1380px] px-4 sm:px-6 py-16 sm:py-24 lg:px-10 lg:py-36 bg-[#080808]">
+          <div className="mb-10 sm:mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
             <div>
               <motion.p
                 className="eyebrow"
@@ -857,7 +975,7 @@ export default function Home() {
                   : (testimonialsData?.eyebrow?.es || 'Lo que dicen nuestros clientes')}
               </motion.p>
               <motion.h2 
-                className="section-title"
+                className="mt-3 sm:mt-4 font-serif text-3xl sm:text-5xl leading-[0.95] tracking-[-0.03em] lg:text-6xl"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
@@ -871,49 +989,132 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {testimonialsItems.map((item: any, index: number) => (
+          {/* ==================== PC: GRID 3 TARJETAS ==================== */}
+          <div ref={testimonialGridRef} className="hidden lg:block">
+            <AnimatePresence mode="wait">
               <motion.div
-                key={item.id || index}
-                className="group relative flex flex-col p-7 rounded-xl border border-[#10B77F]/30 bg-[#0A0A0A] transition-all duration-500 hover:border-[#10B77F] hover:shadow-[0_0_60px_10px_rgba(16,183,127,0.55)]"
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.15 }}
-                transition={{ 
-                  duration: 0.8, 
-                  delay: index * 0.1,
-                  ease: [0.22, 1, 0.36, 1] 
-                }}
+                key={testimonialPage}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                className="grid gap-6 lg:grid-cols-3"
               >
-                <div className="flex gap-1 mb-5">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`size-4 transition-colors duration-500 ${
-                        star <= (item.rating || 5)
-                          ? 'text-[#d7bd77] fill-[#d7bd77]'
-                          : 'text-white/20'
-                      }`}
-                    />
-                  ))}
-                </div>
+                {visibleTestimonials.map((item: any, index: number) => (
+                  <motion.div
+                    key={item.id || `${testimonialPage}-${index}`}
+                    className="group relative flex flex-col p-7 rounded-xl border border-[#10B77F]/30 bg-[#0A0A0A] transition-all duration-500 hover:border-[#10B77F] hover:shadow-[0_0_60px_10px_rgba(16,183,127,0.55)]"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <div className="flex gap-1 mb-5">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`size-4 transition-colors duration-500 ${
+                            star <= (item.rating || 5)
+                              ? 'text-[#d7bd77] fill-[#d7bd77]'
+                              : 'text-white/20'
+                          }`}
+                        />
+                      ))}
+                    </div>
 
-                <p className="flex-1 text-sm lg:text-base leading-relaxed text-white/80 transition-colors duration-500 group-hover:text-white/95 italic">
-                  "{item.text?.[language] || item.text?.es || ''}"
-                </p>
+                    <p className="flex-1 text-sm lg:text-base leading-relaxed text-white/80 transition-colors duration-500 group-hover:text-white/95 italic">
+                      "{item.text?.[language] || item.text?.es || ''}"
+                    </p>
 
-                <div className="mt-6 h-px w-12 bg-[#10B77F] transition-all duration-700 group-hover:w-20 group-hover:bg-[#d7bd77]" />
+                    <div className="mt-6 h-px w-12 bg-[#10B77F] transition-all duration-700 group-hover:w-20 group-hover:bg-[#d7bd77]" />
 
-                <div className="mt-5">
-                  <p className="font-serif text-lg text-[#10B77F] transition-colors duration-500 group-hover:text-[#d7bd77]">
-                    {item.name}
-                  </p>
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 mt-1">
-                    {item.role?.[language] || item.role?.es || ''}
-                  </p>
-                </div>
+                    <div className="mt-5">
+                      <p className="font-serif text-lg text-[#10B77F] transition-colors duration-500 group-hover:text-[#d7bd77]">
+                        {item.name}
+                      </p>
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 mt-1">
+                        {item.role?.[language] || item.role?.es || ''}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
               </motion.div>
-            ))}
+            </AnimatePresence>
+
+            {/* Puntitos PC */}
+            {totalTestimonialPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-10">
+                {Array.from({ length: totalTestimonialPages }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setTestimonialPage(i)}
+                    aria-label={`Ir al grupo ${i + 1}`}
+                    className={`rounded-full transition-all duration-500 ${
+                      i === testimonialPage
+                        ? 'w-8 h-2 bg-[#10B77F]'
+                        : 'w-2 h-2 bg-white/30 hover:bg-[#d7bd77]/70'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+
+            {totalTestimonialPages > 1 && (
+              <p className="text-center mt-6 text-[10px] uppercase tracking-[0.2em] text-white/30">
+                {ca ? 'Posa el cursor sobre les targetes i usa la roda del ratolí' : 'Pon el cursor sobre las tarjetas y usa la rueda del ratón'}
+              </p>
+            )}
+          </div>
+
+          {/* ==================== MÓVIL: CARRUSEL 1 TARJETA ANCHA Y BAJA ==================== */}
+          <div ref={mobileCarouselRef} className="lg:hidden">
+            <AnimatePresence mode="wait">
+              {currentMobileTestimonial && (
+                <motion.div
+                  key={`mobile-${mobileTestimonialIndex}`}
+                  initial={{ opacity: 0, x: 60 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -60 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  className="group relative flex flex-col p-5 rounded-xl border border-[#10B77F]/30 bg-[#0A0A0A] w-full"
+                >
+                  <div className="flex gap-1 mb-3">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`size-3.5 transition-colors duration-500 ${
+                          star <= (currentMobileTestimonial.rating || 5)
+                            ? 'text-[#d7bd77] fill-[#d7bd77]'
+                            : 'text-white/20'
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  <p className="text-sm leading-relaxed text-white/80 italic">
+                    "{currentMobileTestimonial.text?.[language] || currentMobileTestimonial.text?.es || ''}"
+                  </p>
+
+                  <div className="mt-4 flex items-center justify-between gap-4">
+                    <div>
+                      <p className="font-serif text-base text-[#10B77F]">
+                        {currentMobileTestimonial.name}
+                      </p>
+                      <p className="text-[9px] uppercase tracking-[0.2em] text-white/50 mt-1">
+                        {currentMobileTestimonial.role?.[language] || currentMobileTestimonial.role?.es || ''}
+                      </p>
+                    </div>
+                    <div className="h-px w-10 bg-[#10B77F] flex-shrink-0" />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Aviso móvil */}
+            {testimonialsItems.length > 1 && (
+              <p className="text-center mt-5 text-[9px] uppercase tracking-[0.2em] text-white/30">
+                {ca ? 'Llisca amb el dit cap als costats' : 'Desliza con el dedo hacia los lados'}
+              </p>
+            )}
           </div>
         </section>
       )}
@@ -1367,7 +1568,9 @@ export default function Home() {
                 >
                   {footerData?.contact?.email || 'info@renovactiva.com'}
                 </a>
-                <WhatsAppFooterButton lang={ca ? 'ca' : 'es'} />
+                <div className="flex items-center gap-3 mt-4">
+                  <WhatsAppFooterButton lang={ca ? 'ca' : 'es'} />
+                </div>
               </div>
               <div>
                 <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77]">
