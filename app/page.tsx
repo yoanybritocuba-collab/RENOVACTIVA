@@ -8,7 +8,8 @@ import { LanguageSwitcher } from '@/components/language-switcher'
 import { useLanguage } from '@/components/language-provider'
 // import { MascotAssistant } from '@/components/MascotAssistant'  // 🚫 PAUSADO
 import { WhatsAppFooterButton } from '@/components/WhatsAppFooterButton'
-import { getPresupuestoMailHref, getFooterMailHref } from '@/lib/mailHref'
+import { ContactModal } from '@/components/ContactModal'
+import { getFooterMailHref } from '@/lib/mailHref'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
@@ -38,6 +39,9 @@ export default function Home() {
   const [statsData, setStatsData] = useState<any>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeHero, setActiveHero] = useState(0)
+
+  // 🎯 Estado del modal de contacto
+  const [contactModalOpen, setContactModalOpen] = useState(false)
 
   const [selectedProject, setSelectedProject] = useState<any>(null)
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
@@ -148,8 +152,6 @@ export default function Home() {
 
   // ============================================================
   // ⭐ SISTEMA DE RESEÑAS
-  // PC: rueda del ratón SOBRE las 3 tarjetas → cambia de grupo
-  // Móvil: swipe horizontal SOBRE el carrusel → cambia 1 a 1
   // ============================================================
   useEffect(() => {
     const totalItems = testimonialsData?.items?.length || 0
@@ -989,7 +991,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* ==================== PC: GRID 3 TARJETAS ==================== */}
+          {/* PC */}
           <div ref={testimonialGridRef} className="hidden lg:block">
             <AnimatePresence mode="wait">
               <motion.div
@@ -1040,7 +1042,6 @@ export default function Home() {
               </motion.div>
             </AnimatePresence>
 
-            {/* Puntitos PC */}
             {totalTestimonialPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-10">
                 {Array.from({ length: totalTestimonialPages }).map((_, i) => (
@@ -1065,7 +1066,7 @@ export default function Home() {
             )}
           </div>
 
-          {/* ==================== MÓVIL: CARRUSEL 1 TARJETA ANCHA Y BAJA ==================== */}
+          {/* MÓVIL */}
           <div ref={mobileCarouselRef} className="lg:hidden">
             <AnimatePresence mode="wait">
               {currentMobileTestimonial && (
@@ -1109,7 +1110,6 @@ export default function Home() {
               )}
             </AnimatePresence>
 
-            {/* Aviso móvil */}
             {testimonialsItems.length > 1 && (
               <p className="text-center mt-5 text-[9px] uppercase tracking-[0.2em] text-white/30">
                 {ca ? 'Llisca amb el dit cap als costats' : 'Desliza con el dedo hacia los lados'}
@@ -1500,16 +1500,17 @@ export default function Home() {
             <p className="text-sm leading-relaxed text-[#141310]/70">
               {ca ? "Explica'ns la teva idea." : 'Cuéntanos tu idea.'}
             </p>
-            <motion.a
-              href={getPresupuestoMailHref()}
-              className="group mt-7 inline-flex items-center gap-3 bg-[#000000] hover:bg-[#10B77F] text-white px-6 py-3 rounded-lg transition-colors text-[11px] uppercase tracking-[0.2em] font-medium"
+            <motion.button
+              type="button"
+              onClick={() => setContactModalOpen(true)}
+              className="group mt-7 inline-flex items-center gap-3 bg-[#000000] hover:bg-[#10B77F] text-white px-6 py-3 rounded-lg transition-colors text-[11px] uppercase tracking-[0.2em] font-medium cursor-pointer"
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             >
               {ca ? 'Demanar pressupost' : 'Solicitar presupuesto'}
               <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-            </motion.a>
+            </motion.button>
           </motion.div>
         </div>
       </section>
@@ -1569,7 +1570,7 @@ export default function Home() {
                   {footerData?.contact?.email || 'info@renovactiva.com'}
                 </a>
                 <div className="flex items-center gap-3 mt-4">
-                  <WhatsAppFooterButton lang={ca ? 'ca' : 'es'} />
+                  <WhatsAppFooterButton lang={ca ? 'ca' : 'es'} onClick={() => setContactModalOpen(true)} />
                 </div>
               </div>
               <div>
@@ -1749,6 +1750,13 @@ export default function Home() {
 
       {/* 🤖 CHAT — PAUSADO HASTA NUEVA ACTUALIZACIÓN */}
       {/* <MascotAssistant lang={ca ? 'ca' : 'es'} /> */}
+
+      {/* 📩 MODAL DE CONTACTO */}
+      <ContactModal
+        open={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
+        lang={ca ? 'ca' : 'es'}
+      />
     </main>
   )
 }
