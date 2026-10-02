@@ -17,12 +17,10 @@ export function WhatsAppFooterButton({ lang = 'es', onClick }: WhatsAppFooterBut
       title={label}
       className="whatsapp-footer-button group relative inline-flex items-center justify-center size-10 rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-[0_0_25px_rgba(37,211,102,0.6)] mt-4"
     >
-      {/* Ondas expansivas (efecto radar) */}
       <span className="whatsapp-footer-pulse whatsapp-footer-pulse-1" aria-hidden="true" />
       <span className="whatsapp-footer-pulse whatsapp-footer-pulse-2" aria-hidden="true" />
       <span className="whatsapp-footer-pulse whatsapp-footer-pulse-3" aria-hidden="true" />
 
-      {/* Logo oficial de WhatsApp */}
       <svg
         viewBox="0 0 24 24"
         className="relative z-10 size-5 fill-current"
