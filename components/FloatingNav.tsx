@@ -109,6 +109,7 @@ export function FloatingNav() {
     setTimeout(() => el.remove(), 2000)
   }
 
+  // ✅ Botón ATRÁS: va a la página anterior donde estabas
   function goBack() {
     const now = Date.now()
     const elapsed = now - lastPressTimeRef.current
@@ -137,10 +138,14 @@ export function FloatingNav() {
     }
   }
 
+  // ✅ Botón HOME: lleva a la pantalla de inicio INMEDIATAMENTE
   function goHome() {
     backPressesRef.current = 0
     lastPressTimeRef.current = 0
-    router.push('/')
+    // Salto instantáneo a la home (sin esperas)
+    if (typeof window !== 'undefined') {
+      window.location.href = '/'
+    }
   }
 
   return (
