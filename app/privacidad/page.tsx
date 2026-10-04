@@ -1,10 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowLeft, Shield } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useLanguage } from '@/components/language-provider'
-import { LanguageSwitcher } from '@/components/language-switcher'
+import { TopNav } from '@/components/TopNav'
 
 export default function PrivacidadPage() {
   const { language } = useLanguage()
@@ -13,31 +13,11 @@ export default function PrivacidadPage() {
   return (
     <main className="min-h-screen bg-[#080808] text-[#f3f0e9]">
 
-      {/* HEADER igual que la web */}
-      <header className="border-b border-white/10 bg-black/40 backdrop-blur-md">
-        <div className="mx-auto flex max-w-[1380px] items-center justify-between px-4 py-4 lg:px-10 lg:py-5">
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <img src="/logo.png" alt="Renovactiva" className="h-8 w-auto lg:h-10" />
-            <span className="font-serif text-base tracking-[0.28em] text-[#d7bd77] lg:text-xl whitespace-nowrap">
-              Renovactiva<span className="text-white/40"> SL</span>
-            </span>
-          </Link>
-
-          <div className="flex items-center gap-2 lg:gap-4 flex-shrink-0">
-            <LanguageSwitcher />
-            <Link
-              href="/admin"
-              className="hidden sm:flex items-center gap-1.5 border border-[#d7bd77]/60 px-3 py-1.5 lg:px-4 lg:py-2 text-[9px] lg:text-[10px] uppercase tracking-[0.2em] text-[#d7bd77] transition-colors hover:bg-[#d7bd77] hover:text-[#000000] rounded"
-            >
-              <Shield className="size-3" />
-              Admin
-            </Link>
-          </div>
-        </div>
-      </header>
+      {/* HEADER con TopNav (logo + menú + botón solicitar presupuesto) */}
+      <TopNav variant="dark" />
 
       {/* CONTENIDO */}
-      <div className="mx-auto max-w-3xl px-6 lg:px-10 py-16 lg:py-20">
+      <div className="mx-auto max-w-3xl px-6 lg:px-10 py-16 lg:py-20 pt-32 lg:pt-40">
 
         {/* Volver */}
         <motion.div

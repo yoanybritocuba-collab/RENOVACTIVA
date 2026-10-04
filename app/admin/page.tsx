@@ -50,7 +50,6 @@ export default function AdminDashboard() {
       const services = data.find((d: any) => d.section === 'services')
       const testimonials = data.find((d: any) => d.section === 'testimonials')
 
-      // ⭐ Cargar códigos de reseña
       let reviewCodesPending = 0
       let reviewCodesUsed = 0
       try {
@@ -106,7 +105,9 @@ export default function AdminDashboard() {
     return (
       <main className="min-h-screen bg-[#11110f] flex items-center justify-center px-4">
         <form onSubmit={signIn} className="w-full max-w-md border border-white/10 bg-[#0b0b0a] p-8 rounded-xl">
-          <h1 className="font-serif text-2xl text-[#d7bd77]">RENOVACTIVA</h1>
+          <h1 className="font-serif text-2xl" style={{ color: '#ad742a' }}>
+            RENOVACTIVA<span style={{ color: '#042133' }}> SL</span>
+          </h1>
           <p className="text-white/40 text-sm mt-1">Panel de administración</p>
 
           <button
@@ -172,7 +173,10 @@ export default function AdminDashboard() {
       <aside className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-white/10 bg-[#0b0b0a] flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         
         <div className="p-6 pb-4 flex-shrink-0">
-          <Link href="/" className="font-serif text-lg text-[#d7bd77]">RENOVACTIVA</Link>
+          <Link href="/" className="font-serif text-lg">
+            <span style={{ color: '#ad742a' }}>RENOVACTIVA</span>
+            <span style={{ color: '#042133' }}> SL</span>
+          </Link>
           <p className="text-[9px] uppercase tracking-[.2em] text-white/30 mt-1">Panel de administración</p>
         </div>
 
@@ -215,7 +219,6 @@ export default function AdminDashboard() {
             <span>Testimonios</span>
           </Link>
 
-          {/* ⭐ NUEVO: Reseñas */}
           <Link href="/admin/reviews" className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 hover:text-white rounded-lg transition-colors">
             <KeyRound className="size-4" />
             <span>Reseñas</span>
@@ -280,7 +283,6 @@ export default function AdminDashboard() {
               <strong className="block mt-2 font-serif text-4xl text-[#d7bd77]">{stats.totalTestimonials}</strong>
             </div>
 
-            {/* ⭐ NUEVO: Tarjeta de códigos de reseña */}
             <Link 
               href="/admin/reviews"
               className="group border border-[#10B77F]/30 bg-[#10B77F]/[.03] hover:border-[#10B77F] hover:bg-[#10B77F]/[.08] p-6 rounded-xl transition-all duration-300"

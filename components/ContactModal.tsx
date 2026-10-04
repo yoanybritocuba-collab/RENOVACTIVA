@@ -165,7 +165,8 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="h-1.5 bg-gradient-to-r from-[#d7bd77] via-[#e5c989] to-[#d7bd77]" />
+              {/* ✅ Barra superior DORADO UNIFICADO */}
+              <div className="h-1.5 bg-[#d7bd77]" />
 
               <button
                 onClick={() => { if (!enviando) onClose() }}
@@ -181,7 +182,8 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
                 <div className="mb-6 pr-10">
                   <h2 className="font-bold text-2xl sm:text-3xl text-[#0a1a3a] leading-tight">
                     {isCa ? 'Demana pressupost' : 'Pídenos presupuesto'}{' '}
-                    <span className="text-[#e0a521]">
+                    {/* ✅ Texto DORADO UNIFICADO */}
+                    <span className="text-[#d7bd77]">
                       {isCa ? 'GRATIS I SENSE COMPROMÍS' : 'GRATIS Y SIN COMPROMISO'}
                     </span>
                   </h2>
@@ -227,7 +229,8 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
                           onChange={(e) => setNombre(e.target.value)}
                           disabled={enviando}
                           placeholder={isCa ? 'Nom' : 'Nombre'}
-                          className="w-full rounded-lg border border-gray-300 pl-11 pr-4 py-3 text-gray-800 placeholder:text-gray-400 focus:border-[#e0a521] focus:ring-2 focus:ring-[#e0a521]/20 outline-none transition disabled:opacity-50"
+                          /* ✅ Focus DORADO UNIFICADO */
+                          className="w-full rounded-lg border border-gray-300 pl-11 pr-4 py-3 text-gray-800 placeholder:text-gray-400 focus:border-[#d7bd77] focus:ring-2 focus:ring-[#d7bd77]/20 outline-none transition disabled:opacity-50"
                         />
                       </div>
                     </div>
@@ -244,7 +247,7 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
                           onChange={(e) => setTelefono(e.target.value)}
                           disabled={enviando}
                           placeholder={isCa ? 'Telèfon' : 'Teléfono'}
-                          className="w-full rounded-lg border border-gray-300 pl-11 pr-4 py-3 text-gray-800 placeholder:text-gray-400 focus:border-[#e0a521] focus:ring-2 focus:ring-[#e0a521]/20 outline-none transition disabled:opacity-50"
+                          className="w-full rounded-lg border border-gray-300 pl-11 pr-4 py-3 text-gray-800 placeholder:text-gray-400 focus:border-[#d7bd77] focus:ring-2 focus:ring-[#d7bd77]/20 outline-none transition disabled:opacity-50"
                         />
                       </div>
                     </div>
@@ -261,7 +264,7 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
                           onChange={(e) => setEmail(e.target.value)}
                           disabled={enviando}
                           placeholder="Email"
-                          className="w-full rounded-lg border border-gray-300 pl-11 pr-4 py-3 text-gray-800 placeholder:text-gray-400 focus:border-[#e0a521] focus:ring-2 focus:ring-[#e0a521]/20 outline-none transition disabled:opacity-50"
+                          className="w-full rounded-lg border border-gray-300 pl-11 pr-4 py-3 text-gray-800 placeholder:text-gray-400 focus:border-[#d7bd77] focus:ring-2 focus:ring-[#d7bd77]/20 outline-none transition disabled:opacity-50"
                         />
                       </div>
                     </div>
@@ -278,26 +281,27 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
                           disabled={enviando}
                           rows={5}
                           placeholder={isCa ? 'Escriu aquí el teu missatge' : 'Escribe aquí tu mensaje'}
-                          className="w-full rounded-lg border border-gray-300 pl-11 pr-4 py-3 text-gray-800 placeholder:text-gray-400 focus:border-[#e0a521] focus:ring-2 focus:ring-[#e0a521]/20 outline-none transition resize-y disabled:opacity-50"
+                          className="w-full rounded-lg border border-gray-300 pl-11 pr-4 py-3 text-gray-800 placeholder:text-gray-400 focus:border-[#d7bd77] focus:ring-2 focus:ring-[#d7bd77]/20 outline-none transition resize-y disabled:opacity-50"
                         />
                       </div>
                     </div>
 
-                    {/* Política de privacidad - abre MODAL interno */}
+                    {/* Política de privacidad */}
                     <label className="flex items-start gap-3 mb-5 p-3 rounded-lg bg-gray-50 border border-gray-200">
                       <input
                         type="checkbox"
                         checked={acepto}
                         onChange={(e) => setAcepto(e.target.checked)}
                         disabled={enviando}
-                        className="mt-0.5 size-4 accent-[#e0a521] cursor-pointer flex-shrink-0"
+                        /* ✅ Checkbox DORADO UNIFICADO */
+                        className="mt-0.5 size-4 accent-[#d7bd77] cursor-pointer flex-shrink-0"
                       />
                       <span className="text-sm text-gray-700">
                         {isCa ? 'He llegit i accepto la ' : 'He leído y acepto la '}
                         <button
                           type="button"
                           onClick={() => setPrivacidadOpen(true)}
-                          className="font-semibold text-[#0a1a3a] hover:text-[#e0a521] underline cursor-pointer"
+                          className="font-semibold text-[#0a1a3a] hover:text-[#d7bd77] underline cursor-pointer"
                         >
                           {isCa ? 'política de privacitat' : 'política de privacidad'}
                         </button>
@@ -316,11 +320,12 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
                       </div>
                     )}
 
+                    {/* ✅ Botón DORADO UNIFICADO (hover mismo color con opacidad) */}
                     <button
                       type="button"
                       onClick={enviar}
                       disabled={enviando}
-                      className="group relative w-full inline-flex items-center justify-center gap-3 bg-[#e0a521] hover:bg-[#c8901a] text-white px-6 py-4 rounded-xl font-bold uppercase tracking-[0.15em] text-sm transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:scale-[1.01] hover:shadow-lg"
+                      className="group relative w-full inline-flex items-center justify-center gap-3 bg-[#d7bd77] hover:bg-[#d7bd77]/85 text-white px-6 py-4 rounded-xl font-bold uppercase tracking-[0.15em] text-sm transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:scale-[1.01] hover:shadow-lg"
                     >
                       {enviando ? (
                         <>
@@ -369,10 +374,9 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Barra dorada superior */}
-              <div className="h-1.5 bg-gradient-to-r from-[#d7bd77] via-[#e5c989] to-[#d7bd77]" />
+              {/* ✅ Barra superior DORADO UNIFICADO */}
+              <div className="h-1.5 bg-[#d7bd77]" />
 
-              {/* Botón cerrar */}
               <button
                 onClick={() => setPrivacidadOpen(false)}
                 aria-label="Cerrar"
@@ -381,23 +385,20 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
                 <X size={18} />
               </button>
 
-              {/* Contenido con scroll interno */}
               <div className="px-6 sm:px-8 py-7 max-h-[70vh] overflow-y-auto">
 
-                {/* Título */}
                 <div className="mb-6 pr-10">
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-[#e0a521] font-semibold mb-2">
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-[#d7bd77] font-semibold mb-2">
                     {isCa ? 'Informació legal' : 'Información legal'}
                   </p>
                   <h2 className="font-bold text-2xl sm:text-3xl text-[#0a1a3a] leading-tight">
                     {isCa ? 'Política de ' : 'Política de '}
-                    <span className="text-[#e0a521]">
+                    <span className="text-[#d7bd77]">
                       {isCa ? 'privacitat' : 'privacidad'}
                     </span>
                   </h2>
                 </div>
 
-                {/* Contenido */}
                 <div className="space-y-6 text-sm text-gray-700 leading-relaxed">
 
                   <section>
@@ -407,13 +408,13 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
                     <p className="mb-1"><strong>Renovactiva SL</strong></p>
                     <p className="mb-1">
                       Email:{' '}
-                      <a href="mailto:info@renovactiva.com" className="text-[#e0a521] hover:underline">
+                      <a href="mailto:info@renovactiva.com" className="text-[#d7bd77] hover:underline">
                         info@renovactiva.com
                       </a>
                     </p>
                     <p>
                       {isCa ? 'Telèfon' : 'Teléfono'}:{' '}
-                      <a href="tel:+34722454020" className="text-[#e0a521] hover:underline">
+                      <a href="tel:+34722454020" className="text-[#d7bd77] hover:underline">
                         +34 722 454 020
                       </a>
                     </p>
@@ -465,7 +466,7 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
                       {isCa
                         ? 'Pot exercir els seus drets enviant un correu a '
                         : 'Puede ejercer sus derechos enviando un email a '}
-                      <a href="mailto:info@renovactiva.com" className="text-[#e0a521] hover:underline">
+                      <a href="mailto:info@renovactiva.com" className="text-[#d7bd77] hover:underline">
                         info@renovactiva.com
                       </a>.
                     </p>
@@ -484,12 +485,12 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
 
                 </div>
 
-                {/* Botón Aceptar */}
                 <div className="mt-8 pt-6 border-t border-gray-200">
+                  {/* ✅ Botón DORADO UNIFICADO */}
                   <button
                     type="button"
                     onClick={aceptarPrivacidad}
-                    className="w-full inline-flex items-center justify-center gap-3 bg-[#e0a521] hover:bg-[#c8901a] text-white px-6 py-4 rounded-xl font-bold uppercase tracking-[0.15em] text-sm transition-all duration-300 hover:scale-[1.01] hover:shadow-lg"
+                    className="w-full inline-flex items-center justify-center gap-3 bg-[#d7bd77] hover:bg-[#d7bd77]/85 text-white px-6 py-4 rounded-xl font-bold uppercase tracking-[0.15em] text-sm transition-all duration-300 hover:scale-[1.01] hover:shadow-lg"
                   >
                     {isCa ? 'Acceptar i continuar' : 'Aceptar y continuar'}
                     <span className="text-lg">→</span>

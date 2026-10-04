@@ -68,9 +68,6 @@ export function WhatsAppModal({ open, onClose, lang = 'es' }: WhatsAppModalProps
   function abrirWhatsApp() {
     if (!validar()) return
 
-    // ============================================================
-    // MENSAJE PRE-ELABORADO
-    // ============================================================
     let mensaje = ''
 
     if (isCa) {
@@ -139,7 +136,7 @@ Gracias.`
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Barra verde superior (color WhatsApp) */}
+              {/* ✅ Verde WhatsApp — NO TOCAR */}
               <div className="h-1.5 bg-gradient-to-r from-[#25D366] via-[#4ae085] to-[#25D366]" />
 
               <button
@@ -153,11 +150,13 @@ Gracias.`
               <div className="px-6 sm:px-8 py-7">
 
                 <div className="mb-6 pr-10">
+                  {/* ✅ Verde WhatsApp — NO TOCAR */}
                   <p className="text-[11px] uppercase tracking-[0.24em] text-[#25D366] font-semibold mb-2">
                     {isCa ? 'Contacte ràpid' : 'Contacto rápido'}
                   </p>
                   <h2 className="font-bold text-2xl sm:text-3xl text-[#0a1a3a] leading-tight">
                     {isCa ? 'Contacta per ' : 'Contacta por '}
+                    {/* ✅ Verde WhatsApp — NO TOCAR */}
                     <span className="text-[#25D366]">WhatsApp</span>
                   </h2>
                   <p className="mt-2 text-sm text-gray-600">
@@ -174,6 +173,7 @@ Gracias.`
                     className="py-8 text-center"
                   >
                     <div className="flex justify-center mb-5">
+                      {/* ✅ Verde WhatsApp — NO TOCAR */}
                       <div className="flex items-center justify-center size-20 rounded-full bg-[#25D366]/15 border-2 border-[#25D366]">
                         <CheckCircle2 className="size-10 text-[#25D366]" />
                       </div>
@@ -195,7 +195,6 @@ Gracias.`
                   </motion.div>
                 ) : (
                   <>
-                    {/* Nombre */}
                     <div className="mb-5">
                       <label className="block text-sm font-medium text-[#0a1a3a] mb-2">
                         {isCa ? 'Nom' : 'Nombre'}
@@ -207,12 +206,12 @@ Gracias.`
                           value={nombre}
                           onChange={(e) => setNombre(e.target.value)}
                           placeholder={isCa ? 'El teu nom' : 'Tu nombre'}
+                          /* ✅ Focus verde WhatsApp — NO TOCAR */
                           className="w-full rounded-lg border border-gray-300 pl-11 pr-4 py-3 text-gray-800 placeholder:text-gray-400 focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 outline-none transition"
                         />
                       </div>
                     </div>
 
-                    {/* Proyecto */}
                     <div className="mb-5">
                       <label className="block text-sm font-medium text-[#0a1a3a] mb-2">
                         {isCa ? 'Què vols reformar?' : '¿Qué quieres reformar?'}
@@ -230,7 +229,6 @@ Gracias.`
                       </div>
                     </div>
 
-                    {/* Zona */}
                     <div className="mb-5">
                       <label className="block text-sm font-medium text-[#0a1a3a] mb-2">
                         {isCa ? 'Zona' : 'Zona'}
@@ -248,12 +246,12 @@ Gracias.`
                       </div>
                     </div>
 
-                    {/* Política de privacidad */}
                     <label className="flex items-start gap-3 mb-5 p-3 rounded-lg bg-gray-50 border border-gray-200">
                       <input
                         type="checkbox"
                         checked={acepto}
                         onChange={(e) => setAcepto(e.target.checked)}
+                        /* ✅ Checkbox verde WhatsApp — NO TOCAR */
                         className="mt-0.5 size-4 accent-[#25D366] cursor-pointer flex-shrink-0"
                       />
                       <span className="text-sm text-gray-700">
@@ -268,21 +266,19 @@ Gracias.`
                       </span>
                     </label>
 
-                    {/* Iconos seguridad */}
                     <div className="flex items-center justify-center gap-6 mb-6 text-gray-400">
                       <Lock size={18} />
                       <ShieldCheck size={18} />
                       <Clock size={18} />
                     </div>
 
-                    {/* Error */}
                     {error && (
                       <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm text-center">
                         {error}
                       </div>
                     )}
 
-                    {/* Botón abrir WhatsApp */}
+                    {/* ✅ Botón verde WhatsApp — NO TOCAR */}
                     <button
                       type="button"
                       onClick={abrirWhatsApp}
@@ -309,7 +305,7 @@ Gracias.`
       </AnimatePresence>
 
       {/* ============================================ */}
-      {/* SUB-MODAL: POLÍTICA DE PRIVACIDAD */}
+      {/* SUB-MODAL: POLÍTICA DE PRIVACIDAD (dentro de WhatsAppModal) */}
       {/* ============================================ */}
       <AnimatePresence>
         {open && privacidadOpen && (
@@ -329,7 +325,8 @@ Gracias.`
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="h-1.5 bg-gradient-to-r from-[#d7bd77] via-[#e5c989] to-[#d7bd77]" />
+              {/* ✅ Barra superior DORADO UNIFICADO */}
+              <div className="h-1.5 bg-[#d7bd77]" />
 
               <button
                 onClick={() => setPrivacidadOpen(false)}
@@ -342,12 +339,14 @@ Gracias.`
               <div className="px-6 sm:px-8 py-7 max-h-[70vh] overflow-y-auto">
 
                 <div className="mb-6 pr-10">
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-[#e0a521] font-semibold mb-2">
+                  {/* ✅ Dorado unificado */}
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-[#d7bd77] font-semibold mb-2">
                     {isCa ? 'Informació legal' : 'Información legal'}
                   </p>
                   <h2 className="font-bold text-2xl sm:text-3xl text-[#0a1a3a] leading-tight">
                     {isCa ? 'Política de ' : 'Política de '}
-                    <span className="text-[#e0a521]">
+                    {/* ✅ Dorado unificado */}
+                    <span className="text-[#d7bd77]">
                       {isCa ? 'privacitat' : 'privacidad'}
                     </span>
                   </h2>
@@ -362,13 +361,14 @@ Gracias.`
                     <p className="mb-1"><strong>Renovactiva SL</strong></p>
                     <p className="mb-1">
                       Email:{' '}
-                      <a href="mailto:info@renovactiva.com" className="text-[#e0a521] hover:underline">
+                      {/* ✅ Dorado unificado */}
+                      <a href="mailto:info@renovactiva.com" className="text-[#d7bd77] hover:underline">
                         info@renovactiva.com
                       </a>
                     </p>
                     <p>
                       {isCa ? 'Telèfon' : 'Teléfono'}:{' '}
-                      <a href="tel:+34722454020" className="text-[#e0a521] hover:underline">
+                      <a href="tel:+34722454020" className="text-[#d7bd77] hover:underline">
                         +34 722 454 020
                       </a>
                     </p>
@@ -413,7 +413,7 @@ Gracias.`
                     </h3>
                     <p>
                       {isCa ? 'Pot exercir els seus drets enviant un correu a ' : 'Puede ejercer sus derechos enviando un email a '}
-                      <a href="mailto:info@renovactiva.com" className="text-[#e0a521] hover:underline">
+                      <a href="mailto:info@renovactiva.com" className="text-[#d7bd77] hover:underline">
                         info@renovactiva.com
                       </a>.
                     </p>
@@ -422,6 +422,7 @@ Gracias.`
                 </div>
 
                 <div className="mt-8 pt-6 border-t border-gray-200">
+                  {/* ✅ Botón verde WhatsApp — NO TOCAR */}
                   <button
                     type="button"
                     onClick={aceptarPrivacidad}

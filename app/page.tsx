@@ -2,10 +2,10 @@
 
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import { ArrowUpRight, Menu, Play, X, Shield, ChevronLeft, ChevronRight, Camera, Star, Plus, Minus, Briefcase, Award, Users, Home as HomeIcon, KeyRound, TrendingUp, Heart, Target, Zap, Loader2, PartyPopper } from 'lucide-react'
+import { ArrowUpRight, Play, X, Shield, ChevronLeft, ChevronRight, Camera, Star, Plus, Minus, Briefcase, Award, Users, Home as HomeIcon, KeyRound, TrendingUp, Heart, Target, Zap, Loader2, PartyPopper } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LanguageSwitcher } from '@/components/language-switcher'
 import { useLanguage } from '@/components/language-provider'
+import { TopNav } from '@/components/TopNav'
 // import { MascotAssistant } from '@/components/MascotAssistant'  // 🚫 PAUSADO
 import { WhatsAppFooterButton } from '@/components/WhatsAppFooterButton'
 import { ContactModal } from '@/components/ContactModal'
@@ -38,7 +38,6 @@ export default function Home() {
   const [footerData, setFooterData] = useState<any>(null)
   const [testimonialsData, setTestimonialsData] = useState<any>(null)
   const [statsData, setStatsData] = useState<any>(null)
-  const [menuOpen, setMenuOpen] = useState(false)
   const [activeHero, setActiveHero] = useState(0)
 
   const [contactModalOpen, setContactModalOpen] = useState(false)
@@ -297,44 +296,8 @@ export default function Home() {
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#080808] text-[#f3f0e9]">
-      <header className="absolute inset-x-0 top-0 z-30 border-b border-black/10 bg-white shadow-sm">
-        <div className="mx-auto flex max-w-[1380px] items-center justify-between px-4 py-4 lg:px-10 lg:py-5">
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            {/* ✅ LOGO MÁS GRANDE (antes: h-8 lg:h-10) */}
-            <img src="/logo.png" alt="Renovactiva" className="h-12 w-auto lg:h-16" />
-            <span className="font-serif text-sm uppercase tracking-[0.18em] text-[#a07c24] sm:text-base lg:text-xl lg:tracking-[0.28em] whitespace-nowrap" style={{ textTransform: 'uppercase' }}>
-              RENOVACTIVA<span className="text-black/40"> SL</span>
-            </span>
-          </Link>
-
-          <nav className="hidden lg:flex items-center gap-8 text-[11px] uppercase tracking-[0.24em] text-[#141310]/75">
-            <button type="button" onClick={() => scrollToSection('servicios')} className="transition-colors hover:text-[#a07c24] cursor-pointer">{ca ? 'Serveis' : 'Servicios'}</button>
-            <button type="button" onClick={() => scrollToSection('metodo')} className="transition-colors hover:text-[#a07c24] cursor-pointer">{ca ? 'El nostre mètode' : 'Nuestro método'}</button>
-            <button type="button" onClick={() => scrollToSection('proyectos')} className="transition-colors hover:text-[#a07c24] cursor-pointer">{ca ? 'Projectes' : 'Proyectos'}</button>
-            <button type="button" onClick={() => scrollToSection('contacto')} className="transition-colors hover:text-[#a07c24] cursor-pointer">{ca ? 'Contacte' : 'Contacto'}</button>
-          </nav>
-
-          <div className="flex items-center gap-2 lg:gap-4 flex-shrink-0">
-            <LanguageSwitcher variant="light" />
-            {/* ✅ BOTÓN ADMIN ELIMINADO DE LA CABECERA (ahora está en el footer) */}
-            <button aria-label="Abrir menú" onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden text-[#141310]/80 hover:text-[#141310] p-1">
-              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-          </div>
-        </div>
-
-        {menuOpen && (
-          <div className="border-t border-black/10 bg-white px-6 py-6 lg:hidden">
-            <nav className="flex flex-col gap-5 text-sm uppercase tracking-[0.18em] text-[#141310]/80">
-              <button type="button" onClick={() => { setMenuOpen(false); setTimeout(() => scrollToSection('servicios'), 150) }} className="text-left cursor-pointer">{ca ? 'Serveis' : 'Servicios'}</button>
-              <button type="button" onClick={() => { setMenuOpen(false); setTimeout(() => scrollToSection('metodo'), 150) }} className="text-left cursor-pointer">{ca ? 'El nostre mètode' : 'Nuestro método'}</button>
-              <button type="button" onClick={() => { setMenuOpen(false); setTimeout(() => scrollToSection('proyectos'), 150) }} className="text-left cursor-pointer">{ca ? 'Projectes' : 'Proyectos'}</button>
-              <button type="button" onClick={() => { setMenuOpen(false); setTimeout(() => scrollToSection('contacto'), 150) }} className="text-left cursor-pointer">{ca ? 'Contacte' : 'Contacto'}</button>
-              {/* ✅ ENLACE ADMIN ELIMINADO DEL MENÚ MÓVIL */}
-            </nav>
-          </div>
-        )}
-      </header>
+      {/* ✅ MENÚ SUPERIOR REUTILIZABLE */}
+      <TopNav variant="light" onOpenContactModal={() => setContactModalOpen(true)} />
 
       {/* 1. HERO */}
       <section className="relative flex min-h-[600px] items-center lg:items-end lg:min-h-screen overflow-hidden pt-20 lg:pt-0">
@@ -356,7 +319,6 @@ export default function Home() {
               </p>
             </motion.div>
 
-            {/* ✅ TITULAR EN MAYÚSCULAS (tamaños ajustados para que no se corte) */}
             <h1 className="max-w-3xl font-serif text-3xl leading-[1.15] tracking-[-0.03em] sm:text-4xl md:text-5xl lg:text-[72px] text-hero-title pb-4" style={{ textTransform: 'uppercase' }}>
               {titleWords.map((word: string, index: number) => (
                 <span key={index} className="inline-block align-bottom" style={{ marginRight: '0.25em' }}>
@@ -846,9 +808,9 @@ export default function Home() {
             <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
               <Link href="/" className="flex items-center gap-3 group">
                 <img src="/logo.png" alt="Renovactiva" className="h-12 w-auto transition-transform duration-500 group-hover:scale-105" />
-                <span className="font-serif text-xl uppercase tracking-[0.28em] text-[#d7bd77] transition-colors duration-500 group-hover:text-[#10B77F]" style={{ textTransform: 'uppercase' }}>
-                  RENOVACTIVA<span className="text-white/40"> SL</span>
-                </span>
+                <span className="font-serif text-xl uppercase tracking-[0.28em] text-[#d7bd77] ..." style={{ textTransform: 'uppercase' }}>
+  RENOVACTIVA<span className="text-[#042133]"> SL</span>
+</span>
               </Link>
               <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/55">
                 {ca ? (footerTrans.description || footerData?.description || 'Dissenyem i construïm espais amb intenció.') : (footerData?.description || 'Diseñamos y construimos espacios con intención.')}
@@ -878,7 +840,6 @@ export default function Home() {
             </motion.div>
           </div>
 
-          {/* ⬇️⬇️⬇️ COPYRIGHT — OCULTO EN MÓVIL PARA NO CHOCAR CON BOTONES FLOTANTES ⬇️⬇️⬇️ */}
           <motion.div className="hidden sm:flex flex-row justify-between gap-5 pt-7 text-[10px] uppercase tracking-[0.18em] text-white/45" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
             <p>
               {ca ? (footerTrans.copyright || footerData?.copyright || '© 2025 Renovactiva SL. Tots els drets reservats.') : (footerData?.copyright || '© 2025 Renovactiva SL. Todos los derechos reservados.')}
@@ -891,7 +852,6 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* ✅ ACCESO ADMIN DISCRETO: icono muy pequeño, casi invisible, solo el administrador sabe que es un botón */}
           <div className="flex justify-center pt-6">
             <Link
               href="/admin"
