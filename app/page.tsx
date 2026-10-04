@@ -297,35 +297,35 @@ export default function Home() {
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#080808] text-[#f3f0e9]">
-      <header className="absolute inset-x-0 top-0 z-30 border-b border-white/10 bg-black/10 backdrop-blur-md">
+      <header className="absolute inset-x-0 top-0 z-30 border-b border-black/10 bg-white shadow-sm">
         <div className="mx-auto flex max-w-[1380px] items-center justify-between px-4 py-4 lg:px-10 lg:py-5">
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
             {/* ✅ LOGO MÁS GRANDE (antes: h-8 lg:h-10) */}
             <img src="/logo.png" alt="Renovactiva" className="h-12 w-auto lg:h-16" />
-            <span className="font-serif text-sm uppercase tracking-[0.18em] text-[#d7bd77] sm:text-base lg:text-xl lg:tracking-[0.28em] whitespace-nowrap" style={{ textTransform: 'uppercase' }}>
-              RENOVACTIVA<span className="text-white/40"> SL</span>
+            <span className="font-serif text-sm uppercase tracking-[0.18em] text-[#a07c24] sm:text-base lg:text-xl lg:tracking-[0.28em] whitespace-nowrap" style={{ textTransform: 'uppercase' }}>
+              RENOVACTIVA<span className="text-black/40"> SL</span>
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-8 text-[11px] uppercase tracking-[0.24em] text-white/70">
-            <button type="button" onClick={() => scrollToSection('servicios')} className="transition-colors hover:text-[#d7bd77] cursor-pointer">{ca ? 'Serveis' : 'Servicios'}</button>
-            <button type="button" onClick={() => scrollToSection('metodo')} className="transition-colors hover:text-[#d7bd77] cursor-pointer">{ca ? 'El nostre mètode' : 'Nuestro método'}</button>
-            <button type="button" onClick={() => scrollToSection('proyectos')} className="transition-colors hover:text-[#d7bd77] cursor-pointer">{ca ? 'Projectes' : 'Proyectos'}</button>
-            <button type="button" onClick={() => scrollToSection('contacto')} className="transition-colors hover:text-[#d7bd77] cursor-pointer">{ca ? 'Contacte' : 'Contacto'}</button>
+          <nav className="hidden lg:flex items-center gap-8 text-[11px] uppercase tracking-[0.24em] text-[#141310]/75">
+            <button type="button" onClick={() => scrollToSection('servicios')} className="transition-colors hover:text-[#a07c24] cursor-pointer">{ca ? 'Serveis' : 'Servicios'}</button>
+            <button type="button" onClick={() => scrollToSection('metodo')} className="transition-colors hover:text-[#a07c24] cursor-pointer">{ca ? 'El nostre mètode' : 'Nuestro método'}</button>
+            <button type="button" onClick={() => scrollToSection('proyectos')} className="transition-colors hover:text-[#a07c24] cursor-pointer">{ca ? 'Projectes' : 'Proyectos'}</button>
+            <button type="button" onClick={() => scrollToSection('contacto')} className="transition-colors hover:text-[#a07c24] cursor-pointer">{ca ? 'Contacte' : 'Contacto'}</button>
           </nav>
 
           <div className="flex items-center gap-2 lg:gap-4 flex-shrink-0">
-            <LanguageSwitcher />
+            <LanguageSwitcher variant="light" />
             {/* ✅ BOTÓN ADMIN ELIMINADO DE LA CABECERA (ahora está en el footer) */}
-            <button aria-label="Abrir menú" onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden text-white/70 hover:text-white p-1">
+            <button aria-label="Abrir menú" onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden text-[#141310]/80 hover:text-[#141310] p-1">
               {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
 
         {menuOpen && (
-          <div className="border-t border-white/10 bg-[#080808]/95 px-6 py-6 lg:hidden">
-            <nav className="flex flex-col gap-5 text-sm uppercase tracking-[0.18em] text-white/70">
+          <div className="border-t border-black/10 bg-white px-6 py-6 lg:hidden">
+            <nav className="flex flex-col gap-5 text-sm uppercase tracking-[0.18em] text-[#141310]/80">
               <button type="button" onClick={() => { setMenuOpen(false); setTimeout(() => scrollToSection('servicios'), 150) }} className="text-left cursor-pointer">{ca ? 'Serveis' : 'Servicios'}</button>
               <button type="button" onClick={() => { setMenuOpen(false); setTimeout(() => scrollToSection('metodo'), 150) }} className="text-left cursor-pointer">{ca ? 'El nostre mètode' : 'Nuestro método'}</button>
               <button type="button" onClick={() => { setMenuOpen(false); setTimeout(() => scrollToSection('proyectos'), 150) }} className="text-left cursor-pointer">{ca ? 'Projectes' : 'Proyectos'}</button>

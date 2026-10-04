@@ -6,7 +6,8 @@ import { FloatingNav } from '@/components/FloatingNav'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.renovactiva.com'),
-  title: 'Renovactiva SL | Arquitectura, interiorismo y construcción',
+  // ✅ TÍTULO NUEVO (es lo que aparece en Google y en la pestaña del navegador)
+  title: 'Renovactiva SL | Rehabilitación integral y construcción',
   description: 'Reformas de alto nivel para viviendas, locales comerciales y oficinas en Barcelona.',
   generator: 'Renovactiva',
   applicationName: 'Renovactiva',
@@ -14,22 +15,14 @@ export const metadata: Metadata = {
   keywords: ['reformas', 'Barcelona', 'arquitectura', 'interiorismo', 'rehabilitación', 'obras', 'construcción'],
 
   // ============================================================
-  // 🖼️ ICONOS (favicon de la pestaña + apple + android)
+  // 🖼️ ICONOS — ✅ ahora usan el logo de Renovactiva (public/logo.png)
+  // El "?v=2" obliga a los navegadores a descargar el icono nuevo.
+  // Si cambias el logo en el futuro, sube el número (v=3, v=4...).
   // ============================================================
   icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
-      { url: '/icon-light-32x32.png', sizes: '32x32', media: '(prefers-color-scheme: light)', type: 'image/png' },
-      { url: '/icon-dark-32x32.png', sizes: '32x32', media: '(prefers-color-scheme: dark)', type: 'image/png' },
-      { url: '/icon.svg', type: 'image/svg+xml' },
-    ],
-    apple: [
-      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
-      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
-    ],
-    shortcut: '/favicon.ico',
+    icon: [{ url: '/logo.png?v=2', type: 'image/png' }],
+    apple: [{ url: '/logo.png?v=2', type: 'image/png' }],
+    shortcut: '/logo.png?v=2',
   },
 
   // ============================================================
@@ -41,7 +34,7 @@ export const metadata: Metadata = {
     alternateLocale: ['ca_ES'],
     url: 'https://www.renovactiva.com',
     siteName: 'Renovactiva SL',
-    title: 'Renovactiva SL | Arquitectura, interiorismo y construcción',
+    title: 'Renovactiva SL | Rehabilitación integral y construcción',
     description: 'Reformas de alto nivel para viviendas, locales comerciales y oficinas en Barcelona.',
   },
 
@@ -50,7 +43,7 @@ export const metadata: Metadata = {
   // ============================================================
   twitter: {
     card: 'summary_large_image',
-    title: 'Renovactiva SL | Arquitectura, interiorismo y construcción',
+    title: 'Renovactiva SL | Rehabilitación integral y construcción',
     description: 'Reformas de alto nivel para viviendas, locales comerciales y oficinas en Barcelona.',
   },
 
@@ -88,14 +81,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <head>
-        {/* ============================================================
-            FAVICON FORZADO (para que los navegadores lo lean primero)
-            ============================================================ */}
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-      </head>
       <body className="antialiased">
         <LanguageProvider>
           {children}
