@@ -6,7 +6,6 @@ import { ArrowUpRight, Play, X, Shield, ChevronLeft, ChevronRight, Camera, Star,
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLanguage } from '@/components/language-provider'
 import { TopNav } from '@/components/TopNav'
-// import { MascotAssistant } from '@/components/MascotAssistant'  // 🚫 PAUSADO
 import { WhatsAppFooterButton } from '@/components/WhatsAppFooterButton'
 import { ContactModal } from '@/components/ContactModal'
 import { WhatsAppModal } from '@/components/WhatsAppModal'
@@ -72,13 +71,36 @@ export default function Home() {
   const { language } = useLanguage()
   const ca = language === 'ca'
 
+  // ✅ NUEVA FUNCIÓN: Salto directo + efecto fade in + slide up
   function scrollToSection(id: string) {
     if (typeof window === 'undefined') return
     const el = document.getElementById(id)
     if (el) {
+      // Salto instantáneo (sin scroll largo)
       const headerHeight = 80
       const top = el.getBoundingClientRect().top + window.scrollY - headerHeight
-      window.scrollTo({ top, behavior: 'smooth' })
+      window.scrollTo({ top, behavior: 'instant' as ScrollBehavior })
+
+      // ✨ Efecto fade in + slide up + escala
+      el.style.opacity = '0'
+      el.style.transform = 'translateY(30px) scale(0.98)'
+      el.style.transition = 'opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)'
+
+      // Forzar reflow para que el navegador reconozca el estado inicial
+      void el.offsetHeight
+
+      // Animar hacia el estado final
+      requestAnimationFrame(() => {
+        el.style.opacity = '1'
+        el.style.transform = 'translateY(0) scale(1)'
+      })
+
+      // Limpiar estilos después de la animación
+      setTimeout(() => {
+        el.style.opacity = ''
+        el.style.transform = ''
+        el.style.transition = ''
+      }, 900)
     }
   }
 
@@ -296,7 +318,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#080808] text-[#f3f0e9]">
-      {/* ✅ MENÚ SUPERIOR REUTILIZABLE */}
       <TopNav variant="light" onOpenContactModal={() => setContactModalOpen(true)} />
 
       {/* 1. HERO */}
@@ -808,9 +829,9 @@ export default function Home() {
             <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
               <Link href="/" className="flex items-center gap-3 group">
                 <img src="/logo.png" alt="Renovactiva" className="h-12 w-auto transition-transform duration-500 group-hover:scale-105" />
-                <span className="font-serif text-xl uppercase tracking-[0.28em] text-[#d7bd77] ..." style={{ textTransform: 'uppercase' }}>
-  RENOVACTIVA<span className="text-[#042133]"> SL</span>
-</span>
+                <span className="font-serif text-xl uppercase tracking-[0.28em] text-[#d7bd77] transition-colors duration-500 group-hover:text-[#10B77F]" style={{ textTransform: 'uppercase' }}>
+                  RENOVACTIVA<span className="text-[#042133]"> SL</span>
+                </span>
               </Link>
               <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/55">
                 {ca ? (footerTrans.description || footerData?.description || 'Dissenyem i construïm espais amb intenció.') : (footerData?.description || 'Diseñamos y construimos espacios con intención.')}
@@ -914,9 +935,6 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* 🤖 CHAT — PAUSADO HASTA NUEVA ACTUALIZACIÓN */}
-      {/* <MascotAssistant lang={ca ? 'ca' : 'es'} /> */}
 
       {/* 📩 MODAL DE CORREO */}
       <ContactModal
