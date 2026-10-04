@@ -144,15 +144,15 @@ export function FloatingNav() {
   }
 
   return (
-    <div className="fixed top-20 left-4 z-[90] flex flex-col gap-2 items-start">
+    <div className="fixed bottom-2 left-2 z-[90] flex flex-col gap-1 items-start">
       {/* Botón Volver (arriba) */}
       <button
         onClick={goBack}
         aria-label="Volver atrás"
         title="Volver"
-        className="group flex items-center justify-center size-8 rounded-full border border-[#10B77F]/40 bg-black/70 backdrop-blur-md text-white/80 hover:text-white hover:border-[#10B77F] hover:bg-[#10B77F]/20 hover:shadow-[0_0_20px_rgba(16,183,127,0.5)] transition-all duration-300 shadow-lg"
+        className="group flex items-center justify-center size-7 rounded-full border border-[#10B77F]/40 bg-black/70 backdrop-blur-md text-white/80 hover:text-white hover:border-[#10B77F] hover:bg-[#10B77F]/20 hover:shadow-[0_0_20px_rgba(16,183,127,0.5)] transition-all duration-300 shadow-lg"
       >
-        <ArrowLeft className="size-3.5 transition-transform duration-300 group-hover:-translate-x-0.5" />
+        <ArrowLeft className="size-3 transition-transform duration-300 group-hover:-translate-x-0.5" />
       </button>
 
       {/* Botón Home (abajo) */}
@@ -160,9 +160,9 @@ export function FloatingNav() {
         onClick={goHome}
         aria-label="Ir al inicio"
         title="Inicio"
-        className="group flex items-center justify-center size-8 rounded-full border border-[#d7bd77]/40 bg-black/70 backdrop-blur-md text-white/80 hover:text-white hover:border-[#d7bd77] hover:bg-[#d7bd77]/20 hover:shadow-[0_0_20px_rgba(215,189,119,0.5)] transition-all duration-300 shadow-lg"
+        className="group flex items-center justify-center size-7 rounded-full border border-[#d7bd77]/40 bg-black/70 backdrop-blur-md text-white/80 hover:text-white hover:border-[#d7bd77] hover:bg-[#d7bd77]/20 hover:shadow-[0_0_20px_rgba(215,189,119,0.5)] transition-all duration-300 shadow-lg"
       >
-        <Home className="size-3.5 transition-transform duration-300 group-hover:scale-110" />
+        <Home className="size-3 transition-transform duration-300 group-hover:scale-110" />
       </button>
     </div>
   )

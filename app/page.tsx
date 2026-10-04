@@ -41,9 +41,8 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeHero, setActiveHero] = useState(0)
 
-  // 🎯 Estados de los modales
-  const [contactModalOpen, setContactModalOpen] = useState(false)      // Correo
-  const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false)   // WhatsApp
+  const [contactModalOpen, setContactModalOpen] = useState(false)
+  const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false)
 
   const [selectedProject, setSelectedProject] = useState<any>(null)
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
@@ -301,9 +300,10 @@ export default function Home() {
       <header className="absolute inset-x-0 top-0 z-30 border-b border-white/10 bg-black/10 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1380px] items-center justify-between px-4 py-4 lg:px-10 lg:py-5">
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <img src="/logo.png" alt="Renovactiva" className="h-8 w-auto lg:h-10" />
-            <span className="font-serif text-base tracking-[0.28em] text-[#d7bd77] lg:text-xl whitespace-nowrap">
-              Renovactiva<span className="text-white/40"> SL</span>
+            {/* ✅ LOGO MÁS GRANDE (antes: h-8 lg:h-10) */}
+            <img src="/logo.png" alt="Renovactiva" className="h-12 w-auto lg:h-16" />
+            <span className="font-serif text-sm uppercase tracking-[0.18em] text-[#d7bd77] sm:text-base lg:text-xl lg:tracking-[0.28em] whitespace-nowrap" style={{ textTransform: 'uppercase' }}>
+              RENOVACTIVA<span className="text-white/40"> SL</span>
             </span>
           </Link>
 
@@ -316,10 +316,7 @@ export default function Home() {
 
           <div className="flex items-center gap-2 lg:gap-4 flex-shrink-0">
             <LanguageSwitcher />
-            <Link href="/admin" className="hidden sm:flex items-center gap-1.5 border border-[#d7bd77]/60 px-2.5 py-1.5 sm:px-3 sm:py-1.5 lg:px-4 lg:py-2 text-[8px] sm:text-[9px] lg:text-[10px] uppercase tracking-[0.2em] text-[#d7bd77] transition-colors hover:bg-[#d7bd77] hover:text-[#000000] rounded">
-              <Shield className="size-3" />
-              Admin
-            </Link>
+            {/* ✅ BOTÓN ADMIN ELIMINADO DE LA CABECERA (ahora está en el footer) */}
             <button aria-label="Abrir menú" onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden text-white/70 hover:text-white p-1">
               {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -333,10 +330,7 @@ export default function Home() {
               <button type="button" onClick={() => { setMenuOpen(false); setTimeout(() => scrollToSection('metodo'), 150) }} className="text-left cursor-pointer">{ca ? 'El nostre mètode' : 'Nuestro método'}</button>
               <button type="button" onClick={() => { setMenuOpen(false); setTimeout(() => scrollToSection('proyectos'), 150) }} className="text-left cursor-pointer">{ca ? 'Projectes' : 'Proyectos'}</button>
               <button type="button" onClick={() => { setMenuOpen(false); setTimeout(() => scrollToSection('contacto'), 150) }} className="text-left cursor-pointer">{ca ? 'Contacte' : 'Contacto'}</button>
-              <Link href="/admin" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 border-t border-white/10 pt-5 text-[#d7bd77] hover:text-white transition-colors">
-                <Shield className="size-4" />
-                {ca ? 'Panell Admin' : 'Panel Admin'}
-              </Link>
+              {/* ✅ ENLACE ADMIN ELIMINADO DEL MENÚ MÓVIL */}
             </nav>
           </div>
         )}
@@ -357,12 +351,13 @@ export default function Home() {
             
             <motion.div className="mb-7 flex items-center gap-4" initial={{ opacity: 0, x: -600 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}>
               <motion.span className="block h-px bg-[#10B77F]" initial={{ width: 0 }} animate={{ width: 40 }} transition={{ duration: 1.2, delay: 1.6, ease: [0.22, 1, 0.36, 1] }} />
-              <p className="text-[11px] uppercase tracking-[0.42em] text-[#d7bd77] text-hero-eyebrow">
+              <p className="text-[11px] uppercase tracking-[0.42em] text-[#d7bd77] text-hero-eyebrow" style={{ textTransform: 'uppercase' }}>
                 {ca ? (heroTrans.eyebrow || heroData?.eyebrow || 'Arquitectura · Interiorisme · Construcció') : (heroData?.eyebrow || 'Arquitectura · Interiorismo · Construcción')}
               </p>
             </motion.div>
 
-            <h1 className="max-w-3xl font-serif text-4xl leading-[1.15] tracking-[-0.03em] sm:text-5xl md:text-6xl lg:text-[104px] text-hero-title pb-4">
+            {/* ✅ TITULAR EN MAYÚSCULAS (tamaños ajustados para que no se corte) */}
+            <h1 className="max-w-3xl font-serif text-3xl leading-[1.15] tracking-[-0.03em] sm:text-4xl md:text-5xl lg:text-[72px] text-hero-title pb-4" style={{ textTransform: 'uppercase' }}>
               {titleWords.map((word: string, index: number) => (
                 <span key={index} className="inline-block align-bottom" style={{ marginRight: '0.25em' }}>
                   <motion.span className="inline-block" initial={{ y: '30%', opacity: 0 }} animate={{ y: '0%', opacity: 1 }} transition={{ duration: 1.1, delay: 1.4 + index * 0.12, ease: [0.22, 1, 0.36, 1] }}>
@@ -467,7 +462,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3. MÉTODO — NÚMEROS GIGANTES DE FONDO + TEXTO EDITORIAL */}
+      {/* 3. MÉTODO */}
       <section id="metodo" className="relative mx-auto max-w-[1380px] px-6 py-24 lg:px-10 lg:py-36 bg-[#080808]">
         <div className="grid gap-16 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
@@ -851,8 +846,8 @@ export default function Home() {
             <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
               <Link href="/" className="flex items-center gap-3 group">
                 <img src="/logo.png" alt="Renovactiva" className="h-12 w-auto transition-transform duration-500 group-hover:scale-105" />
-                <span className="font-serif text-xl tracking-[0.28em] text-[#d7bd77] transition-colors duration-500 group-hover:text-[#10B77F]">
-                  Renovactiva<span className="text-white/40"> SL</span>
+                <span className="font-serif text-xl uppercase tracking-[0.28em] text-[#d7bd77] transition-colors duration-500 group-hover:text-[#10B77F]" style={{ textTransform: 'uppercase' }}>
+                  RENOVACTIVA<span className="text-white/40"> SL</span>
                 </span>
               </Link>
               <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/55">
@@ -883,7 +878,8 @@ export default function Home() {
             </motion.div>
           </div>
 
-          <motion.div className="flex flex-col justify-between gap-5 pt-7 text-[10px] uppercase tracking-[0.18em] text-white/45 sm:flex-row" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
+          {/* ⬇️⬇️⬇️ COPYRIGHT — OCULTO EN MÓVIL PARA NO CHOCAR CON BOTONES FLOTANTES ⬇️⬇️⬇️ */}
+          <motion.div className="hidden sm:flex flex-row justify-between gap-5 pt-7 text-[10px] uppercase tracking-[0.18em] text-white/45" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
             <p>
               {ca ? (footerTrans.copyright || footerData?.copyright || '© 2025 Renovactiva SL. Tots els drets reservats.') : (footerData?.copyright || '© 2025 Renovactiva SL. Todos los derechos reservados.')}
             </p>
@@ -894,6 +890,17 @@ export default function Home() {
               {footerData?.social?.facebook && (<a href={footerData.social.facebook} target="_blank" rel="noopener noreferrer" className="footer-link">Facebook</a>)}
             </div>
           </motion.div>
+
+          {/* ✅ ACCESO ADMIN DISCRETO: icono muy pequeño, casi invisible, solo el administrador sabe que es un botón */}
+          <div className="flex justify-center pt-6">
+            <Link
+              href="/admin"
+              aria-label="Admin"
+              className="inline-flex size-6 items-center justify-center rounded text-white/15 transition-colors duration-300 hover:text-[#d7bd77]"
+            >
+              <Shield className="size-3" />
+            </Link>
+          </div>
         </div>
       </footer>
 
