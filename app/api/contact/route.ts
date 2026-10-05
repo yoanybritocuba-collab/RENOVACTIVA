@@ -5,6 +5,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 
 const EMAIL_TO = 'info@renovactiva.com'
 const EMAIL_FROM = 'Renovactiva <info@renovactiva.com>'
+const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY
 
 type ContactPayload = {
   nombre?: string
@@ -12,6 +13,7 @@ type ContactPayload = {
   email?: string
   mensaje?: string
   lang?: 'es' | 'ca'
+  turnstileToken?: string
 }
 
 export async function POST(req: Request) {
@@ -23,6 +25,7 @@ export async function POST(req: Request) {
     const email = (body.email || '').trim()
     const mensaje = (body.mensaje || '').trim()
     const lang = body.lang === 'ca' ? 'ca' : 'es'
+    const turnstileToken = body.turnstileToken
 
     // Validación básica
     if (!nombre || !telefono || !mensaje) {
@@ -32,6 +35,46 @@ export async function POST(req: Request) {
       )
     }
 
+    // ✅ Verificar Turnstile
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { error: lang === 'ca' ? 'Verificació de seguretat requerida' : 'Verificación de seguridad requerida' },
+        { status: 400 }
+      )
+    }
+
+    if (!TURNSTILE_SECRET) {
+      console.error('[CONTACT] Falta TURNSTILE_SECRET_KEY')
+      return NextResponse.json(
+        { error: 'Servidor no configurado' },
+        { status: 500 }
+      )
+    }
+
+    // Llamada a la API de Cloudflare para verificar el token
+    const turnstileVerify = await fetch(
+      'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          secret: TURNSTILE_SECRET,
+          response: turnstileToken,
+        }),
+      }
+    )
+
+    const turnstileData = await turnstileVerify.json()
+
+    if (!turnstileData.success) {
+      console.warn('[CONTACT] Turnstile falló:', turnstileData)
+      return NextResponse.json(
+        { error: lang === 'ca' ? 'Verificació de seguretat fallida' : 'Verificación de seguridad fallida' },
+        { status: 400 }
+      )
+    }
+
+    // Comprobar Resend
     if (!process.env.RESEND_API_KEY) {
       console.error('[CONTACT] Falta RESEND_API_KEY')
       return NextResponse.json(
@@ -101,7 +144,6 @@ Enviado desde renovactiva.com`
       </div>
     `
 
-    // Enviar el correo con Resend
     const result = await resend.emails.send({
       from: EMAIL_FROM,
       to: EMAIL_TO,
