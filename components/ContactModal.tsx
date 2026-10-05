@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { X, User, Phone, Mail, MessageSquare, CheckCircle2, ShieldCheck, Clock, Lock, Loader2 } from 'lucide-react'
+import { X, User, Phone, Mail, MessageSquare, CheckCircle2, ShieldCheck, Clock, Lock, Loader2, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Turnstile } from '@marsidev/react-turnstile'
 import type { TurnstileInstance } from '@marsidev/react-turnstile'
@@ -31,6 +31,7 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
   const [enviando, setEnviando] = useState(false)
   const [enviado, setEnviado] = useState(false)
   const [privacidadOpen, setPrivacidadOpen] = useState(false)
+  const [verificado, setVerificado] = useState(false)
 
   const turnstileRef = useRef<TurnstileInstance | null>(null)
 
@@ -72,6 +73,7 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
       setEnviado(false)
       setEnviando(false)
       setPrivacidadOpen(false)
+      setVerificado(false)
     }
   }, [open])
 
@@ -90,6 +92,10 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
     }
     if (!acepto) {
       setError(isCa ? 'Has d\'acceptar la política de privacitat' : 'Debes aceptar la política de privacidad')
+      return false
+    }
+    if (!verificado) {
+      setError(isCa ? 'Espera un moment a la comprovació de seguretat' : 'Espera un momento a la comprobación de seguridad')
       return false
     }
     setError('')
@@ -127,6 +133,7 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
       if (!res.ok) {
         setError(data.error || (isCa ? 'No s\'ha pogut enviar. Torna-ho a provar.' : 'No se ha podido enviar. Vuelve a intentarlo.'))
         turnstileRef.current?.reset()
+        setVerificado(false)
         return
       }
 
@@ -139,12 +146,14 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
         setMensaje('')
         setAcepto(false)
         setEnviado(false)
+        setVerificado(false)
       }, 6000)
 
     } catch (err) {
       console.error('[CONTACT] Error:', err)
       setError(isCa ? 'Error de connexió. Torna-ho a provar.' : 'Error de conexión. Vuelve a intentarlo.')
       turnstileRef.current?.reset()
+      setVerificado(false)
     } finally {
       setEnviando(false)
     }
@@ -314,22 +323,61 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
                       </span>
                     </label>
 
-                    {/* ✅ CLOUDFLARE TURNSTILE + TEXTO ACLARATORIO */}
-                    <div className="mb-3 sm:mb-4 flex flex-col items-center gap-2">
-                      <Turnstile
-                        ref={turnstileRef}
-                        siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
-                        options={{
-                          appearance: 'always',
-                          theme: 'light',
-                          size: 'normal',
-                        }}
-                      />
-                      <p className="text-[10px] sm:text-xs text-gray-500 text-center max-w-xs leading-tight">
-                        {isCa
-                          ? 'Completa la verificació de seguretat. Després prem "Enviar" per enviar el missatge.'
-                          : 'Completa la verificación de seguridad. Después pulsa "Enviar" para enviar el mensaje.'}
-                      </p>
+                    {/* ✅ CLOUDFLARE TURNSTILE — INVISIBLE + MENSAJE PROPIO */}
+                    <div className="mb-3 sm:mb-4">
+                      {/* Turnstile invisible: no se ve nada */}
+                      <div style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+                        <Turnstile
+                          ref={turnstileRef}
+                          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
+                          options={{
+                            theme: 'light',
+                            size: 'invisible',
+                          }}
+                          onSuccess={() => setVerificado(true)}
+                          onError={() => setVerificado(false)}
+                          onExpire={() => setVerificado(false)}
+                        />
+                      </div>
+
+                      {/* Mensaje propio profesional */}
+                      <AnimatePresence>
+                        {verificado && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -5 }}
+                            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                            className="flex items-center gap-3 sm:gap-4 py-3 sm:py-4 px-4 sm:px-5 rounded-xl bg-gray-50 border border-[#10B77F]/30"
+                          >
+                            {/* Check verde */}
+                            <div className="flex-shrink-0 flex items-center justify-center size-8 sm:size-9 rounded-full bg-[#10B77F]/15">
+                              <Check className="size-4 sm:size-5 text-[#10B77F]" strokeWidth={3} />
+                            </div>
+
+                            {/* Texto */}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs sm:text-sm font-semibold text-[#0a1a3a] leading-tight">
+                                {isCa ? 'Comprovació intel·ligent' : 'Comprobación inteligente'}
+                              </p>
+                              <p className="text-[11px] sm:text-xs text-gray-500 leading-tight mt-0.5">
+                                {isCa
+                                  ? 'Hem verificat que ets humà'
+                                  : 'Hemos verificado que eres humano'}
+                              </p>
+                            </div>
+
+                            {/* Logo Cloudflare */}
+                            <div className="flex-shrink-0 opacity-60">
+                              <img
+                                src="https://www.cloudflare.com/img/logo-cloudflare-dark.svg"
+                                alt="Cloudflare"
+                                className="h-3 sm:h-4 w-auto"
+                              />
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
 
                     <div className="flex items-center justify-center gap-4 sm:gap-6 mb-4 sm:mb-5 text-gray-400">
@@ -347,8 +395,8 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
                     <button
                       type="button"
                       onClick={enviar}
-                      disabled={enviando}
-                      className="group relative w-full inline-flex items-center justify-center gap-2 sm:gap-3 bg-[#d7bd77] hover:bg-[#d7bd77]/85 text-white px-5 sm:px-6 py-3 sm:py-4 rounded-xl font-bold uppercase tracking-[0.15em] text-xs sm:text-sm transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:scale-[1.01] hover:shadow-lg"
+                      disabled={enviando || !verificado}
+                      className="group relative w-full inline-flex items-center justify-center gap-2 sm:gap-3 bg-[#d7bd77] hover:bg-[#d7bd77]/85 text-white px-5 sm:px-6 py-3 sm:py-4 rounded-xl font-bold uppercase tracking-[0.15em] text-xs sm:text-sm transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01] hover:shadow-lg"
                     >
                       {enviando ? (
                         <>

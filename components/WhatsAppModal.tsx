@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { X, User, MessageSquare, MapPin, CheckCircle2, ShieldCheck, Lock, Clock } from 'lucide-react'
+import { X, User, MessageSquare, MapPin, CheckCircle2, ShieldCheck, Lock, Clock, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Turnstile } from '@marsidev/react-turnstile'
 import type { TurnstileInstance } from '@marsidev/react-turnstile'
@@ -25,6 +25,7 @@ export function WhatsAppModal({ open, onClose, lang = 'es' }: WhatsAppModalProps
   const [error, setError] = useState('')
   const [abierto, setAbierto] = useState(false)
   const [privacidadOpen, setPrivacidadOpen] = useState(false)
+  const [verificado, setVerificado] = useState(false)
 
   const turnstileRef = useRef<TurnstileInstance | null>(null)
 
@@ -53,6 +54,7 @@ export function WhatsAppModal({ open, onClose, lang = 'es' }: WhatsAppModalProps
       setError('')
       setAbierto(false)
       setPrivacidadOpen(false)
+      setVerificado(false)
     }
   }, [open])
 
@@ -63,6 +65,10 @@ export function WhatsAppModal({ open, onClose, lang = 'es' }: WhatsAppModalProps
     }
     if (!acepto) {
       setError(isCa ? 'Has d\'acceptar la política de privacitat' : 'Debes aceptar la política de privacidad')
+      return false
+    }
+    if (!verificado) {
+      setError(isCa ? 'Espera un moment a la comprovació de seguretat' : 'Espera un momento a la comprobación de seguridad')
       return false
     }
     setError('')
@@ -89,12 +95,14 @@ export function WhatsAppModal({ open, onClose, lang = 'es' }: WhatsAppModalProps
       if (!verify.ok || !verifyData.success) {
         setError(isCa ? 'Verificació fallida. Torna-ho a provar.' : 'Verificación fallida. Vuelve a intentarlo.')
         turnstileRef.current?.reset()
+        setVerificado(false)
         return
       }
     } catch (err) {
       console.error('[WHATSAPP] Error verificando Turnstile:', err)
       setError(isCa ? 'Error de connexió. Torna-ho a provar.' : 'Error de conexión. Vuelve a intentarlo.')
       turnstileRef.current?.reset()
+      setVerificado(false)
       return
     }
 
@@ -130,6 +138,7 @@ Gracias.`
     setAbierto(true)
 
     turnstileRef.current?.reset()
+    setVerificado(false)
 
     setTimeout(() => {
       setNombre('')
@@ -290,22 +299,58 @@ Gracias.`
                       </span>
                     </label>
 
-                    {/* ✅ CLOUDFLARE TURNSTILE + TEXTO ACLARATORIO */}
-                    <div className="mb-3 sm:mb-4 flex flex-col items-center gap-2">
-                      <Turnstile
-                        ref={turnstileRef}
-                        siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
-                        options={{
-                          appearance: 'always',
-                          theme: 'light',
-                          size: 'normal',
-                        }}
-                      />
-                      <p className="text-[10px] sm:text-xs text-gray-500 text-center max-w-xs leading-tight">
-                        {isCa
-                          ? 'Completa la verificació de seguretat. Després prem "Obrir WhatsApp" per continuar.'
-                          : 'Completa la verificación de seguridad. Después pulsa "Abrir WhatsApp" para continuar.'}
-                      </p>
+                    {/* ✅ CLOUDFLARE TURNSTILE — INVISIBLE + MENSAJE PROPIO */}
+                    <div className="mb-3 sm:mb-4">
+                      {/* Turnstile invisible */}
+                      <div style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+                        <Turnstile
+                          ref={turnstileRef}
+                          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
+                          options={{
+                            theme: 'light',
+                            size: 'invisible',
+                          }}
+                          onSuccess={() => setVerificado(true)}
+                          onError={() => setVerificado(false)}
+                          onExpire={() => setVerificado(false)}
+                        />
+                      </div>
+
+                      {/* Caja personalizada con check verde + logo Cloudflare */}
+                      <AnimatePresence>
+                        {verificado && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -5 }}
+                            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                            className="flex items-center gap-3 sm:gap-4 py-3 sm:py-4 px-4 sm:px-5 rounded-xl bg-gray-50 border border-[#10B77F]/30"
+                          >
+                            <div className="flex-shrink-0 flex items-center justify-center size-8 sm:size-9 rounded-full bg-[#10B77F]/15">
+                              <Check className="size-4 sm:size-5 text-[#10B77F]" strokeWidth={3} />
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs sm:text-sm font-semibold text-[#0a1a3a] leading-tight">
+                                {isCa ? 'Comprovació intel·ligent' : 'Comprobación inteligente'}
+                              </p>
+                              <p className="text-[11px] sm:text-xs text-gray-500 leading-tight mt-0.5">
+                                {isCa
+                                  ? 'Hem verificat que ets humà'
+                                  : 'Hemos verificado que eres humano'}
+                              </p>
+                            </div>
+
+                            <div className="flex-shrink-0 opacity-60">
+                              <img
+                                src="https://www.cloudflare.com/img/logo-cloudflare-dark.svg"
+                                alt="Cloudflare"
+                                className="h-3 sm:h-4 w-auto"
+                              />
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
 
                     <div className="flex items-center justify-center gap-4 sm:gap-6 mb-4 sm:mb-5 text-gray-400">
@@ -323,7 +368,8 @@ Gracias.`
                     <button
                       type="button"
                       onClick={abrirWhatsApp}
-                      className="group relative w-full inline-flex items-center justify-center gap-2 sm:gap-3 bg-[#25D366] hover:bg-[#1faa53] text-white px-5 sm:px-6 py-3 sm:py-4 rounded-xl font-bold uppercase tracking-[0.15em] text-xs sm:text-sm transition-all duration-300 hover:scale-[1.01] hover:shadow-lg"
+                      disabled={!verificado}
+                      className="group relative w-full inline-flex items-center justify-center gap-2 sm:gap-3 bg-[#25D366] hover:bg-[#1faa53] text-white px-5 sm:px-6 py-3 sm:py-4 rounded-xl font-bold uppercase tracking-[0.15em] text-xs sm:text-sm transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01] hover:shadow-lg"
                     >
                       <svg viewBox="0 0 24 24" className="size-4 sm:size-5 fill-current">
                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
