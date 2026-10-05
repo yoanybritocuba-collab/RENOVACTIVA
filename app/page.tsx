@@ -24,6 +24,13 @@ const ICON_MAP: Record<string, any> = {
   zap: Zap,
 }
 
+const FALLBACK_METHOD_STEPS = [
+  { id: 'step-01', slug: 'escuchamos', number: '01', title: { es: 'Escuchamos', ca: 'Escoltem' }, shortDescription: { es: 'Entendemos tu visión, tus necesidades y la forma en que quieres vivir.', ca: 'Entenem la teva visió, les teves necessitats i la forma en què vols viure.' } },
+  { id: 'step-02', slug: 'disenamos', number: '02', title: { es: 'Diseñamos', ca: 'Dissenyem' }, shortDescription: { es: 'Convertimos las ideas en un proyecto claro, bello y posible.', ca: 'Convertim les idees en un projecte clar, bonic i possible.' } },
+  { id: 'step-03', slug: 'construimos', number: '03', title: { es: 'Construimos', ca: 'Construïm' }, shortDescription: { es: 'Coordinamos cada gremio y cuidamos cada acabado.', ca: 'Coordinem cada gremi i cuidem cada acabat.' } },
+  { id: 'step-04', slug: 'entregamos', number: '04', title: { es: 'Entregamos', ca: 'Lliurem' }, shortDescription: { es: 'Te entregamos un espacio listo para empezar una nueva etapa.', ca: 'Et lliurem un espai a punt per començar una nova etapa.' } },
+]
+
 export default function Home() {
   const [loading, setLoading] = useState(true)
   const [heroData, setHeroData] = useState<any>(null)
@@ -35,6 +42,7 @@ export default function Home() {
   const [footerData, setFooterData] = useState<any>(null)
   const [testimonialsData, setTestimonialsData] = useState<any>(null)
   const [statsData, setStatsData] = useState<any>(null)
+  const [methodData, setMethodData] = useState<any>(null)
   const [activeHero, setActiveHero] = useState(0)
 
   const [contactModalOpen, setContactModalOpen] = useState(false)
@@ -69,7 +77,6 @@ export default function Home() {
   const { language } = useLanguage()
   const ca = language === 'ca'
 
-  // ✅ Salto directo + efecto fade in + slide up
   function scrollToSection(id: string) {
     if (typeof window === 'undefined') return
     const el = document.getElementById(id)
@@ -111,6 +118,7 @@ export default function Home() {
         const footer = data.find((d: any) => d.section === 'footer')
         const testimonials = data.find((d: any) => d.section === 'testimonials')
         const stats = data.find((d: any) => d.section === 'stats')
+        const metodo = data.find((d: any) => d.section === 'metodo')
 
         if (hero) setHeroData(hero.content)
         if (services) { setServicesData(services.content?.items || []); setServicesSection(services.content) }
@@ -119,6 +127,7 @@ export default function Home() {
         if (footer) setFooterData(footer.content)
         if (testimonials) setTestimonialsData(testimonials.content)
         if (stats) setStatsData(stats.content)
+        if (metodo) setMethodData(metodo.content)
 
         try {
           const trabajosRes = await fetch(`${SUPABASE_URL}/rest/v1/trabajos?select=*&order=orden.asc`, {
@@ -198,9 +207,6 @@ export default function Home() {
     }
   }, [testimonialsData])
 
-  // ============================================================
-  // ⭐ EFECTO EN MÓVIL — MÉTODO
-  // ============================================================
   useEffect(() => {
     if (typeof window === 'undefined') return
 
@@ -239,7 +245,7 @@ export default function Home() {
         ;(window as any).__methodObserver = null
       }
     }
-  }, [loading])
+  }, [loading, methodData])
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -291,6 +297,17 @@ export default function Home() {
         { icon: Users, number: 98, suffix: '%', labelEs: 'Clientes satisfechos', labelCa: 'Clients satisfets' },
         { icon: HomeIcon, number: 250, suffix: 'K', labelEs: 'm² reformados', labelCa: 'm² reformats' },
       ]
+
+  const methodSteps = methodData?.steps?.length > 0 ? methodData.steps : FALLBACK_METHOD_STEPS
+  const methodEyebrow = ca
+    ? (methodData?.eyebrow?.ca || methodData?.eyebrow?.es || 'El nostre mètode')
+    : (methodData?.eyebrow?.es || 'Nuestro método')
+  const methodTitle = ca
+    ? (methodData?.title?.ca || methodData?.title?.es || "L'excel·lència")
+    : (methodData?.title?.es || 'La excelencia')
+  const methodTitleItalic = ca
+    ? (methodData?.titleItalic?.ca || methodData?.titleItalic?.es || 'és un procés.')
+    : (methodData?.titleItalic?.es || 'es un proceso.')
 
   const faqs = [
     { qEs: '¿Cuánto tarda una reforma integral?', qCa: 'Quant triga una reforma integral?', aEs: 'Depende del tamaño y la complejidad, pero una reforma integral de un piso medio suele tardar entre 2 y 4 meses. En la primera visita te damos un plazo estimado.', aCa: 'Depèn de la mida i la complexitat, però una reforma integral d\'un pis mitjà sol trigar entre 2 i 4 mesos. A la primera visita et donem un termini estimat.' },
@@ -351,7 +368,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#080808] text-[#f3f0e9]">
-      {/* ✅ CAMBIO: variant="light" → variant="dark" para que la barra sea negra */}
       <TopNav variant="dark" onOpenContactModal={() => setContactModalOpen(true)} />
 
       {/* 1. HERO */}
@@ -482,43 +498,48 @@ export default function Home() {
         <div className="grid gap-16 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
             <motion.p className="eyebrow" initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
-              {ca ? 'El nostre mètode' : 'Nuestro método'}
+              {methodEyebrow}
             </motion.p>
             <motion.h2 className="section-title" initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}>
-              {ca ? <>L'excel·lència<br /><i>és un procés.</i></> : <>La excelencia<br /><i>es un proceso.</i></>}
+              {methodTitle}<br /><i>{methodTitleItalic}</i>
             </motion.h2>
           </div>
 
           <div className="method-list">
-            {[
-              { es: 'Escuchamos', ca: 'Escoltem', description: { es: 'Entendemos tu visión, tus necesidades y la forma en que quieres vivir.', ca: 'Entenem la teva visió, les teves necessitats.' } },
-              { es: 'Diseñamos', ca: 'Dissenyem', description: { es: 'Convertimos las ideas en un proyecto claro, bello y posible.', ca: 'Convertim les idees en un projecte clar.' } },
-              { es: 'Construimos', ca: 'Construïm', description: { es: 'Coordinamos cada gremio y cuidamos cada acabado.', ca: 'Coordinem cada ofici i cuidem cada acabat.' } },
-              { es: 'Entregamos', ca: 'Lliurem', description: { es: 'Te entregamos un espacio listo para empezar una nueva etapa.', ca: 'Et lliurem un espai a punt.' } },
-            ].map((step, index) => (
-              <motion.div 
-                key={index} 
-                className="method-row group relative py-10 px-2 cursor-default"
-                initial={{ opacity: 0, y: 20 }} 
-                whileInView={{ opacity: 1, y: 0 }} 
-                viewport={{ once: true, amount: 0.4 }} 
-                transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <span className="method-divider" aria-hidden="true" />
-                <span className="method-bg-number" aria-hidden="true">0{index + 1}</span>
-                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-4 lg:gap-10 items-center">
-                  <h3 className="method-title font-serif text-3xl lg:text-4xl text-white transition-colors duration-500 group-hover:text-[#d7bd77]">
-                    {step[language] || ''}
-                  </h3>
-                  <div className="method-desc-wrap relative">
-                    <span className="method-desc-bar" aria-hidden="true" />
-                    <p className="method-desc text-sm lg:text-base leading-relaxed text-white/65">
-                      {step.description[language] || ''}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+            {methodSteps.map((step: any, index: number) => {
+              const stepTitle = ca ? (step.title?.ca || step.title?.es) : step.title?.es
+              const stepDesc = ca ? (step.shortDescription?.ca || step.shortDescription?.es) : step.shortDescription?.es
+              const stepNumber = step.number || String(index + 1).padStart(2, '0')
+              const href = step.slug ? `/metodo/${step.slug}` : '#metodo'
+
+              return (
+                <motion.div 
+                  key={step.id || index} 
+                  className="method-row group relative py-10 px-2"
+                  initial={{ opacity: 0, y: 20 }} 
+                  whileInView={{ opacity: 1, y: 0 }} 
+                  viewport={{ once: true, amount: 0.4 }} 
+                  transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <Link href={href} className="block">
+                    <span className="method-divider" aria-hidden="true" />
+                    <span className="method-bg-number" aria-hidden="true">{stepNumber}</span>
+                    <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-4 lg:gap-10 items-center">
+                      <h3 className="method-title font-serif text-3xl lg:text-4xl text-white transition-colors duration-500 group-hover:text-[#d7bd77] flex items-center gap-3">
+                        {stepTitle}
+                        <ArrowUpRight className="size-6 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 text-[#d7bd77]" />
+                      </h3>
+                      <div className="method-desc-wrap relative">
+                        <span className="method-desc-bar" aria-hidden="true" />
+                        <p className="method-desc text-sm lg:text-base leading-relaxed text-white/65 group-hover:text-white/85 transition-colors duration-500">
+                          {stepDesc}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -871,11 +892,9 @@ export default function Home() {
             </motion.div>
 
             <motion.div className="grid grid-cols-2 gap-x-8 gap-y-8 text-sm" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}>
-              {/* COLUMNA CONTACTO */}
               <div className="min-w-0">
                 <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77] font-semibold">{ca ? 'Contacte' : 'Contacto'}</p>
 
-                {/* TELÉFONO */}
                 <a
                   href={`tel:${(footerData?.contact?.phone || '+34600000000').replace(/\s/g, '')}`}
                   className="group flex items-center gap-2 mb-3 text-[#10B77F] hover:text-[#d7bd77] transition-colors break-words"
@@ -884,7 +903,6 @@ export default function Home() {
                   <span className="text-sm break-all">{footerData?.contact?.phone || '+34 600 000 000'}</span>
                 </a>
 
-                {/* CORREO — abre ContactModal */}
                 <button
                   type="button"
                   onClick={() => setContactModalOpen(true)}
@@ -894,7 +912,6 @@ export default function Home() {
                   <span className="text-sm break-all">{footerData?.contact?.email || 'info@renovactiva.com'}</span>
                 </button>
 
-                {/* WHATSAPP — abre WhatsAppModal */}
                 <button
                   type="button"
                   onClick={() => setWhatsAppModalOpen(true)}
@@ -907,7 +924,6 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* COLUMNA VISÍTANOS */}
               <div className="min-w-0">
                 <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77] font-semibold">{ca ? "Visita'ns" : 'Visítanos'}</p>
                 <p className="text-white/75 text-sm">{ca ? (footerTrans.address?.street || footerData?.address?.street || 'Carrer Exemple 123') : (footerData?.address?.street || 'Carrer Exemple 123')}</p>
@@ -997,14 +1013,12 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* 📩 MODAL DE CORREO */}
       <ContactModal
         open={contactModalOpen}
         onClose={() => setContactModalOpen(false)}
         lang={ca ? 'ca' : 'es'}
       />
 
-      {/* 💬 MODAL DE WHATSAPP */}
       <WhatsAppModal
         open={whatsAppModalOpen}
         onClose={() => setWhatsAppModalOpen(false)}

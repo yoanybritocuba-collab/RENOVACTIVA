@@ -1,27 +1,68 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import AdminSection from '@/components/admin/AdminSection'
 import ImageUploader from '@/components/admin/ImageUploader'
 import { useTranslation } from '@/lib/useTranslation'
-import { Plus, Trash2, ArrowUp, ArrowDown, Link2, ImageIcon } from 'lucide-react'
+import { Plus, Trash2, ArrowUp, ArrowDown, ImageIcon, Link as LinkIcon } from 'lucide-react'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
 
+function makeSlug(text: string) {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ñ/g, 'n')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+}
+
 const DEFAULT_STEPS = [
-  { n: '01', es: 'Escuchamos', ca: 'Escoltem', desc_es: 'Entendemos tu visión, tus necesidades y la forma en que quieres vivir.', desc_ca: 'Entenem la teva visió, les teves necessitats i la forma en què vols viure.' },
-  { n: '02', es: 'Diseñamos', ca: 'Dissenyem', desc_es: 'Convertimos las ideas en un proyecto claro, bello y posible.', desc_ca: 'Convertim les idees en un projecte clar, bonic i possible.' },
-  { n: '03', es: 'Construimos', ca: 'Construïm', desc_es: 'Coordinamos cada gremio y cuidamos cada acabado.', desc_ca: 'Coordinem cada gremi i cuidem cada acabat.' },
-  { n: '04', es: 'Entregamos', ca: 'Lliurem', desc_es: 'Te entregamos un espacio listo para empezar una nueva etapa.', desc_ca: "Et lliurem un espai a punt per començar una nova etapa." },
+  {
+    n: '01',
+    es: 'Escuchamos',
+    ca: 'Escoltem',
+    desc_es: 'Entendemos tu visión, tus necesidades y la forma en que quieres vivir.',
+    desc_ca: 'Entenem la teva visió, les teves necessitats i la forma en què vols viure.',
+    img: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=1200&q=80',
+  },
+  {
+    n: '02',
+    es: 'Diseñamos',
+    ca: 'Dissenyem',
+    desc_es: 'Convertimos las ideas en un proyecto claro, bello y posible.',
+    desc_ca: 'Convertim les idees en un projecte clar, bonic i possible.',
+    img: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1200&q=80',
+  },
+  {
+    n: '03',
+    es: 'Construimos',
+    ca: 'Construïm',
+    desc_es: 'Coordinamos cada gremio y cuidamos cada acabado.',
+    desc_ca: 'Coordinem cada gremi i cuidem cada acabat.',
+    img: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1200&q=80',
+  },
+  {
+    n: '04',
+    es: 'Entregamos',
+    ca: 'Lliurem',
+    desc_es: 'Te entregamos un espacio listo para empezar una nueva etapa.',
+    desc_ca: 'Et lliurem un espai a punt per començar una nova etapa.',
+    img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80',
+  },
 ].map((s) => ({
   id: `step-${s.n}`,
+  slug: makeSlug(s.es),
   number: s.n,
   title: { es: s.es, ca: s.ca },
   subtitle: { es: '', ca: '' },
-  description: { es: s.desc_es, ca: s.desc_ca },
+  shortDescription: { es: s.desc_es, ca: s.desc_ca },
+  longDescription: { es: '', ca: '' },
   bullets: { es: [] as string[], ca: [] as string[] },
-  image: '',
+  image: s.img,
   href: '',
 }))
 
@@ -58,6 +99,13 @@ export default function MetodoAdminPage() {
       if (result.length > 0) {
         const metodo = result[0]
         const c = metodo.content || {}
+        const steps = (c.steps && c.steps.length > 0 ? c.steps : DEFAULT_STEPS).map((s: any) => ({
+          ...s,
+          slug: s.slug || makeSlug(s.title?.es || ''),
+          shortDescription: s.shortDescription || s.description || { es: '', ca: '' },
+          longDescription: s.longDescription || { es: '', ca: '' },
+          href: s.href || '',
+        }))
         setData({
           id: metodo.id,
           content: {
@@ -65,12 +113,9 @@ export default function MetodoAdminPage() {
             title: c.title || EMPTY_CONTENT.title,
             titleItalic: c.titleItalic || EMPTY_CONTENT.titleItalic,
             intro: c.intro || EMPTY_CONTENT.intro,
-            steps: (c.steps && c.steps.length > 0 ? c.steps : DEFAULT_STEPS).map((s: any) => ({ href: '', ...s })),
+            steps,
           },
         })
-        if (!c.steps || c.steps.length === 0) {
-          setNotice('Se han cargado los 4 pasos por defecto. Pulsa Guardar para publicarlos.')
-        }
       } else {
         setNotice('La sección "método" no existía. Se han cargado los 4 pasos por defecto. Pulsa Guardar para crearla.')
       }
@@ -96,14 +141,18 @@ export default function MetodoAdminPage() {
       const translatedSteps = await Promise.all(
         (contentToSave.steps || []).map(async (step: any) => {
           const newStep = { ...step }
+          newStep.slug = step.slug || makeSlug(step.title?.es || '')
           if (step.title?.es && !step.title?.ca) {
             newStep.title = { ...step.title, ca: await translate(step.title.es, 'ca') }
           }
           if (step.subtitle?.es && !step.subtitle?.ca) {
             newStep.subtitle = { ...step.subtitle, ca: await translate(step.subtitle.es, 'ca') }
           }
-          if (step.description?.es && !step.description?.ca) {
-            newStep.description = { ...step.description, ca: await translate(step.description.es, 'ca') }
+          if (step.shortDescription?.es && !step.shortDescription?.ca) {
+            newStep.shortDescription = { ...step.shortDescription, ca: await translate(step.shortDescription.es, 'ca') }
+          }
+          if (step.longDescription?.es && !step.longDescription?.ca) {
+            newStep.longDescription = { ...step.longDescription, ca: await translate(step.longDescription.es, 'ca') }
           }
           if (step.bullets?.es?.length && (!step.bullets?.ca || step.bullets.ca.length === 0)) {
             const caBullets = await Promise.all(
@@ -147,13 +196,9 @@ export default function MetodoAdminPage() {
 
       setData({ id: newId, content: contentToSave })
 
-      try {
-        await fetch('/api/revalidate', { method: 'POST' })
-      } catch (e) {
-        console.warn('Revalidate falló:', e)
-      }
+      try { await fetch('/api/revalidate', { method: 'POST' }) } catch {}
 
-      setNotice('Método guardado y traducido correctamente ✅')
+      setNotice('Método guardado correctamente ✅')
       setTimeout(() => setNotice(''), 3500)
     } catch (err) {
       setError((err as Error).message)
@@ -163,13 +208,7 @@ export default function MetodoAdminPage() {
   }
 
   function updateField(key: string, lang: string, value: string) {
-    setData({
-      ...data,
-      content: {
-        ...data.content,
-        [key]: { ...data.content[key], [lang]: value },
-      },
-    })
+    setData({ ...data, content: { ...data.content, [key]: { ...data.content[key], [lang]: value } } })
   }
 
   function updateStep(index: number, key: string, value: any) {
@@ -180,9 +219,16 @@ export default function MetodoAdminPage() {
 
   function updateStepNested(index: number, parent: string, lang: string, value: string) {
     const newSteps = [...(data.content.steps || [])]
+    newSteps[index] = { ...newSteps[index], [parent]: { ...newSteps[index][parent], [lang]: value } }
+    setData({ ...data, content: { ...data.content, steps: newSteps } })
+  }
+
+  function updateStepTitleES(index: number, value: string) {
+    const newSteps = [...(data.content.steps || [])]
     newSteps[index] = {
       ...newSteps[index],
-      [parent]: { ...newSteps[index][parent], [lang]: value },
+      title: { ...newSteps[index].title, es: value },
+      slug: makeSlug(value),
     }
     setData({ ...data, content: { ...data.content, steps: newSteps } })
   }
@@ -190,10 +236,7 @@ export default function MetodoAdminPage() {
   function updateStepBullets(index: number, lang: string, bulletsText: string) {
     const bulletsArray = bulletsText.split('\n').filter((b) => b.trim() !== '')
     const newSteps = [...(data.content.steps || [])]
-    newSteps[index] = {
-      ...newSteps[index],
-      bullets: { ...newSteps[index].bullets, [lang]: bulletsArray },
-    }
+    newSteps[index] = { ...newSteps[index], bullets: { ...newSteps[index].bullets, [lang]: bulletsArray } }
     setData({ ...data, content: { ...data.content, steps: newSteps } })
   }
 
@@ -207,23 +250,21 @@ export default function MetodoAdminPage() {
     const newSteps = [...(data.content.steps || [])]
     newSteps.push({
       id: `step-${Date.now()}`,
+      slug: '',
       number: String(newSteps.length + 1).padStart(2, '0'),
       title: { es: '', ca: '' },
       subtitle: { es: '', ca: '' },
-      description: { es: '', ca: '' },
+      shortDescription: { es: '', ca: '' },
+      longDescription: { es: '', ca: '' },
       bullets: { es: [], ca: [] },
       image: '',
       href: '',
     })
     setData({ ...data, content: { ...data.content, steps: newSteps } })
-    setTimeout(() => {
-      const el = document.getElementById(`step-${newSteps.length - 1}`)
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 100)
   }
 
   function removeStep(index: number) {
-    if (!confirm('¿Seguro que quieres eliminar este paso?')) return
+    if (!confirm('¿Eliminar este paso?')) return
     const newSteps = (data.content.steps || []).filter((_: any, i: number) => i !== index)
     setData({ ...data, content: { ...data.content, steps: newSteps } })
   }
@@ -246,16 +287,15 @@ export default function MetodoAdminPage() {
   return (
     <AdminSection
       title="Método"
-      description="Gestiona los pasos del método Renovactiva, sus imágenes y enlaces"
+      description="Gestiona los pasos del método Renovactiva"
       onSave={saveData}
       saving={saving}
       error={error}
       notice={notice}
     >
       <div className="space-y-8">
-        {/* CABECERA */}
         <div className="border border-white/10 rounded-xl p-5 bg-white/[.02] space-y-4">
-          <h3 className="text-white/60 text-sm font-semibold mb-2">Cabecera de la sección</h3>
+          <h3 className="text-white/60 text-sm font-semibold mb-2">Cabecera</h3>
 
           <div>
             <label className="block text-white/50 text-xs mb-1">Eyebrow (ES)</label>
@@ -264,11 +304,8 @@ export default function MetodoAdminPage() {
               value={data.content.eyebrow.es || ''}
               onChange={(e) => updateField('eyebrow', 'es', e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
-              placeholder="Nuestro método"
             />
-            {data.content.eyebrow.ca && (
-              <p className="text-white/40 text-xs mt-1">CA: {data.content.eyebrow.ca}</p>
-            )}
+            {data.content.eyebrow.ca && <p className="text-white/40 text-xs mt-1">CA: {data.content.eyebrow.ca}</p>}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -279,11 +316,8 @@ export default function MetodoAdminPage() {
                 value={data.content.title.es || ''}
                 onChange={(e) => updateField('title', 'es', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
-                placeholder="La excelencia"
               />
-              {data.content.title.ca && (
-                <p className="text-white/40 text-xs mt-1">CA: {data.content.title.ca}</p>
-              )}
+              {data.content.title.ca && <p className="text-white/40 text-xs mt-1">CA: {data.content.title.ca}</p>}
             </div>
             <div>
               <label className="block text-white/50 text-xs mb-1">Título cursiva (ES)</label>
@@ -292,11 +326,8 @@ export default function MetodoAdminPage() {
                 value={data.content.titleItalic.es || ''}
                 onChange={(e) => updateField('titleItalic', 'es', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
-                placeholder="es un proceso."
               />
-              {data.content.titleItalic.ca && (
-                <p className="text-white/40 text-xs mt-1">CA: {data.content.titleItalic.ca}</p>
-              )}
+              {data.content.titleItalic.ca && <p className="text-white/40 text-xs mt-1">CA: {data.content.titleItalic.ca}</p>}
             </div>
           </div>
 
@@ -305,17 +336,13 @@ export default function MetodoAdminPage() {
             <textarea
               value={data.content.intro.es || ''}
               onChange={(e) => updateField('intro', 'es', e.target.value)}
-              rows={3}
+              rows={2}
               className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
-              placeholder="Cada proyecto es único..."
             />
-            {data.content.intro.ca && (
-              <p className="text-white/40 text-xs mt-1">CA: {data.content.intro.ca}</p>
-            )}
+            {data.content.intro.ca && <p className="text-white/40 text-xs mt-1">CA: {data.content.intro.ca}</p>}
           </div>
         </div>
 
-        {/* BOTÓN AÑADIR */}
         <button
           onClick={addStep}
           className="w-full flex items-center justify-center gap-2 bg-[#d7bd77] px-6 py-4 text-[#11110f] rounded-xl hover:bg-white transition-colors text-base font-medium"
@@ -323,51 +350,33 @@ export default function MetodoAdminPage() {
           <Plus className="size-5" /> Añadir paso
         </button>
 
-        <div className="flex items-center justify-between">
-          <h3 className="text-white/60 text-sm font-semibold">
-            Pasos ({(data.content.steps || []).length})
-          </h3>
-        </div>
+        <h3 className="text-white/60 text-sm font-semibold">
+          Pasos ({(data.content.steps || []).length})
+        </h3>
 
-        {/* LISTA DE PASOS */}
         <div className="space-y-6">
           {(data.content.steps || []).map((step: any, index: number) => (
             <div
               key={step.id || index}
-              id={`step-${index}`}
-              className="border border-white/10 rounded-xl p-5 bg-white/[.02] space-y-4 scroll-mt-20"
+              className="border border-white/10 rounded-xl p-5 bg-white/[.02] space-y-4"
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <h3 className="text-[#d7bd77] font-serif text-lg">
                   Paso {index + 1} — {step.number || ''}
                 </h3>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => moveStep(index, 'up')}
-                    disabled={index === 0}
-                    className="text-white/50 hover:text-white p-1 disabled:opacity-30"
-                    title="Subir"
-                  >
+                  <button onClick={() => moveStep(index, 'up')} disabled={index === 0} className="text-white/50 hover:text-white p-1 disabled:opacity-30">
                     <ArrowUp className="size-4" />
                   </button>
-                  <button
-                    onClick={() => moveStep(index, 'down')}
-                    disabled={index === (data.content.steps || []).length - 1}
-                    className="text-white/50 hover:text-white p-1 disabled:opacity-30"
-                    title="Bajar"
-                  >
+                  <button onClick={() => moveStep(index, 'down')} disabled={index === (data.content.steps || []).length - 1} className="text-white/50 hover:text-white p-1 disabled:opacity-30">
                     <ArrowDown className="size-4" />
                   </button>
-                  <button
-                    onClick={() => removeStep(index)}
-                    className="text-red-400 hover:text-red-300 p-1 flex items-center gap-1 text-sm"
-                  >
+                  <button onClick={() => removeStep(index)} className="text-red-400 hover:text-red-300 p-1 flex items-center gap-1 text-sm">
                     <Trash2 className="size-4" /> Eliminar
                   </button>
                 </div>
               </div>
 
-              {/* NÚMERO + ENLACE */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-white/50 text-xs mb-1">Número</label>
@@ -381,28 +390,24 @@ export default function MetodoAdminPage() {
                 </div>
                 <div>
                   <label className="block text-white/50 text-xs mb-1 flex items-center gap-1.5">
-                    <Link2 className="size-3.5" />
-                    Enlace al hacer clic en la imagen (opcional)
+                    <LinkIcon className="size-3.5" /> Slug (URL)
                   </label>
                   <input
                     type="text"
-                    value={step.href || ''}
-                    onChange={(e) => updateStep(index, 'href', e.target.value)}
+                    value={step.slug || ''}
+                    onChange={(e) => updateStep(index, 'slug', makeSlug(e.target.value))}
                     className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
-                    placeholder="/contacto  o  https://..."
+                    placeholder="escuchamos"
                   />
                   <p className="text-white/30 text-[11px] mt-1">
-                    Si empieza por <code className="text-[#d7bd77]">/</code> abre una página interna.
-                    Si empieza por <code className="text-[#d7bd77]">https://</code> se abre en otra pestaña.
+                    URL: <span className="text-[#d7bd77]">/metodo/{step.slug || '...'}</span>
                   </p>
                 </div>
               </div>
 
-              {/* IMAGEN */}
               <div>
                 <label className="block text-white/50 text-xs mb-2 flex items-center gap-1.5">
-                  <ImageIcon className="size-3.5" />
-                  Imagen del paso
+                  <ImageIcon className="size-3.5" /> Imagen
                 </label>
                 <ImageUploader
                   images={step.image ? [step.image] : []}
@@ -412,9 +417,7 @@ export default function MetodoAdminPage() {
                   allowVideos={false}
                 />
                 <div className="mt-2">
-                  <label className="block text-white/40 text-[11px] mb-1">
-                    O pega una URL de imagen directamente:
-                  </label>
+                  <label className="block text-white/40 text-[11px] mb-1">O pega una URL:</label>
                   <input
                     type="text"
                     value={step.image || ''}
@@ -425,13 +428,12 @@ export default function MetodoAdminPage() {
                 </div>
               </div>
 
-              {/* ES */}
               <div className="border-l-2 border-[#d7bd77]/30 pl-3 space-y-2">
                 <p className="text-[#d7bd77] text-xs font-bold">🇪🇸 Español</p>
                 <input
                   type="text"
                   value={step.title?.es || ''}
-                  onChange={(e) => updateStepNested(index, 'title', 'es', e.target.value)}
+                  onChange={(e) => updateStepTitleES(index, e.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
                   placeholder="Escuchamos"
                 />
@@ -440,75 +442,66 @@ export default function MetodoAdminPage() {
                   value={step.subtitle?.es || ''}
                   onChange={(e) => updateStepNested(index, 'subtitle', 'es', e.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
-                  placeholder="Subtítulo corto (ej: Primera fase)"
+                  placeholder="Subtítulo corto"
                 />
+                <label className="block text-white/40 text-xs">Descripción corta (lista /metodo)</label>
                 <textarea
-                  value={step.description?.es || ''}
-                  onChange={(e) => updateStepNested(index, 'description', 'es', e.target.value)}
+                  value={step.shortDescription?.es || ''}
+                  onChange={(e) => updateStepNested(index, 'shortDescription', 'es', e.target.value)}
+                  rows={2}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
+                />
+                <label className="block text-white/40 text-xs">Descripción larga (sub-página)</label>
+                <textarea
+                  value={step.longDescription?.es || ''}
+                  onChange={(e) => updateStepNested(index, 'longDescription', 'es', e.target.value)}
+                  rows={4}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
+                />
+                <label className="block text-white/40 text-xs">Bullets ES (uno por línea)</label>
+                <textarea
+                  value={(step.bullets?.es || []).join('\n')}
+                  onChange={(e) => updateStepBullets(index, 'es', e.target.value)}
                   rows={3}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
-                  placeholder="Descripción larga del paso..."
                 />
-                <div>
-                  <label className="block text-white/40 text-xs mb-1">
-                    Bullets ES (uno por línea)
-                  </label>
-                  <textarea
-                    value={(step.bullets?.es || []).join('\n')}
-                    onChange={(e) => updateStepBullets(index, 'es', e.target.value)}
-                    rows={3}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
-                    placeholder={'Visita sin compromiso\nEscuchamos tus ideas\nPropuesta personalizada'}
-                  />
-                </div>
               </div>
 
-              {/* CA */}
               <div className="border-l-2 border-white/10 pl-3 space-y-2">
-                <p className="text-white/40 text-xs font-bold">🇨🇦 Català (auto-traducido)</p>
+                <p className="text-white/40 text-xs font-bold">🇨🇦 Català</p>
                 <input
                   type="text"
                   value={step.title?.ca || ''}
                   onChange={(e) => updateStepNested(index, 'title', 'ca', e.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
-                  placeholder="Escoltem"
                 />
                 <input
                   type="text"
                   value={step.subtitle?.ca || ''}
                   onChange={(e) => updateStepNested(index, 'subtitle', 'ca', e.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
-                  placeholder="Primera fase"
                 />
                 <textarea
-                  value={step.description?.ca || ''}
-                  onChange={(e) => updateStepNested(index, 'description', 'ca', e.target.value)}
+                  value={step.shortDescription?.ca || ''}
+                  onChange={(e) => updateStepNested(index, 'shortDescription', 'ca', e.target.value)}
+                  rows={2}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
+                />
+                <textarea
+                  value={step.longDescription?.ca || ''}
+                  onChange={(e) => updateStepNested(index, 'longDescription', 'ca', e.target.value)}
+                  rows={4}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
+                />
+                <textarea
+                  value={(step.bullets?.ca || []).join('\n')}
+                  onChange={(e) => updateStepBullets(index, 'ca', e.target.value)}
                   rows={3}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
-                  placeholder="Descripció llarga..."
                 />
-                <div>
-                  <label className="block text-white/40 text-xs mb-1">
-                    Bullets CA (uno por línea)
-                  </label>
-                  <textarea
-                    value={(step.bullets?.ca || []).join('\n')}
-                    onChange={(e) => updateStepBullets(index, 'ca', e.target.value)}
-                    rows={3}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
-                    placeholder={'Visita sense compromís\nEscoltem les teves idees'}
-                  />
-                </div>
               </div>
             </div>
           ))}
-
-          {(!data.content.steps || data.content.steps.length === 0) && (
-            <div className="text-center py-12 border border-white/10 rounded-xl bg-white/[.02]">
-              <p className="text-white/40 mb-2">No hay pasos todavía</p>
-              <p className="text-white/30 text-sm">Pulsa "Añadir paso" para crear el primero</p>
-            </div>
-          )}
         </div>
       </div>
     </AdminSection>
