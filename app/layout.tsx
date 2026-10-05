@@ -7,16 +7,16 @@ import { FloatingNav } from '@/components/FloatingNav'
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.renovactiva.com'),
 
-  // ✅ TÍTULO — Aparece en la pestaña del navegador
-  // Formato: "Empresa de Construcción y Rehabilitación Integral | Renovactiva"
-  title: 'Empresa de Construcción y Rehabilitación Integral | Renovactiva',
+  // ✅ TÍTULO — Pestaña del navegador y Google
+  title: 'RENOVACTIVA SL | Rehabilitación integral y construcción',
 
-  description: 'Empresa de construcción y rehabilitación integral en Barcelona. Reformas de alto nivel para viviendas, locales comerciales, oficinas y fincas.',
+  description: 'RENOVACTIVA SL — Empresa de construcción y rehabilitación integral en Barcelona. Reformas de alto nivel para viviendas, locales comerciales, oficinas y fincas.',
 
   generator: 'Renovactiva',
-  applicationName: 'Renovactiva',
-  authors: [{ name: 'Renovactiva SL' }],
+  applicationName: 'RENOVACTIVA SL',
+  authors: [{ name: 'RENOVACTIVA SL' }],
   keywords: [
+    'RENOVACTIVA SL',
     'construcción',
     'rehabilitación integral',
     'reformas Barcelona',
@@ -29,8 +29,7 @@ export const metadata: Metadata = {
   ],
 
   // ============================================================
-  // 🖼️ ICONOS — Forzado a v=3 para que los navegadores y Google
-  // descarguen el favicon nuevo (logo de Renovactiva).
+  // 🖼️ ICONOS
   // ============================================================
   icons: {
     icon: [
@@ -45,22 +44,22 @@ export const metadata: Metadata = {
   },
 
   // ============================================================
-  // 🌐 OPEN GRAPH (WhatsApp, Facebook, LinkedIn, Telegram...)
+  // 🌐 OPEN GRAPH
   // ============================================================
   openGraph: {
     type: 'website',
     locale: 'es_ES',
     alternateLocale: ['ca_ES'],
     url: 'https://www.renovactiva.com',
-    siteName: 'Empresa de Construcción y Rehabilitación Integral',
-    title: 'Empresa de Construcción y Rehabilitación Integral | Renovactiva',
-    description: 'Empresa de construcción y rehabilitación integral en Barcelona. Reformas de alto nivel para viviendas, locales comerciales, oficinas y fincas.',
+    siteName: 'RENOVACTIVA SL',
+    title: 'RENOVACTIVA SL | Rehabilitación integral y construcción',
+    description: 'RENOVACTIVA SL — Empresa de construcción y rehabilitación integral en Barcelona. Reformas de alto nivel para viviendas, locales comerciales, oficinas y fincas.',
     images: [
       {
         url: '/logo.png',
         width: 1200,
         height: 630,
-        alt: 'Renovactiva — Empresa de Construcción y Rehabilitación Integral',
+        alt: 'RENOVACTIVA SL — Rehabilitación integral y construcción',
       },
     ],
   },
@@ -70,8 +69,8 @@ export const metadata: Metadata = {
   // ============================================================
   twitter: {
     card: 'summary_large_image',
-    title: 'Empresa de Construcción y Rehabilitación Integral | Renovactiva',
-    description: 'Empresa de construcción y rehabilitación integral en Barcelona. Reformas de alto nivel para viviendas, locales comerciales, oficinas y fincas.',
+    title: 'RENOVACTIVA SL | Rehabilitación integral y construcción',
+    description: 'RENOVACTIVA SL — Empresa de construcción y rehabilitación integral en Barcelona.',
     images: ['/logo.png'],
   },
 
@@ -90,9 +89,6 @@ export const metadata: Metadata = {
     },
   },
 
-  // ============================================================
-  // 🏢 INFORMACIÓN DE LA EMPRESA (Google Business / Schema)
-  // ============================================================
   category: 'Construction Company',
 }
 
@@ -122,27 +118,22 @@ export default function RootLayout({
 
         {/* ============================================================
             ✅ DATOS ESTRUCTURADOS JSON-LD
-            Esto le dice a Google:
-            - El nombre de tu web: "Empresa de Construcción y Rehabilitación Integral"
-            - El logo oficial
-            - Los datos de la empresa
-            Google usará esto para mostrar la información correcta.
             ============================================================ */}
 
-        {/* WebSite — Nombre que aparece en Google */}
+        {/* WebSite — Nombre oficial que aparece en Google */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'WebSite',
-              name: 'Empresa de Construcción y Rehabilitación Integral',
+              name: 'RENOVACTIVA SL',
               alternateName: 'Renovactiva',
               url: 'https://www.renovactiva.com',
               inLanguage: ['es-ES', 'ca-ES'],
               publisher: {
                 '@type': 'Organization',
-                name: 'Renovactiva SL',
+                name: 'RENOVACTIVA SL',
                 logo: {
                   '@type': 'ImageObject',
                   url: 'https://www.renovactiva.com/logo.png',
@@ -159,8 +150,8 @@ export default function RootLayout({
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'Organization',
-              name: 'Empresa de Construcción y Rehabilitación Integral',
-              legalName: 'Renovactiva SL',
+              name: 'RENOVACTIVA SL',
+              legalName: 'RENOVACTIVA SL',
               alternateName: 'Renovactiva',
               url: 'https://www.renovactiva.com',
               logo: {
@@ -171,7 +162,7 @@ export default function RootLayout({
               },
               image: 'https://www.renovactiva.com/logo.png',
               description:
-                'Empresa de construcción y rehabilitación integral en Barcelona. Reformas de alto nivel para viviendas, locales comerciales, oficinas y fincas.',
+                'RENOVACTIVA SL — Empresa de construcción y rehabilitación integral en Barcelona. Reformas de alto nivel para viviendas, locales comerciales, oficinas y fincas.',
               address: {
                 '@type': 'PostalAddress',
                 addressCountry: 'ES',
