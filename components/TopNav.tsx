@@ -94,13 +94,16 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
     }
   }
 
-  const navLinkClass = 'relative inline-flex items-center px-3 py-2 text-white/75 hover:text-[#d7bd77] transition-colors'
+  // ✅ Enlaces del menú (colores oscuros porque la barra es blanca)
+  const navLinkClass = 'relative inline-flex items-center px-3 py-2 text-[#141310]/75 hover:text-[#ad742a] transition-colors'
 
-  const menuBtnClass = 'text-white/80 hover:text-white'
+  // ✅ Icono hamburguesa (oscuro)
+  const menuBtnClass = 'text-[#141310]/80 hover:text-[#141310]'
 
-  const panelBg = 'bg-[#000000] border-white/10'
+  // ✅ Panel móvil
+  const panelBg = 'bg-white border-black/10'
 
-  const panelLinkClass = 'block w-full text-left px-6 py-4 text-white/80 hover:bg-[#d7bd77]/10 hover:text-[#d7bd77] transition-colors text-sm uppercase tracking-[0.18em] border-b border-white/5'
+  const panelLinkClass = 'block w-full text-left px-6 py-4 text-[#141310]/80 hover:bg-[#d7bd77]/10 hover:text-[#ad742a] transition-colors text-sm uppercase tracking-[0.18em] border-b border-black/5'
 
   return (
     <>
@@ -109,7 +112,7 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
           navVisible ? 'translate-y-0' : '-translate-y-full'
         }`}
         style={{
-          background: '#000000',
+          background: '#FFFFFF',
         }}
       >
         <div className="mx-auto flex max-w-[1380px] items-center justify-between px-4 py-3 lg:px-10 lg:py-4">
@@ -120,8 +123,8 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
               alt="Renovactiva" 
               className="h-10 w-auto lg:h-14" 
             />
-            <span className="font-serif text-sm uppercase tracking-[0.18em] text-[#d7bd77] sm:text-base lg:text-xl lg:tracking-[0.28em] whitespace-nowrap">
-              RENOVACTIVA<span className="text-[#FFFFFF]"> SL</span>
+            <span className="font-serif text-sm uppercase tracking-[0.18em] text-[#ad742a] sm:text-base lg:text-xl lg:tracking-[0.28em] whitespace-nowrap">
+              RENOVACTIVA<span className="text-[#042133]"> SL</span>
             </span>
           </Link>
 
@@ -149,7 +152,7 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
           </nav>
 
           <div className="flex items-center gap-2 lg:gap-4 flex-shrink-0">
-            <LanguageSwitcher variant="dark" />
+            <LanguageSwitcher variant="light" />
             <button
               aria-label="Abrir menú"
               onClick={() => setMenuOpen(true)}
@@ -172,8 +175,8 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
           <div
             className={`fixed top-0 right-0 z-[101] h-full w-[280px] ${panelBg} border-l shadow-2xl lg:hidden flex flex-col animate-in slide-in-from-right duration-300`}
           >
-            <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
-              <span className="font-serif text-lg tracking-[0.2em] text-[#d7bd77]">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-black/10">
+              <span className="font-serif text-lg tracking-[0.2em] text-[#ad742a]">
                 MENÚ
               </span>
               <button
