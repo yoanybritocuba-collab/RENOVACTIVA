@@ -2,14 +2,12 @@
 
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import { ArrowUpRight, Play, X, Shield, ChevronLeft, ChevronRight, Camera, Star, Plus, Minus, Briefcase, Award, Users, Home as HomeIcon, KeyRound, TrendingUp, Heart, Target, Zap, Loader2, PartyPopper } from 'lucide-react'
+import { ArrowUpRight, Play, X, Shield, ChevronLeft, ChevronRight, Camera, Star, Plus, Minus, Briefcase, Award, Users, Home as HomeIcon, KeyRound, TrendingUp, Heart, Target, Zap, Loader2, PartyPopper, Phone, Mail } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLanguage } from '@/components/language-provider'
 import { TopNav } from '@/components/TopNav'
-import { WhatsAppFooterButton } from '@/components/WhatsAppFooterButton'
 import { ContactModal } from '@/components/ContactModal'
 import { WhatsAppModal } from '@/components/WhatsAppModal'
-import { getFooterMailHref } from '@/lib/mailHref'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
@@ -71,31 +69,23 @@ export default function Home() {
   const { language } = useLanguage()
   const ca = language === 'ca'
 
-  // ✅ NUEVA FUNCIÓN: Salto directo + efecto fade in + slide up
+  // ✅ Salto directo + efecto fade in + slide up
   function scrollToSection(id: string) {
     if (typeof window === 'undefined') return
     const el = document.getElementById(id)
     if (el) {
-      // Salto instantáneo (sin scroll largo)
       const headerHeight = 80
       const top = el.getBoundingClientRect().top + window.scrollY - headerHeight
       window.scrollTo({ top, behavior: 'instant' as ScrollBehavior })
 
-      // ✨ Efecto fade in + slide up + escala
       el.style.opacity = '0'
       el.style.transform = 'translateY(30px) scale(0.98)'
       el.style.transition = 'opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)'
-
-      // Forzar reflow para que el navegador reconozca el estado inicial
       void el.offsetHeight
-
-      // Animar hacia el estado final
       requestAnimationFrame(() => {
         el.style.opacity = '1'
         el.style.transform = 'translateY(0) scale(1)'
       })
-
-      // Limpiar estilos después de la animación
       setTimeout(() => {
         el.style.opacity = ''
         el.style.transform = ''
@@ -207,6 +197,57 @@ export default function Home() {
       document.removeEventListener('touchend', onTouchEnd)
     }
   }, [testimonialsData])
+
+  // ============================================================
+  // ⭐ EFECTO EN MÓVIL — MÉTODO
+  // Cuando un bloque del método está en el centro de la pantalla,
+  // se activa la clase .is-active (equivalente al hover de PC).
+  // Solo se ejecuta en móvil/tablet (< 1024px).
+  // ============================================================
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    // Solo aplicar en móvil/tablet
+    const isMobile = window.matchMedia('(max-width: 1023px)').matches
+    if (!isMobile) return
+
+    // Esperar un frame a que el DOM tenga los .method-row renderizados
+    const timeoutId = setTimeout(() => {
+      const rows = document.querySelectorAll('.method-row')
+      if (rows.length === 0) return
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-active')
+            } else {
+              entry.target.classList.remove('is-active')
+            }
+          })
+        },
+        {
+          // Activa solo cuando el bloque entra en el 30% central de la pantalla
+          rootMargin: '-35% 0px -35% 0px',
+          threshold: 0,
+        }
+      )
+
+      rows.forEach((row) => observer.observe(row))
+
+      // Guardamos referencia para limpiar después
+      ;(window as any).__methodObserver = observer
+    }, 300)
+
+    return () => {
+      clearTimeout(timeoutId)
+      const observer = (window as any).__methodObserver
+      if (observer) {
+        observer.disconnect()
+        ;(window as any).__methodObserver = null
+      }
+    }
+  }, [loading])
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -322,7 +363,6 @@ export default function Home() {
 
       {/* 1. HERO */}
       <section className="relative flex min-h-[600px] items-center lg:items-end lg:min-h-screen overflow-hidden pt-20 lg:pt-0">
-        
         {heroImages.map((image: string, index: number) => (
           <div key={index} className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${index === activeHero ? 'opacity-100' : 'opacity-0'}`} style={{ backgroundImage: `url(${image})`, backgroundPosition: 'center', backgroundSize: 'cover' }} />
         ))}
@@ -332,7 +372,6 @@ export default function Home() {
 
         <div className="relative z-20 mx-auto w-full max-w-[1380px] px-6 pb-12 pt-24 lg:px-10 lg:pb-28 lg:pt-40">
           <div className="max-w-3xl">
-            
             <motion.div className="mb-7 flex items-center gap-4" initial={{ opacity: 0, x: -600 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}>
               <motion.span className="block h-px bg-[#10B77F]" initial={{ width: 0 }} animate={{ width: 40 }} transition={{ duration: 1.2, delay: 1.6, ease: [0.22, 1, 0.36, 1] }} />
               <p className="text-[11px] uppercase tracking-[0.42em] text-[#d7bd77] text-hero-eyebrow" style={{ textTransform: 'uppercase' }}>
@@ -387,10 +426,10 @@ export default function Home() {
       <section id="servicios" className="relative border-y border-white/10 bg-[#0D0D0D] px-6 py-24 lg:px-10 lg:py-32">
         <div className="relative mx-auto max-w-[1380px]">
           <div className="mb-16 lg:mb-20">
-            <motion.p className="eyebrow" initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.p className="eyebrow" initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
               {ca ? (servicesTrans.eyebrow || servicesSection?.eyebrow || 'El que fem') : (servicesSection?.eyebrow || 'Lo que hacemos')}
             </motion.p>
-            <motion.h2 className="mt-4 font-serif text-5xl leading-[0.95] tracking-[-0.03em] sm:text-6xl lg:text-7xl xl:text-8xl" initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.h2 className="mt-4 font-serif text-5xl leading-[0.95] tracking-[-0.03em] sm:text-6xl lg:text-7xl xl:text-8xl" initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
               {ca 
                 ? <>{servicesTrans.title || servicesSection?.title || 'Una visió'}<br /><i className="text-[#10B77F]">{servicesTrans.titleItalic || servicesSection?.titleItalic || 'sense límits.'}</i></>
                 : <>{servicesSection?.title || 'Una visión'}<br /><i className="text-[#10B77F]">{servicesSection?.titleItalic || 'sin límites.'}</i></>
@@ -404,7 +443,7 @@ export default function Home() {
               const title = service.title?.[language] || ''
               const copy = service.copy?.[language] || ''
               return (
-                <motion.div key={index} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.8, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}>
+                <motion.div key={index} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}>
                   <Link href={service.href || '#'} className="service-row group relative block border-t border-white/10 py-8 lg:py-12 transition-all duration-500 hover:border-[#10B77F] hover:shadow-[0_0_40px_-5px_rgba(16,183,127,0.4)]">
                     <div className="grid grid-cols-1 lg:grid-cols-[120px_1fr_1.4fr_200px] gap-4 lg:gap-8 items-center">
                       <div className="flex lg:justify-start">
@@ -436,7 +475,7 @@ export default function Home() {
             })}
           </div>
 
-          <motion.div className="mt-12 text-center" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
+          <motion.div className="mt-12 text-center" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
             <button type="button" onClick={() => scrollToSection('contacto')} className="inline-flex items-center gap-3 border-b-2 border-[#10B77F] pb-2 text-[11px] uppercase tracking-[0.24em] text-[#10B77F] transition-all duration-500 hover:border-[#d7bd77] hover:text-[#d7bd77] cursor-pointer">
               {ca ? 'Parlem del teu projecte' : 'Hablemos de tu proyecto'}
               <ArrowUpRight className="size-4" />
@@ -449,10 +488,10 @@ export default function Home() {
       <section id="metodo" className="relative mx-auto max-w-[1380px] px-6 py-24 lg:px-10 lg:py-36 bg-[#080808]">
         <div className="grid gap-16 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
-            <motion.p className="eyebrow" initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.p className="eyebrow" initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
               {ca ? 'El nostre mètode' : 'Nuestro método'}
             </motion.p>
-            <motion.h2 className="section-title" initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.h2 className="section-title" initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}>
               {ca ? <>L'excel·lència<br /><i>és un procés.</i></> : <>La excelencia<br /><i>es un proceso.</i></>}
             </motion.h2>
           </div>
@@ -469,7 +508,7 @@ export default function Home() {
                 className="method-row group relative py-10 px-2 cursor-default"
                 initial={{ opacity: 0, y: 20 }} 
                 whileInView={{ opacity: 1, y: 0 }} 
-                viewport={{ once: true, amount: 0.3 }} 
+                viewport={{ once: true, amount: 0.4 }} 
                 transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
               >
                 <span className="method-divider" aria-hidden="true" />
@@ -495,12 +534,12 @@ export default function Home() {
       <section id="proyectos" className="relative mx-auto max-w-[1380px] px-6 py-24 lg:px-10 lg:py-36 bg-[#080808]">
         <div className="mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
-            <motion.p className="eyebrow" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.p className="eyebrow" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
               {ca 
                 ? (projectsSection?.translations?.sectionTitle?.eyebrow || projectsSection?.sectionTitle?.eyebrow || 'Una selecció')
                 : (projectsSection?.sectionTitle?.eyebrow || 'Una selección')}
             </motion.p>
-            <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
               {ca 
                 ? <>{projectsSection?.translations?.sectionTitle?.title || projectsSection?.sectionTitle?.title || 'El resultat'}<br /><i>{projectsSection?.translations?.sectionTitle?.titleItalic || projectsSection?.sectionTitle?.titleItalic || 'parla per si sol.'}</i></>
                 : <>{projectsSection?.sectionTitle?.title || 'El resultado'}<br /><i>{projectsSection?.sectionTitle?.titleItalic || 'habla por sí solo.'}</i></>
@@ -519,7 +558,7 @@ export default function Home() {
             const isWide = index === 0 || index === 3
             const photoCount = project.images?.length || 1
             return (
-              <motion.div key={index} onClick={() => { setSelectedProject(project); setCurrentPhotoIndex(0) }} className={`project-card group relative overflow-hidden rounded-lg min-h-[400px] border border-[#10B77F]/30 transition-all duration-500 hover:border-[#10B77F] hover:shadow-[0_0_60px_10px_rgba(16,183,127,0.55)] cursor-pointer ${isWide ? 'lg:col-span-2' : 'lg:col-span-1'}`} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.8, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}>
+              <motion.div key={index} onClick={() => { setSelectedProject(project); setCurrentPhotoIndex(0) }} className={`project-card group relative overflow-hidden rounded-lg min-h-[400px] border border-[#10B77F]/30 transition-all duration-500 hover:border-[#10B77F] hover:shadow-[0_0_60px_10px_rgba(16,183,127,0.55)] cursor-pointer ${isWide ? 'lg:col-span-2' : 'lg:col-span-1'}`} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}>
                 <div className="project-image absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${project.image})` }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent md:from-black/70 md:via-black/20" />
                 <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm border border-[#10B77F]/50 rounded-full px-3 py-1.5 transition-all duration-500 group-hover:border-[#10B77F] group-hover:bg-[#10B77F]/20">
@@ -547,7 +586,7 @@ export default function Home() {
             {dynamicStatsData.map((stat: any, index: number) => {
               const IconComponent = stat.icon
               return (
-                <motion.div key={index} className="stat-block group text-center cursor-default" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}>
+                <motion.div key={index} className="stat-block group text-center cursor-default" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}>
                   <IconComponent className="stat-icon size-8 lg:size-10 mx-auto text-[#10B77F] mb-4" />
                   <div className="stat-number font-serif text-5xl lg:text-7xl leading-none text-[#10B77F]">
                     {stat.number}<span className="text-3xl lg:text-5xl">{stat.suffix}</span>
@@ -567,12 +606,12 @@ export default function Home() {
         <section className="relative mx-auto max-w-[1380px] px-4 sm:px-6 py-16 sm:py-24 lg:px-10 lg:py-36 bg-[#080808]">
           <div className="mb-10 sm:mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
             <div>
-              <motion.p className="eyebrow" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
+              <motion.p className="eyebrow" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
                 {ca
                   ? (testimonialsTrans.eyebrow?.ca || testimonialsData?.eyebrow?.ca || 'El que diuen els nostres clients')
                   : (testimonialsData?.eyebrow?.es || 'Lo que dicen nuestros clientes')}
               </motion.p>
-              <motion.h2 className="mt-3 sm:mt-4 font-serif text-3xl sm:text-5xl leading-[0.95] tracking-[-0.03em] lg:text-6xl" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
+              <motion.h2 className="mt-3 sm:mt-4 font-serif text-3xl sm:text-5xl leading-[0.95] tracking-[-0.03em] lg:text-6xl" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
                 {ca 
                   ? <>{testimonialsTrans.title?.ca || testimonialsData?.title?.ca || 'Opinions reals'}<br /><i>{testimonialsTrans.titleItalic?.ca || testimonialsData?.titleItalic?.ca || 'que parlen per nosaltres.'}</i></>
                   : <>{testimonialsData?.title?.es || 'Opiniones reales'}<br /><i>{testimonialsData?.titleItalic?.es || 'que hablan por nosotros.'}</i></>
@@ -650,21 +689,21 @@ export default function Home() {
       <section className="relative border-y border-white/10 bg-[#0D0D0D] px-6 py-24 lg:px-10 lg:py-32">
         <div className="relative mx-auto max-w-[700px]">
           <div className="mb-12 text-center">
-            <motion.p className="eyebrow" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.p className="eyebrow" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
               {ca ? 'La teva opinió' : 'Tu opinión'}
             </motion.p>
-            <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
               {ca 
                 ? <>{'Deixa la teva'}<br /><i className="text-[#10B77F]">{'ressenya.'}</i></>
                 : <>{'Deja tu'}<br /><i className="text-[#10B77F]">{'reseña.'}</i></>
               }
             </motion.h2>
-            <motion.p className="mt-6 text-sm text-white/60 max-w-md mx-auto" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.8, delay: 0.2 }}>
+            <motion.p className="mt-6 text-sm text-white/60 max-w-md mx-auto" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.2 }}>
               {ca ? 'Només per a clients que han treballat amb nosaltres.' : 'Solo para clientes que han trabajado con nosotros.'}
             </motion.p>
           </div>
 
-          <motion.div className="relative p-8 lg:p-10 rounded-2xl border border-[#10B77F]/40 bg-[#0A0A0A] transition-all duration-500 hover:border-[#10B77F] hover:shadow-[0_0_60px_10px_rgba(16,183,127,0.35)]" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
+          <motion.div className="relative p-8 lg:p-10 rounded-2xl border border-[#10B77F]/40 bg-[#0A0A0A] transition-all duration-500 hover:border-[#10B77F] hover:shadow-[0_0_60px_10px_rgba(16,183,127,0.35)]" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
             {reviewSuccess ? (
               <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-8">
                 <div className="flex justify-center mb-6">
@@ -754,10 +793,10 @@ export default function Home() {
       <section className="relative border-y border-white/10 bg-[#0D0D0D] px-6 py-24 lg:px-10 lg:py-32">
         <div className="relative mx-auto max-w-[1000px]">
           <div className="mb-14 lg:mb-16 text-center">
-            <motion.p className="eyebrow" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.p className="eyebrow" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
               {ca ? 'Dubtes freqüents' : 'Dudas frecuentes'}
             </motion.p>
-            <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.h2 className="section-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
               {ca 
                 ? <>{'Preguntes'}<br /><i className="text-[#10B77F]">{'freqüents.'}</i></>
                 : <>{'Preguntas'}<br /><i className="text-[#10B77F]">{'frecuentes.'}</i></>
@@ -769,7 +808,7 @@ export default function Home() {
             {faqs.map((faq, index) => {
               const isOpen = openFaq === index
               return (
-                <motion.div key={index} className="faq-item" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.6, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}>
+                <motion.div key={index} className="faq-item" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.6, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}>
                   <button onClick={() => setOpenFaq(isOpen ? null : index)} className="group w-full flex items-start justify-between gap-6 py-6 lg:py-7 text-left transition-colors duration-500">
                     <span className={`font-serif text-xl lg:text-2xl leading-tight transition-colors duration-500 ${isOpen ? 'text-[#d7bd77]' : 'text-white group-hover:text-[#10B77F]'}`}>
                       {ca ? faq.qCa : faq.qEs}
@@ -794,19 +833,19 @@ export default function Home() {
 
       {/* 9. CONTACTO */}
       <section id="contacto" className="relative overflow-hidden bg-[#d7bd77] px-6 py-24 text-[#141310] lg:px-10 lg:py-32">
-        <motion.div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-[#10B77F]/10 blur-3xl" initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, amount: 0.1 }} transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }} />
-        <motion.div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-[#10B77F]/10 blur-3xl" initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, amount: 0.1 }} transition={{ duration: 1.5, delay: 0.3, ease: [0.22, 1, 0.36, 1] }} />
+        <motion.div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-[#10B77F]/10 blur-3xl" initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }} />
+        <motion.div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-[#10B77F]/10 blur-3xl" initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 1.5, delay: 0.3, ease: [0.22, 1, 0.36, 1] }} />
 
         <div className="relative mx-auto flex max-w-[1380px] flex-col justify-between gap-12 lg:flex-row lg:items-end">
           <div>
-            <motion.p className="eyebrow !text-[#141310]/60" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.p className="eyebrow !text-[#141310]/60" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
               {ca ? 'El primer pas' : 'El primer paso'}
             </motion.p>
-            <motion.h2 className="max-w-3xl font-serif text-5xl leading-none tracking-tight sm:text-7xl" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.h2 className="max-w-3xl font-serif text-5xl leading-none tracking-tight sm:text-7xl" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}>
               {ca ? <>Fem alguna cosa<br /><i>extraordinària.</i></> : <>Hagamos algo<br /><i>extraordinario.</i></>}
             </motion.h2>
           </div>
-          <motion.div className="max-w-sm" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
+          <motion.div className="max-w-sm" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
             <p className="text-sm leading-relaxed text-[#141310]/70">
               {ca ? "Explica'ns la teva idea." : 'Cuéntanos tu idea.'}
             </p>
@@ -822,11 +861,11 @@ export default function Home() {
 
       {/* 10. FOOTER */}
       <footer className="relative bg-[#080808] px-6 py-14 lg:px-10">
-        <motion.div className="absolute top-0 left-0 h-px bg-gradient-to-r from-[#10B77F] via-[#10B77F]/40 to-transparent" initial={{ width: 0 }} whileInView={{ width: '100%' }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }} />
+        <motion.div className="absolute top-0 left-0 h-px bg-gradient-to-r from-[#10B77F] via-[#10B77F]/40 to-transparent" initial={{ width: 0 }} whileInView={{ width: '100%' }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }} />
 
         <div className="mx-auto max-w-[1380px]">
           <div className="flex flex-col justify-between gap-10 border-b border-white/10 pb-12 md:flex-row">
-            <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
               <Link href="/" className="flex items-center gap-3 group">
                 <img src="/logo.png" alt="Renovactiva" className="h-12 w-auto transition-transform duration-500 group-hover:scale-105" />
                 <span className="font-serif text-xl uppercase tracking-[0.28em] text-[#d7bd77] transition-colors duration-500 group-hover:text-[#10B77F]" style={{ textTransform: 'uppercase' }}>
@@ -838,21 +877,50 @@ export default function Home() {
               </p>
             </motion.div>
 
-            <motion.div className="grid grid-cols-2 gap-x-14 gap-y-8 text-sm text-white/65" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}>
-              <div>
-                <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77]">{ca ? 'Contacte' : 'Contacto'}</p>
-                <a href={`tel:${(footerData?.contact?.phone || '+34600000000').replace(/\s/g, '')}`} className="footer-link block">{footerData?.contact?.phone || '+34 600 000 000'}</a>
-                <a href={getFooterMailHref()} className="footer-link block">{footerData?.contact?.email || 'info@renovactiva.com'}</a>
-                <div className="flex items-center gap-3 mt-4">
-                  <WhatsAppFooterButton lang={ca ? 'ca' : 'es'} onClick={() => setWhatsAppModalOpen(true)} />
-                </div>
+            <motion.div className="grid grid-cols-2 gap-x-8 gap-y-8 text-sm" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}>
+              {/* COLUMNA CONTACTO */}
+              <div className="min-w-0">
+                <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77] font-semibold">{ca ? 'Contacte' : 'Contacto'}</p>
+
+                {/* TELÉFONO */}
+                <a
+                  href={`tel:${(footerData?.contact?.phone || '+34600000000').replace(/\s/g, '')}`}
+                  className="group flex items-center gap-2 mb-3 text-[#10B77F] hover:text-[#d7bd77] transition-colors break-words"
+                >
+                  <Phone className="size-4 flex-shrink-0 text-[#d7bd77] group-hover:text-[#10B77F] transition-colors" />
+                  <span className="text-sm break-all">{footerData?.contact?.phone || '+34 600 000 000'}</span>
+                </a>
+
+                {/* CORREO — abre ContactModal */}
+                <button
+                  type="button"
+                  onClick={() => setContactModalOpen(true)}
+                  className="group flex items-center gap-2 mb-3 text-[#10B77F] hover:text-[#d7bd77] transition-colors w-full text-left cursor-pointer break-words"
+                >
+                  <Mail className="size-4 flex-shrink-0 text-[#d7bd77] group-hover:text-[#10B77F] transition-colors" />
+                  <span className="text-sm break-all">{footerData?.contact?.email || 'info@renovactiva.com'}</span>
+                </button>
+
+                {/* WHATSAPP — abre WhatsAppModal */}
+                <button
+                  type="button"
+                  onClick={() => setWhatsAppModalOpen(true)}
+                  className="group flex items-center gap-2 text-[#10B77F] hover:text-[#d7bd77] transition-colors w-full text-left cursor-pointer break-words"
+                >
+                  <svg viewBox="0 0 24 24" className="size-4 flex-shrink-0 fill-[#d7bd77] group-hover:fill-[#10B77F] transition-colors">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                  </svg>
+                  <span className="text-sm break-all">{footerData?.contact?.phone || '+34 722 454 020'}</span>
+                </button>
               </div>
-              <div>
-                <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77]">{ca ? "Visita'ns" : 'Visítanos'}</p>
-                <p>{ca ? (footerTrans.address?.street || footerData?.address?.street || 'Carrer Exemple 123') : (footerData?.address?.street || 'Carrer Exemple 123')}</p>
-                <p>{footerData?.address?.postal || '08001'}{' '}{ca ? (footerTrans.address?.city || footerData?.address?.city || 'Barcelona') : (footerData?.address?.city || 'Barcelona')}</p>
+
+              {/* COLUMNA VISÍTANOS */}
+              <div className="min-w-0">
+                <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77] font-semibold">{ca ? "Visita'ns" : 'Visítanos'}</p>
+                <p className="text-white/75 text-sm">{ca ? (footerTrans.address?.street || footerData?.address?.street || 'Carrer Exemple 123') : (footerData?.address?.street || 'Carrer Exemple 123')}</p>
+                <p className="text-white/75 text-sm">{footerData?.address?.postal || '08001'}{' '}{ca ? (footerTrans.address?.city || footerData?.address?.city || 'Barcelona') : (footerData?.address?.city || 'Barcelona')}</p>
                 {footerData?.schedule && (
-                  <p className="mt-3 flex items-start gap-2">
+                  <p className="mt-3 flex items-start gap-2 text-white/75 text-sm">
                     <span className="flex-shrink-0">🕒</span>
                     <span>{ca ? (footerTrans.schedule || footerData.schedule) : footerData.schedule}</span>
                   </p>
@@ -861,7 +929,7 @@ export default function Home() {
             </motion.div>
           </div>
 
-          <motion.div className="hidden sm:flex flex-row justify-between gap-5 pt-7 text-[10px] uppercase tracking-[0.18em] text-white/45" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
+          <motion.div className="hidden sm:flex flex-row justify-between gap-5 pt-7 text-[10px] uppercase tracking-[0.18em] text-white/45" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
             <p>
               {ca ? (footerTrans.copyright || footerData?.copyright || '© 2025 Renovactiva SL. Tots els drets reservats.') : (footerData?.copyright || '© 2025 Renovactiva SL. Todos los derechos reservados.')}
             </p>

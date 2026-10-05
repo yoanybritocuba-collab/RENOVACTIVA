@@ -725,3 +725,38 @@
   .mascot-speech.is-recurring, .mascot-assistant.is-deep-sleep .robot-eye,
   .mascot-assistant.is-deep-sleep .robot-core { animation: none; }
 }
+/* ============================================================
+   ⭐ EFECTO ACTIVO EN MÓVIL — MÉTODO
+   Cuando el bloque está en el centro de la pantalla (móvil),
+   se activa el mismo efecto que el hover de PC.
+   ============================================================ */
+@media (max-width: 1023px) {
+  .method-row.is-active .method-divider {
+    background: linear-gradient(90deg, transparent, #10B77F, transparent);
+    box-shadow: 0 0 20px rgba(16, 183, 127, 0.6);
+  }
+
+  .method-row.is-active .method-bg-number {
+    color: rgba(215, 189, 119, 0.18);
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  .method-row.is-active .method-title {
+    transform: translateX(6px);
+    text-shadow: 0 0 30px rgba(215, 189, 119, 0.35);
+  }
+
+  .method-row.is-active .method-desc-bar {
+    transform: translateY(-50%) scaleY(1);
+    opacity: 1;
+    width: 3px;
+    box-shadow: 0 0 15px rgba(215, 189, 119, 0.6);
+  }
+
+  .method-row.is-active .method-desc {
+    color: #d7bd77;
+    font-size: 1rem;
+    letter-spacing: 0.03em;
+    text-shadow: 0 0 20px rgba(215, 189, 119, 0.2);
+  }
+}
