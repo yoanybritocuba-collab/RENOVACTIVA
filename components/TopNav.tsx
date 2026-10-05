@@ -109,23 +109,23 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
           navVisible ? 'translate-y-0' : '-translate-y-full'
         }`}
         style={{
-          background: 'linear-gradient(115deg, #ffffff 0%, #ffffff 32%, #000000 32.5%, #000000 100%)',
+          background: '#000000',
         }}
       >
         <div className="mx-auto flex max-w-[1380px] items-center justify-between px-4 py-3 lg:px-10 lg:py-4">
-          {/* ✅ LOGO + NOMBRE — movidos 3cm a la izquierda con -ml */}
-          <Link href="/" className="-ml-12 lg:-ml-28 flex items-center gap-3 flex-shrink-0">
+          {/* ✅ LOGO + NOMBRE */}
+          <Link href="/" className="ml-2 lg:-ml-28 flex items-center gap-3 flex-shrink-0">
             <img 
               src="/logo.png" 
               alt="Renovactiva" 
               className="h-10 w-auto lg:h-14" 
             />
-            <span className="font-serif text-sm uppercase tracking-[0.18em] text-[#ad742a] sm:text-base lg:text-xl lg:tracking-[0.28em] whitespace-nowrap">
-              RENOVACTIVA<span className="text-[#042133]"> SL</span>
+            <span className="font-serif text-sm uppercase tracking-[0.18em] text-[#d7bd77] sm:text-base lg:text-xl lg:tracking-[0.28em] whitespace-nowrap">
+              RENOVACTIVA<span className="text-[#FFFFFF]"> SL</span>
             </span>
           </Link>
 
-          {/* ✅ MENÚ — sin cambios */}
+          {/* ✅ MENÚ ESCRITORIO */}
           <nav className="hidden lg:flex items-center gap-2 xl:gap-4 text-[11px] uppercase tracking-[0.2em]">
             <button type="button" onClick={goToServicios} className={navLinkClass}>
               {ca ? 'SERVEIS' : 'SERVICIOS'}
