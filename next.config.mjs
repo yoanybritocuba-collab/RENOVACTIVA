@@ -17,6 +17,22 @@ const nextConfig = {
       ],
     }]
   },
+  async redirects() {
+    return [
+      // ✅ Redirige la URL antigua de locales a la nueva unificada
+      {
+        source: '/reformas-locales-comerciales',
+        destination: '/reformas-locales-oficinas',
+        permanent: true, // 308: permanente (mejor para SEO)
+      },
+      // ✅ Redirige la URL antigua de oficinas a la nueva unificada
+      {
+        source: '/reformas-oficinas',
+        destination: '/reformas-locales-oficinas',
+        permanent: true, // 308: permanente (mejor para SEO)
+      },
+    ]
+  },
 }
 
 export default nextConfig

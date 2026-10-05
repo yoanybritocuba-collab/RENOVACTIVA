@@ -5,9 +5,10 @@ export async function POST() {
   try {
     revalidatePath('/', 'page')
     revalidatePath('/reformas-viviendas', 'page')
-    revalidatePath('/reformas-oficinas', 'page')
-    revalidatePath('/reformas-locales-comerciales', 'page')
-    
+    revalidatePath('/reformas-locales-oficinas', 'page')
+    revalidatePath('/reformas-fincas', 'page')
+    revalidatePath('/servicios', 'page')
+
     revalidatePath('/admin', 'page')
     revalidatePath('/admin/hero', 'page')
     revalidatePath('/admin/services', 'page')
@@ -16,15 +17,15 @@ export async function POST() {
     revalidatePath('/admin/testimonials', 'page')
     revalidatePath('/admin/contact', 'page')
     revalidatePath('/admin/footer', 'page')
-    
-    return NextResponse.json({ 
-      revalidated: true, 
+
+    return NextResponse.json({
+      revalidated: true,
       now: Date.now()
     })
   } catch (err) {
-    return NextResponse.json({ 
-      revalidated: false, 
-      error: String(err) 
+    return NextResponse.json({
+      revalidated: false,
+      error: String(err)
     }, { status: 500 })
   }
 }

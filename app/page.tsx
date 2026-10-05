@@ -200,18 +200,13 @@ export default function Home() {
 
   // ============================================================
   // ⭐ EFECTO EN MÓVIL — MÉTODO
-  // Cuando un bloque del método está en el centro de la pantalla,
-  // se activa la clase .is-active (equivalente al hover de PC).
-  // Solo se ejecuta en móvil/tablet (< 1024px).
   // ============================================================
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    // Solo aplicar en móvil/tablet
     const isMobile = window.matchMedia('(max-width: 1023px)').matches
     if (!isMobile) return
 
-    // Esperar un frame a que el DOM tenga los .method-row renderizados
     const timeoutId = setTimeout(() => {
       const rows = document.querySelectorAll('.method-row')
       if (rows.length === 0) return
@@ -227,15 +222,12 @@ export default function Home() {
           })
         },
         {
-          // Activa solo cuando el bloque entra en el 30% central de la pantalla
           rootMargin: '-35% 0px -35% 0px',
           threshold: 0,
         }
       )
 
       rows.forEach((row) => observer.observe(row))
-
-      // Guardamos referencia para limpiar después
       ;(window as any).__methodObserver = observer
     }, 300)
 
@@ -359,7 +351,8 @@ export default function Home() {
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#080808] text-[#f3f0e9]">
-      <TopNav variant="light" onOpenContactModal={() => setContactModalOpen(true)} />
+      {/* ✅ CAMBIO: variant="light" → variant="dark" para que la barra sea negra */}
+      <TopNav variant="dark" onOpenContactModal={() => setContactModalOpen(true)} />
 
       {/* 1. HERO */}
       <section className="relative flex min-h-[600px] items-center lg:items-end lg:min-h-screen overflow-hidden pt-20 lg:pt-0">
