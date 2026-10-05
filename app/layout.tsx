@@ -8,20 +8,18 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://www.renovactiva.com'),
 
   // ✅ TÍTULO — Pestaña del navegador y Google
-  title: 'RENOVACTIVA SL | Rehabilitación integral y construcción',
+  title: 'Rehabilitación integral y construcción',
 
-  description: 'RENOVACTIVA SL — Empresa de construcción y rehabilitación integral en Barcelona. Reformas de alto nivel para viviendas, locales comerciales, oficinas y fincas.',
+  description: 'Empresa de rehabilitación integral y construcción en Barcelona. Reformas de alto nivel para viviendas, locales comerciales, oficinas y fincas.',
 
   generator: 'Renovactiva',
-  applicationName: 'RENOVACTIVA SL',
-  authors: [{ name: 'RENOVACTIVA SL' }],
+  applicationName: 'Rehabilitación integral y construcción',
+  authors: [{ name: 'Renovactiva SL' }],
   keywords: [
-    'RENOVACTIVA SL',
-    'construcción',
     'rehabilitación integral',
+    'construcción',
     'reformas Barcelona',
     'rehabilitación',
-    'construcción',
     'obras',
     'reformas integrales',
     'interiorismo',
@@ -51,15 +49,15 @@ export const metadata: Metadata = {
     locale: 'es_ES',
     alternateLocale: ['ca_ES'],
     url: 'https://www.renovactiva.com',
-    siteName: 'RENOVACTIVA SL',
-    title: 'RENOVACTIVA SL | Rehabilitación integral y construcción',
-    description: 'RENOVACTIVA SL — Empresa de construcción y rehabilitación integral en Barcelona. Reformas de alto nivel para viviendas, locales comerciales, oficinas y fincas.',
+    siteName: 'Rehabilitación integral y construcción',
+    title: 'Rehabilitación integral y construcción',
+    description: 'Empresa de rehabilitación integral y construcción en Barcelona. Reformas de alto nivel para viviendas, locales comerciales, oficinas y fincas.',
     images: [
       {
         url: '/logo.png',
         width: 1200,
         height: 630,
-        alt: 'RENOVACTIVA SL — Rehabilitación integral y construcción',
+        alt: 'Rehabilitación integral y construcción',
       },
     ],
   },
@@ -69,8 +67,8 @@ export const metadata: Metadata = {
   // ============================================================
   twitter: {
     card: 'summary_large_image',
-    title: 'RENOVACTIVA SL | Rehabilitación integral y construcción',
-    description: 'RENOVACTIVA SL — Empresa de construcción y rehabilitación integral en Barcelona.',
+    title: 'Rehabilitación integral y construcción',
+    description: 'Empresa de rehabilitación integral y construcción en Barcelona.',
     images: ['/logo.png'],
   },
 
@@ -118,17 +116,18 @@ export default function RootLayout({
 
         {/* ============================================================
             ✅ DATOS ESTRUCTURADOS JSON-LD
+            Esto es lo que le dice a Google qué nombre mostrar
             ============================================================ */}
 
-        {/* WebSite — Nombre oficial que aparece en Google */}
+        {/* WebSite — Nombre del sitio en Google */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'WebSite',
-              name: 'RENOVACTIVA SL',
-              alternateName: 'Renovactiva',
+              name: 'Rehabilitación integral y construcción',
+              alternateName: ['RENOVACTIVA SL', 'Renovactiva'],
               url: 'https://www.renovactiva.com',
               inLanguage: ['es-ES', 'ca-ES'],
               publisher: {
@@ -150,7 +149,7 @@ export default function RootLayout({
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'Organization',
-              name: 'RENOVACTIVA SL',
+              name: 'Rehabilitación integral y construcción',
               legalName: 'RENOVACTIVA SL',
               alternateName: 'Renovactiva',
               url: 'https://www.renovactiva.com',
@@ -162,7 +161,7 @@ export default function RootLayout({
               },
               image: 'https://www.renovactiva.com/logo.png',
               description:
-                'RENOVACTIVA SL — Empresa de construcción y rehabilitación integral en Barcelona. Reformas de alto nivel para viviendas, locales comerciales, oficinas y fincas.',
+                'Empresa de rehabilitación integral y construcción en Barcelona. Reformas de alto nivel para viviendas, locales comerciales, oficinas y fincas.',
               address: {
                 '@type': 'PostalAddress',
                 addressCountry: 'ES',
