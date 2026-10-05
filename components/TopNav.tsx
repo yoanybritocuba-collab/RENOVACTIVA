@@ -44,8 +44,7 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
 
-  // ✅ Mostrar/ocultar barra según cursor (solo en páginas que no son Home)
-  // Zona ampliada a 250px
+  // ✅ Mostrar/ocultar barra según cursor
   useEffect(() => {
     if (isHome || isMobile) {
       setNavVisible(true)
@@ -66,7 +65,6 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
     return () => document.removeEventListener('mousemove', handleMouseMove)
   }, [pathname, isHome, isMobile])
 
-  // ✅ Navegación a páginas
   function goToServicios() {
     setMenuOpen(false)
     router.push('/servicios')
@@ -96,43 +94,38 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
     }
   }
 
-  // ✅ CAMBIO: barra negra pura #000000
-  const headerClass = light
-    ? 'fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white shadow-sm'
-    : 'fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#000000] backdrop-blur-md'
+  const navLinkClass = 'relative inline-flex items-center px-3 py-2 text-white/75 hover:text-[#d7bd77] transition-colors'
 
-  const navLinkClass = light
-    ? 'relative inline-flex items-center px-3 py-2 text-[#141310]/75 hover:text-[#d7bd77] transition-colors'
-    : 'relative inline-flex items-center px-3 py-2 text-white/75 hover:text-[#d7bd77] transition-colors'
+  const menuBtnClass = 'text-white/80 hover:text-white'
 
-  const menuBtnClass = light
-    ? 'text-[#141310]/80 hover:text-[#141310]'
-    : 'text-white/80 hover:text-white'
+  const panelBg = 'bg-[#000000] border-white/10'
 
-  // ✅ Panel lateral móvil en negro puro
-  const panelBg = light
-    ? 'bg-white border-black/10'
-    : 'bg-[#000000] border-white/10'
-
-  const panelLinkClass = light
-    ? 'block w-full text-left px-6 py-4 text-[#141310]/80 hover:bg-[#d7bd77]/10 hover:text-[#d7bd77] transition-colors text-sm uppercase tracking-[0.18em] border-b border-black/5'
-    : 'block w-full text-left px-6 py-4 text-white/80 hover:bg-[#d7bd77]/10 hover:text-[#d7bd77] transition-colors text-sm uppercase tracking-[0.18em] border-b border-white/5'
+  const panelLinkClass = 'block w-full text-left px-6 py-4 text-white/80 hover:bg-[#d7bd77]/10 hover:text-[#d7bd77] transition-colors text-sm uppercase tracking-[0.18em] border-b border-white/5'
 
   return (
     <>
       <header
-        className={`${headerClass} transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`fixed inset-x-0 top-0 z-50 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           navVisible ? 'translate-y-0' : '-translate-y-full'
         }`}
+        style={{
+          background: 'linear-gradient(115deg, #ffffff 0%, #ffffff 32%, #000000 32.5%, #000000 100%)',
+        }}
       >
-        <div className="mx-auto flex max-w-[1380px] items-center justify-between px-4 py-4 lg:px-10 lg:py-5">
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <img src="/logo.png" alt="Renovactiva" className="h-10 w-auto lg:h-14" />
-            <span className="font-serif text-sm uppercase tracking-[0.18em] text-[#d7bd77] sm:text-base lg:text-xl lg:tracking-[0.28em] whitespace-nowrap">
+        <div className="mx-auto flex max-w-[1380px] items-center justify-between px-4 py-3 lg:px-10 lg:py-4">
+          {/* ✅ LOGO + NOMBRE — movidos 3cm a la izquierda con -ml */}
+          <Link href="/" className="-ml-12 lg:-ml-28 flex items-center gap-3 flex-shrink-0">
+            <img 
+              src="/logo.png" 
+              alt="Renovactiva" 
+              className="h-10 w-auto lg:h-14" 
+            />
+            <span className="font-serif text-sm uppercase tracking-[0.18em] text-[#ad742a] sm:text-base lg:text-xl lg:tracking-[0.28em] whitespace-nowrap">
               RENOVACTIVA<span className="text-[#042133]"> SL</span>
             </span>
           </Link>
 
+          {/* ✅ MENÚ — sin cambios */}
           <nav className="hidden lg:flex items-center gap-2 xl:gap-4 text-[11px] uppercase tracking-[0.2em]">
             <button type="button" onClick={goToServicios} className={navLinkClass}>
               {ca ? 'SERVEIS' : 'SERVICIOS'}
@@ -156,7 +149,7 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
           </nav>
 
           <div className="flex items-center gap-2 lg:gap-4 flex-shrink-0">
-            <LanguageSwitcher variant={light ? 'light' : 'dark'} />
+            <LanguageSwitcher variant="dark" />
             <button
               aria-label="Abrir menú"
               onClick={() => setMenuOpen(true)}
@@ -171,17 +164,14 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
       {/* ✅ PANEL LATERAL MÓVIL */}
       {menuOpen && (
         <>
-          {/* Overlay oscuro */}
           <div
             className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm lg:hidden animate-in fade-in duration-300"
             onClick={() => setMenuOpen(false)}
           />
 
-          {/* Panel deslizante desde la derecha */}
           <div
             className={`fixed top-0 right-0 z-[101] h-full w-[280px] ${panelBg} border-l shadow-2xl lg:hidden flex flex-col animate-in slide-in-from-right duration-300`}
           >
-            {/* Header del panel */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
               <span className="font-serif text-lg tracking-[0.2em] text-[#d7bd77]">
                 MENÚ
@@ -195,7 +185,6 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
               </button>
             </div>
 
-            {/* Enlaces del panel */}
             <nav className="flex-1 overflow-y-auto">
               <button type="button" onClick={goToServicios} className={panelLinkClass}>
                 {ca ? 'SERVEIS' : 'SERVICIOS'}
@@ -210,7 +199,6 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
                 {ca ? 'CONTACTE' : 'CONTACTO'}
               </button>
 
-              {/* Botón destacado de solicitar presupuesto */}
               <div className="p-6">
                 <button
                   type="button"
