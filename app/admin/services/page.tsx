@@ -43,44 +43,40 @@ export default function ServicesPage() {
           ...item,
           images: item.images || (item.image ? [item.image] : [])
         }))
-        setData({
-          ...servicesData,
-          content: { ...servicesData.content, items }
-        })
+        setData({ ...servicesData, content: { ...servicesData.content, items } })
       }
     } catch (err) { setError('Error: ' + (err as Error).message) }
     finally { setLoading(false) }
   }
 
+  async function translateField(esValue: string | undefined): Promise<string> {
+    if (!esValue || !esValue.trim()) return ''
+    try { return await translate(esValue, 'ca') } catch { return '' }
+  }
+
   async function saveData() {
-    setSaving(true); setError(''); setNotice('Traduciendo y guardando...')
+    setSaving(true); setError(''); setNotice('🌐 Traduciendo y guardando...')
     try {
       const contentToSave = { ...data.content }
 
-      // Validar: ningún servicio puede tener href vacío
       const hrefVacio = (contentToSave.items || []).some((item: any) => !item.href?.trim())
       if (hrefVacio) {
         throw new Error('Todos los servicios deben tener un enlace. Revisa los que tengan el campo "Enlace" vacío.')
       }
 
-      const translations = {
-        eyebrow: await translate(data.content.eyebrow || '', 'ca'),
-        title: await translate(data.content.title || '', 'ca'),
-        titleItalic: await translate(data.content.titleItalic || '', 'ca'),
+      // 🔥 Traducir SIEMPRE desde ES
+      contentToSave.translations = {
+        eyebrow: await translateField(data.content.eyebrow),
+        title: await translateField(data.content.title),
+        titleItalic: await translateField(data.content.titleItalic),
       }
-      contentToSave.translations = translations
 
       const translatedItems = await Promise.all(
-        (data.content.items || []).map(async (item: any) => {
-          const newItem = { ...item }
-          if (item.title?.es && !item.title?.ca) {
-            newItem.title = { ...item.title, ca: await translate(item.title.es, 'ca') }
-          }
-          if (item.copy?.es && !item.copy?.ca) {
-            newItem.copy = { ...item.copy, ca: await translate(item.copy.es, 'ca') }
-          }
-          return newItem
-        })
+        (data.content.items || []).map(async (item: any) => ({
+          ...item,
+          title: { es: item.title?.es || '', ca: await translateField(item.title?.es) },
+          copy: { es: item.copy?.es || '', ca: await translateField(item.copy?.es) },
+        }))
       )
       contentToSave.items = translatedItems
 
@@ -98,11 +94,7 @@ export default function ServicesPage() {
       if (!res.ok) throw new Error('Error al guardar')
       setData({ ...data, content: contentToSave })
 
-      try {
-        await fetch('/api/revalidate', { method: 'POST' })
-      } catch (e) {
-        console.warn('Revalidate falló:', e)
-      }
+      try { await fetch('/api/revalidate', { method: 'POST' }) } catch {}
 
       setNotice('✅ Servicios guardados y traducidos correctamente')
       setTimeout(() => setNotice(''), 3000)
@@ -119,10 +111,7 @@ export default function ServicesPage() {
 
   function updateItemNested(index: number, parent: string, lang: string, value: string) {
     const newItems = [...(data.content.items || [])]
-    newItems[index] = {
-      ...newItems[index],
-      [parent]: { ...newItems[index][parent], [lang]: value }
-    }
+    newItems[index] = { ...newItems[index], [parent]: { ...newItems[index][parent], [lang]: value } }
     setData({ ...data, content: { ...data.content, items: newItems } })
   }
 
@@ -136,14 +125,6 @@ export default function ServicesPage() {
       href: ''
     })
     setData({ ...data, content: { ...data.content, items: newItems } })
-
-    setTimeout(() => {
-      const newIndex = newItems.length - 1
-      const element = document.getElementById(`service-${newIndex}`)
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }
-    }, 100)
   }
 
   function removeItem(index: number) {
@@ -158,9 +139,7 @@ export default function ServicesPage() {
     const temp = newItems[index]
     newItems[index] = newItems[index - 1]
     newItems[index - 1] = temp
-    newItems.forEach((item: any, i: number) => {
-      item.number = String(i + 1).padStart(2, '0')
-    })
+    newItems.forEach((item: any, i: number) => { item.number = String(i + 1).padStart(2, '0') })
     setData({ ...data, content: { ...data.content, items: newItems } })
   }
 
@@ -170,9 +149,7 @@ export default function ServicesPage() {
     const temp = newItems[index]
     newItems[index] = newItems[index + 1]
     newItems[index + 1] = temp
-    newItems.forEach((item: any, i: number) => {
-      item.number = String(i + 1).padStart(2, '0')
-    })
+    newItems.forEach((item: any, i: number) => { item.number = String(i + 1).padStart(2, '0') })
     setData({ ...data, content: { ...data.content, items: newItems } })
   }
 
@@ -181,7 +158,7 @@ export default function ServicesPage() {
   return (
     <AdminSection
       title="Servicios"
-      description="Edita la sección 'Lo que hacemos'"
+      description="Edita los servicios. El catalán se genera automáticamente al guardar."
       onSave={saveData}
       saving={saving}
       error={error}
@@ -195,16 +172,13 @@ export default function ServicesPage() {
           <Plus className="size-5" /> Añadir servicio
         </button>
 
-        <div className="flex items-center justify-between">
-          <h3 className="text-white/60 text-sm font-semibold">Servicios ({(data.content.items || []).length})</h3>
-        </div>
+        <h3 className="text-white/60 text-sm font-semibold">Servicios ({(data.content.items || []).length})</h3>
 
         <div className="space-y-8">
           {(data.content.items || []).map((item: any, index: number) => {
             const hrefVacio = !item.href?.trim()
-
             return (
-              <div key={index} id={`service-${index}`} className={`space-y-5 scroll-mt-20 ${hrefVacio ? 'border-l-4 border-yellow-400/50 pl-4' : ''}`}>
+              <div key={index} className={`space-y-5 ${hrefVacio ? 'border-l-4 border-yellow-400/50 pl-4' : ''}`}>
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <div className="flex items-center gap-3">
                     <span className="text-[#d7bd77] font-serif text-lg">Servicio {index + 1}</span>
@@ -215,22 +189,8 @@ export default function ServicesPage() {
                     )}
                   </div>
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => moveUp(index)}
-                      disabled={index === 0}
-                      className="text-white/40 hover:text-white p-1 disabled:opacity-30 disabled:cursor-not-allowed"
-                      title="Subir"
-                    >
-                      ▲
-                    </button>
-                    <button
-                      onClick={() => moveDown(index)}
-                      disabled={index === (data.content.items || []).length - 1}
-                      className="text-white/40 hover:text-white p-1 disabled:opacity-30 disabled:cursor-not-allowed"
-                      title="Bajar"
-                    >
-                      ▼
-                    </button>
+                    <button onClick={() => moveUp(index)} disabled={index === 0} className="text-white/40 hover:text-white p-1 disabled:opacity-30">▲</button>
+                    <button onClick={() => moveDown(index)} disabled={index === (data.content.items || []).length - 1} className="text-white/40 hover:text-white p-1 disabled:opacity-30">▼</button>
                     <button onClick={() => removeItem(index)} className="text-red-400 hover:text-red-300 p-1 ml-2">
                       <Trash2 className="size-4" />
                     </button>
@@ -247,13 +207,9 @@ export default function ServicesPage() {
                     <label className={`block text-xs mb-1 ${hrefVacio ? 'text-yellow-400' : 'text-white/50'}`}>
                       Enlace * {hrefVacio && '⚠️'}
                     </label>
-                    <input
-                      type="text"
-                      value={item.href || ''}
-                      onChange={(e) => updateItem(index, 'href', e.target.value)}
+                    <input type="text" value={item.href || ''} onChange={(e) => updateItem(index, 'href', e.target.value)}
                       className={`w-full bg-white/5 border rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none ${hrefVacio ? 'border-yellow-400/50' : 'border-white/10'}`}
-                      placeholder="/reformas-viviendas"
-                    />
+                      placeholder="/reformas-viviendas" />
                   </div>
                 </div>
 
@@ -269,33 +225,24 @@ export default function ServicesPage() {
                 </div>
 
                 <div className="border-l-2 border-[#d7bd77]/30 pl-3 space-y-2">
-                  <p className="text-[#d7bd77] text-xs font-bold">ES Español</p>
+                  <p className="text-[#d7bd77] text-xs font-bold">🇪🇸 Español</p>
                   <input type="text" value={item.title?.es || ''} onChange={(e) => updateItemNested(index, 'title', 'es', e.target.value)}
                     className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Título del servicio" />
                   <input type="text" value={item.copy?.es || ''} onChange={(e) => updateItemNested(index, 'copy', 'es', e.target.value)}
                     className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Descripción del servicio" />
                 </div>
 
-                <div className="border-l-2 border-white/10 pl-3 space-y-2">
-                  <p className="text-white/40 text-xs font-bold">CA Català</p>
-                  <input type="text" value={item.title?.ca || ''} onChange={(e) => updateItemNested(index, 'title', 'ca', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Títol del servei" />
-                  <input type="text" value={item.copy?.ca || ''} onChange={(e) => updateItemNested(index, 'copy', 'ca', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none" placeholder="Descripció del servei" />
+                <div className="border-l-2 border-white/10 pl-3 space-y-2 bg-white/[.01] p-3 rounded-lg">
+                  <p className="text-white/40 text-xs font-bold">🇨🇦 Català (auto — solo lectura)</p>
+                  <input type="text" value={item.title?.ca || ''} readOnly tabIndex={-1}
+                    className="w-full bg-white/[.02] border border-white/5 rounded-lg px-3 py-2 text-sm text-white/60 outline-none cursor-default" />
+                  <input type="text" value={item.copy?.ca || ''} readOnly tabIndex={-1}
+                    className="w-full bg-white/[.02] border border-white/5 rounded-lg px-3 py-2 text-sm text-white/60 outline-none cursor-default" />
                 </div>
               </div>
             )
           })}
         </div>
-
-        {(data.content.items || []).some((item: any) => !item.href?.trim()) && (
-          <div className="bg-yellow-400/10 border border-yellow-400/30 px-4 py-3 rounded-lg">
-            <p className="text-yellow-400 text-sm flex items-center gap-2">
-              <AlertTriangle className="size-4" />
-              Hay servicios sin enlace. Rellena el campo "Enlace" para poder guardar.
-            </p>
-          </div>
-        )}
       </div>
     </AdminSection>
   )

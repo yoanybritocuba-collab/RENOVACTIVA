@@ -17,18 +17,9 @@ export default function ContactPage() {
   const [data, setData] = useState<any>({
     id: '',
     content: {
-      title: 'Hagamos algo extraordinario.',
-      subtitle: "Explica'ns la teva idea.",
-      buttonText: 'Solicitar presupuesto',
-      email: 'info@renovactiva.com',
-      phone: '+34 600 000 000',
-      address: 'Carrer Exemple 123, 08001 Barcelona',
-      schedule: 'Lun - Vie: 9:00 - 18:00',
-      translations: {
-        title: '',
-        subtitle: '',
-        buttonText: ''
-      }
+      title: '', subtitle: '', buttonText: '',
+      email: '', phone: '', address: '', schedule: '',
+      translations: { title: '', subtitle: '', buttonText: '' }
     }
   })
 
@@ -48,9 +39,7 @@ export default function ContactPage() {
           content: {
             ...data.content,
             ...contact.content,
-            translations: contact.content.translations || {
-              title: '', subtitle: '', buttonText: ''
-            }
+            translations: contact.content.translations || { title: '', subtitle: '', buttonText: '' }
           }
         })
       }
@@ -58,33 +47,28 @@ export default function ContactPage() {
     finally { setLoading(false) }
   }
 
+  async function translateField(esValue: string | undefined): Promise<string> {
+    if (!esValue || !esValue.trim()) return ''
+    try { return await translate(esValue, 'ca') } catch { return '' }
+  }
+
   async function saveData() {
-    setSaving(true); setError(''); setNotice('Traduciendo y guardando...')
+    setSaving(true); setError(''); setNotice('🌐 Traduciendo y guardando...')
     try {
       const contentToSave = { ...data.content }
 
-      const translations = {
-        title: await translate(data.content.title || '', 'ca'),
-        subtitle: await translate(data.content.subtitle || '', 'ca'),
-        buttonText: await translate(data.content.buttonText || '', 'ca'),
+      // 🔥 Traducir SIEMPRE desde ES
+      contentToSave.translations = {
+        title: await translateField(data.content.title),
+        subtitle: await translateField(data.content.subtitle),
+        buttonText: await translateField(data.content.buttonText),
       }
-      contentToSave.translations = translations
 
       if (!data.id) {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content`, {
           method: 'POST',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation'
-          },
-          body: JSON.stringify({
-            section: 'contact',
-            content: contentToSave,
-            sort_order: 5,
-            is_published: true
-          })
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+          body: JSON.stringify({ section: 'contact', content: contentToSave, sort_order: 5, is_published: true })
         })
         if (!res.ok) throw new Error('Error al crear')
         const saved = await res.json()
@@ -92,29 +76,18 @@ export default function ContactPage() {
       } else {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content?id=eq.${data.id}`, {
           method: 'PATCH',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
-          },
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
           body: JSON.stringify({ content: contentToSave, updated_at: new Date().toISOString() })
         })
         if (!res.ok) throw new Error('Error al guardar')
         setData({ ...data, content: contentToSave })
       }
 
-      try {
-        await fetch('/api/revalidate', { method: 'POST' })
-      } catch (e) {
-        console.warn('Revalidate falló:', e)
-      }
-
-      setNotice('Contacto guardado y traducido correctamente')
+      try { await fetch('/api/revalidate', { method: 'POST' }) } catch {}
+      setNotice('✅ Contacto guardado y traducido')
       setTimeout(() => setNotice(''), 3000)
-    } catch (err) {
-      setError((err as Error).message)
-    } finally { setSaving(false) }
+    } catch (err) { setError('❌ ' + (err as Error).message) }
+    finally { setSaving(false) }
   }
 
   function updateField(key: string, value: string) {
@@ -126,7 +99,7 @@ export default function ContactPage() {
   return (
     <AdminSection
       title="Contacto"
-      description="Edita la sección de contacto"
+      description="Edita la sección de contacto. El catalán se genera automáticamente al guardar."
       onSave={saveData}
       saving={saving}
       error={error}
@@ -134,25 +107,25 @@ export default function ContactPage() {
     >
       <div className="space-y-6">
         <div>
-          <h3 className="text-white/60 text-sm font-semibold mb-4">Textos de la sección</h3>
+          <h3 className="text-white/60 text-sm font-semibold mb-4">Textos (Español)</h3>
           <div className="space-y-4">
             <div>
               <label className="block text-white/50 text-sm mb-1">Título</label>
               <input type="text" value={data.content.title || ''} onChange={(e) => updateField('title', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="Hagamos algo extraordinario." />
-              {data.content.translations?.title && <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.title}</p>}
+              <p className="text-white/30 text-xs mt-1 italic">CA (auto): {data.content.translations?.title || '—'}</p>
             </div>
             <div>
               <label className="block text-white/50 text-sm mb-1">Subtítulo</label>
               <input type="text" value={data.content.subtitle || ''} onChange={(e) => updateField('subtitle', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="Cuéntanos tu idea." />
-              {data.content.translations?.subtitle && <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.subtitle}</p>}
+              <p className="text-white/30 text-xs mt-1 italic">CA (auto): {data.content.translations?.subtitle || '—'}</p>
             </div>
             <div>
               <label className="block text-white/50 text-sm mb-1">Texto del botón</label>
               <input type="text" value={data.content.buttonText || ''} onChange={(e) => updateField('buttonText', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="Solicitar presupuesto" />
-              {data.content.translations?.buttonText && <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.buttonText}</p>}
+              <p className="text-white/30 text-xs mt-1 italic">CA (auto): {data.content.translations?.buttonText || '—'}</p>
             </div>
           </div>
         </div>

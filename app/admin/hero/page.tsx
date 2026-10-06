@@ -43,9 +43,7 @@ export default function HeroPage() {
           content: {
             ...hero.content,
             images: hero.content.images || [],
-            translations: hero.content.translations || {
-              eyebrow: '', title: '', description: '', cta: ''
-            }
+            translations: hero.content.translations || { eyebrow: '', title: '', description: '', cta: '' }
           }
         })
       }
@@ -53,19 +51,25 @@ export default function HeroPage() {
     finally { setLoading(false) }
   }
 
+  async function translateField(esValue: string | undefined): Promise<string> {
+    if (!esValue || !esValue.trim()) return ''
+    try { return await translate(esValue, 'ca') } catch { return '' }
+  }
+
   async function saveData() {
     setSaving(true)
     setError('')
-    setNotice('Traduciendo y guardando...')
+    setNotice('🌐 Traduciendo y guardando...')
 
     try {
-      let contentToSave = { ...data.content }
+      const contentToSave = { ...data.content }
 
+      // 🔥 Traducir SIEMPRE desde ES
       const translations = {
-        eyebrow: await translate(data.content.eyebrow || '', 'ca'),
-        title: await translate(data.content.title || '', 'ca'),
-        description: await translate(data.content.description || '', 'ca'),
-        cta: await translate(data.content.cta || '', 'ca'),
+        eyebrow: await translateField(data.content.eyebrow),
+        title: await translateField(data.content.title),
+        description: await translateField(data.content.description),
+        cta: await translateField(data.content.cta),
       }
 
       contentToSave.translations = translations
@@ -78,36 +82,25 @@ export default function HeroPage() {
           'Content-Type': 'application/json',
           'Prefer': 'return=minimal'
         },
-        body: JSON.stringify({
-          content: contentToSave,
-          updated_at: new Date().toISOString()
-        })
+        body: JSON.stringify({ content: contentToSave, updated_at: new Date().toISOString() })
       })
 
       if (!res.ok) throw new Error('Error al guardar')
-
       setData({ ...data, content: contentToSave })
 
-      try {
-        await fetch('/api/revalidate', { method: 'POST' })
-      } catch (e) {
-        console.warn('Revalidate falló:', e)
-      }
+      try { await fetch('/api/revalidate', { method: 'POST' }) } catch {}
 
-      setNotice('Hero guardado y traducido correctamente')
+      setNotice('✅ Hero guardado y traducido correctamente')
       setTimeout(() => setNotice(''), 3000)
     } catch (err) {
-      setError((err as Error).message)
+      setError('❌ ' + (err as Error).message)
     } finally {
       setSaving(false)
     }
   }
 
   function updateField(key: string, value: string) {
-    setData({
-      ...data,
-      content: { ...data.content, [key]: value }
-    })
+    setData({ ...data, content: { ...data.content, [key]: value } })
   }
 
   if (loading) return <div className="min-h-screen bg-[#11110f] flex items-center justify-center text-white/50">Cargando...</div>
@@ -115,7 +108,7 @@ export default function HeroPage() {
   return (
     <AdminSection
       title="Hero"
-      description="Edita la portada principal"
+      description="Edita la portada principal. El catalán se genera automáticamente al guardar."
       onSave={saveData}
       saving={saving}
       error={error}
@@ -133,7 +126,7 @@ export default function HeroPage() {
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-white/60 text-sm font-semibold">Textos</h3>
+          <h3 className="text-white/60 text-sm font-semibold">Textos (Español)</h3>
 
           <div>
             <label className="block text-white/50 text-sm mb-1">Eyebrow (ES)</label>
@@ -144,9 +137,7 @@ export default function HeroPage() {
               className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm"
               placeholder="Arquitectura · Interiorismo · Construcción"
             />
-            {data.content.translations?.eyebrow && (
-              <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.eyebrow}</p>
-            )}
+            <p className="text-white/30 text-xs mt-1 italic">CA (auto): {data.content.translations?.eyebrow || '—'}</p>
           </div>
 
           <div>
@@ -158,9 +149,7 @@ export default function HeroPage() {
               className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm"
               placeholder="Espacios que trascienden."
             />
-            {data.content.translations?.title && (
-              <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.title}</p>
-            )}
+            <p className="text-white/30 text-xs mt-1 italic">CA (auto): {data.content.translations?.title || '—'}</p>
           </div>
 
           <div>
@@ -172,9 +161,7 @@ export default function HeroPage() {
               className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm resize-y"
               placeholder="Reformas de alto nivel..."
             />
-            {data.content.translations?.description && (
-              <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.description}</p>
-            )}
+            <p className="text-white/30 text-xs mt-1 italic">CA (auto): {data.content.translations?.description || '—'}</p>
           </div>
 
           <div>
@@ -186,9 +173,7 @@ export default function HeroPage() {
               className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm"
               placeholder="Hablemos de tu proyecto"
             />
-            {data.content.translations?.cta && (
-              <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.cta}</p>
-            )}
+            <p className="text-white/30 text-xs mt-1 italic">CA (auto): {data.content.translations?.cta || '—'}</p>
           </div>
         </div>
       </div>

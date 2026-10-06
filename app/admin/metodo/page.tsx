@@ -126,40 +126,41 @@ export default function MetodoAdminPage() {
     }
   }
 
+  // 🔥 Traduce SIEMPRE desde el ES actual (ignora cualquier CA existente)
+  async function translateField(esValue: string | undefined): Promise<string> {
+    if (!esValue || !esValue.trim()) return ''
+    try {
+      return await translate(esValue, 'ca')
+    } catch {
+      return ''
+    }
+  }
+
   async function saveData() {
-    setSaving(true); setError(''); setNotice('Traduciendo y guardando...')
+    setSaving(true); setError(''); setNotice('🌐 Traduciendo y guardando...')
     try {
       const contentToSave = JSON.parse(JSON.stringify(data.content))
 
-      for (const key of ['eyebrow', 'title', 'titleItalic', 'intro'] as const) {
-        const field = contentToSave[key]
-        if (field?.es && !field?.ca) {
-          contentToSave[key] = { ...field, ca: await translate(field.es, 'ca') }
-        }
-      }
+      // 1. Traducir cabecera (siempre desde ES)
+      contentToSave.eyebrow = { es: contentToSave.eyebrow?.es || '', ca: await translateField(contentToSave.eyebrow?.es) }
+      contentToSave.title = { es: contentToSave.title?.es || '', ca: await translateField(contentToSave.title?.es) }
+      contentToSave.titleItalic = { es: contentToSave.titleItalic?.es || '', ca: await translateField(contentToSave.titleItalic?.es) }
+      contentToSave.intro = { es: contentToSave.intro?.es || '', ca: await translateField(contentToSave.intro?.es) }
 
+      // 2. Traducir pasos (siempre desde ES)
       const translatedSteps = await Promise.all(
         (contentToSave.steps || []).map(async (step: any) => {
           const newStep = { ...step }
           newStep.slug = step.slug || makeSlug(step.title?.es || '')
-          if (step.title?.es && !step.title?.ca) {
-            newStep.title = { ...step.title, ca: await translate(step.title.es, 'ca') }
-          }
-          if (step.subtitle?.es && !step.subtitle?.ca) {
-            newStep.subtitle = { ...step.subtitle, ca: await translate(step.subtitle.es, 'ca') }
-          }
-          if (step.shortDescription?.es && !step.shortDescription?.ca) {
-            newStep.shortDescription = { ...step.shortDescription, ca: await translate(step.shortDescription.es, 'ca') }
-          }
-          if (step.longDescription?.es && !step.longDescription?.ca) {
-            newStep.longDescription = { ...step.longDescription, ca: await translate(step.longDescription.es, 'ca') }
-          }
-          if (step.bullets?.es?.length && (!step.bullets?.ca || step.bullets.ca.length === 0)) {
-            const caBullets = await Promise.all(
-              step.bullets.es.map((b: string) => translate(b, 'ca'))
-            )
-            newStep.bullets = { ...step.bullets, ca: caBullets }
-          }
+          newStep.title = { es: step.title?.es || '', ca: await translateField(step.title?.es) }
+          newStep.subtitle = { es: step.subtitle?.es || '', ca: await translateField(step.subtitle?.es) }
+          newStep.shortDescription = { es: step.shortDescription?.es || '', ca: await translateField(step.shortDescription?.es) }
+          newStep.longDescription = { es: step.longDescription?.es || '', ca: await translateField(step.longDescription?.es) }
+          
+          const esBullets = step.bullets?.es || []
+          const caBullets = await Promise.all(esBullets.map((b: string) => translateField(b)))
+          newStep.bullets = { es: esBullets, ca: caBullets }
+          
           return newStep
         })
       )
@@ -198,10 +199,10 @@ export default function MetodoAdminPage() {
 
       try { await fetch('/api/revalidate', { method: 'POST' }) } catch {}
 
-      setNotice('Método guardado correctamente ✅')
+      setNotice('✅ Método guardado y traducido correctamente')
       setTimeout(() => setNotice(''), 3500)
     } catch (err) {
-      setError((err as Error).message)
+      setError('❌ ' + (err as Error).message)
     } finally {
       setSaving(false)
     }
@@ -293,7 +294,7 @@ export default function MetodoAdminPage() {
   return (
     <AdminSection
       title="Método"
-      description="Gestiona los pasos del método Renovactiva"
+      description="Edita los pasos del método. El catalán se genera automáticamente al guardar."
       onSave={saveData}
       saving={saving}
       error={error}
@@ -311,7 +312,7 @@ export default function MetodoAdminPage() {
               onChange={(e) => updateField('eyebrow', 'es', e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
             />
-            {data.content.eyebrow.ca && <p className="text-white/40 text-xs mt-1">CA: {data.content.eyebrow.ca}</p>}
+            <p className="text-white/30 text-xs mt-1 italic">CA (auto): {data.content.eyebrow.ca || '—'}</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -323,7 +324,7 @@ export default function MetodoAdminPage() {
                 onChange={(e) => updateField('title', 'es', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
               />
-              {data.content.title.ca && <p className="text-white/40 text-xs mt-1">CA: {data.content.title.ca}</p>}
+              <p className="text-white/30 text-xs mt-1 italic">CA (auto): {data.content.title.ca || '—'}</p>
             </div>
             <div>
               <label className="block text-white/50 text-xs mb-1">Título cursiva (ES)</label>
@@ -333,7 +334,7 @@ export default function MetodoAdminPage() {
                 onChange={(e) => updateField('titleItalic', 'es', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
               />
-              {data.content.titleItalic.ca && <p className="text-white/40 text-xs mt-1">CA: {data.content.titleItalic.ca}</p>}
+              <p className="text-white/30 text-xs mt-1 italic">CA (auto): {data.content.titleItalic.ca || '—'}</p>
             </div>
           </div>
 
@@ -345,7 +346,7 @@ export default function MetodoAdminPage() {
               rows={2}
               className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
             />
-            {data.content.intro.ca && <p className="text-white/40 text-xs mt-1">CA: {data.content.intro.ca}</p>}
+            <p className="text-white/30 text-xs mt-1 italic">CA (auto): {data.content.intro.ca || '—'}</p>
           </div>
         </div>
 
@@ -411,7 +412,6 @@ export default function MetodoAdminPage() {
                 </div>
               </div>
 
-              {/* IMAGEN PRINCIPAL */}
               <div>
                 <label className="block text-white/50 text-xs mb-2 flex items-center gap-1.5">
                   <ImageIcon className="size-3.5" /> Imagen principal
@@ -435,7 +435,6 @@ export default function MetodoAdminPage() {
                 </div>
               </div>
 
-              {/* GALERÍA */}
               <div>
                 <label className="block text-white/50 text-xs mb-2 flex items-center gap-1.5">
                   <Images className="size-3.5" /> Galería (fotos adicionales)
@@ -469,23 +468,21 @@ export default function MetodoAdminPage() {
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
                   placeholder="Subtítulo corto"
                 />
-                <label className="block text-white/40 text-xs">Resumen (sale en Home y lista)</label>
+                <label className="block text-white/40 text-xs">Resumen (Home y lista)</label>
                 <textarea
                   value={step.shortDescription?.es || ''}
                   onChange={(e) => updateStepNested(index, 'shortDescription', 'es', e.target.value)}
                   rows={2}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
-                  placeholder="Una frase corta. Se cortará automáticamente en Home si es muy larga."
                 />
-                <label className="block text-white/40 text-xs">Descripción larga (sale en la sub-página)</label>
+                <label className="block text-white/40 text-xs">Descripción larga (sub-página)</label>
                 <textarea
                   value={step.longDescription?.es || ''}
                   onChange={(e) => updateStepNested(index, 'longDescription', 'es', e.target.value)}
                   rows={5}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
-                  placeholder="Explicación ampliada del paso..."
                 />
-                <label className="block text-white/40 text-xs">Bullets ES (uno por línea)</label>
+                <label className="block text-white/40 text-xs">Bullets (uno por línea)</label>
                 <textarea
                   value={(step.bullets?.es || []).join('\n')}
                   onChange={(e) => updateStepBullets(index, 'es', e.target.value)}
@@ -494,38 +491,43 @@ export default function MetodoAdminPage() {
                 />
               </div>
 
-              {/* CA */}
-              <div className="border-l-2 border-white/10 pl-3 space-y-2">
-                <p className="text-white/40 text-xs font-bold">🇨🇦 Català</p>
+              {/* CA (solo lectura) */}
+              <div className="border-l-2 border-white/10 pl-3 space-y-2 bg-white/[.01] p-3 rounded-lg">
+                <p className="text-white/40 text-xs font-bold">🇨🇦 Català (auto — solo lectura)</p>
                 <input
                   type="text"
                   value={step.title?.ca || ''}
-                  onChange={(e) => updateStepNested(index, 'title', 'ca', e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
+                  readOnly
+                  tabIndex={-1}
+                  className="w-full bg-white/[.02] border border-white/5 rounded-lg px-3 py-2 text-sm text-white/60 outline-none cursor-default"
                 />
                 <input
                   type="text"
                   value={step.subtitle?.ca || ''}
-                  onChange={(e) => updateStepNested(index, 'subtitle', 'ca', e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
+                  readOnly
+                  tabIndex={-1}
+                  className="w-full bg-white/[.02] border border-white/5 rounded-lg px-3 py-2 text-sm text-white/60 outline-none cursor-default"
                 />
                 <textarea
                   value={step.shortDescription?.ca || ''}
-                  onChange={(e) => updateStepNested(index, 'shortDescription', 'ca', e.target.value)}
+                  readOnly
+                  tabIndex={-1}
                   rows={2}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
+                  className="w-full bg-white/[.02] border border-white/5 rounded-lg px-3 py-2 text-sm text-white/60 outline-none resize-none cursor-default"
                 />
                 <textarea
                   value={step.longDescription?.ca || ''}
-                  onChange={(e) => updateStepNested(index, 'longDescription', 'ca', e.target.value)}
+                  readOnly
+                  tabIndex={-1}
                   rows={5}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
+                  className="w-full bg-white/[.02] border border-white/5 rounded-lg px-3 py-2 text-sm text-white/60 outline-none resize-none cursor-default"
                 />
                 <textarea
                   value={(step.bullets?.ca || []).join('\n')}
-                  onChange={(e) => updateStepBullets(index, 'ca', e.target.value)}
+                  readOnly
+                  tabIndex={-1}
                   rows={3}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
+                  className="w-full bg-white/[.02] border border-white/5 rounded-lg px-3 py-2 text-sm text-white/60 outline-none resize-none cursor-default"
                 />
               </div>
             </div>

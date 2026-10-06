@@ -17,15 +17,13 @@ export default function FooterPage() {
   const [data, setData] = useState<any>({
     id: '',
     content: {
-      description: '',
-      copyright: '',
+      description: '', copyright: '',
       contact: { phone: '', email: '' },
       address: { street: '', city: '', postal: '' },
       schedule: '',
       social: { instagram: '', linkedin: '', youtube: '', facebook: '' },
       translations: {
-        description: '',
-        copyright: '',
+        description: '', copyright: '',
         contact: { phone: '', email: '' },
         address: { street: '', city: '', postal: '' },
         schedule: '',
@@ -56,8 +54,7 @@ export default function FooterPage() {
             schedule: c.schedule || '',
             social: c.social || { instagram: '', linkedin: '', youtube: '', facebook: '' },
             translations: c.translations || {
-              description: '',
-              copyright: '',
+              description: '', copyright: '',
               contact: { phone: '', email: '' },
               address: { street: '', city: '', postal: '' },
               schedule: '',
@@ -70,27 +67,30 @@ export default function FooterPage() {
     finally { setLoading(false) }
   }
 
+  async function translateField(esValue: string | undefined): Promise<string> {
+    if (!esValue || !esValue.trim()) return ''
+    try { return await translate(esValue, 'ca') } catch { return '' }
+  }
+
   async function saveData() {
-    setSaving(true)
-    setError('')
-    setNotice('Traduciendo y guardando...')
-
+    setSaving(true); setError(''); setNotice('🌐 Traduciendo y guardando...')
     try {
-      let contentToSave = { ...data.content }
+      const contentToSave = { ...data.content }
 
-      const translations = {
-        description: await translate(data.content.description || '', 'ca'),
-        copyright: await translate(data.content.copyright || '', 'ca'),
+      // 🔥 Traducir SIEMPRE desde ES (excepto email, phone, redes sociales y postal)
+      contentToSave.translations = {
+        description: await translateField(data.content.description),
+        copyright: await translateField(data.content.copyright),
         contact: {
           phone: data.content.contact?.phone || '',
           email: data.content.contact?.email || ''
         },
         address: {
-          street: await translate(data.content.address?.street || '', 'ca'),
-          city: await translate(data.content.address?.city || '', 'ca'),
+          street: await translateField(data.content.address?.street),
+          city: await translateField(data.content.address?.city),
           postal: data.content.address?.postal || ''
         },
-        schedule: await translate(data.content.schedule || '', 'ca'),
+        schedule: await translateField(data.content.schedule),
         social: {
           instagram: data.content.social?.instagram || '',
           linkedin: data.content.social?.linkedin || '',
@@ -99,39 +99,19 @@ export default function FooterPage() {
         }
       }
 
-      contentToSave.translations = translations
-
       const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content?id=eq.${data.id}`, {
         method: 'PATCH',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({
-          content: contentToSave,
-          updated_at: new Date().toISOString()
-        })
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ content: contentToSave, updated_at: new Date().toISOString() })
       })
-
       if (!res.ok) throw new Error('Error al guardar')
-
       setData({ ...data, content: contentToSave })
 
-      try {
-        await fetch('/api/revalidate', { method: 'POST' })
-      } catch (e) {
-        console.warn('Revalidate falló:', e)
-      }
-
-      setNotice('Footer guardado y traducido correctamente')
+      try { await fetch('/api/revalidate', { method: 'POST' }) } catch {}
+      setNotice('✅ Footer guardado y traducido')
       setTimeout(() => setNotice(''), 3000)
-    } catch (err) {
-      setError((err as Error).message)
-    } finally {
-      setSaving(false)
-    }
+    } catch (err) { setError('❌ ' + (err as Error).message) }
+    finally { setSaving(false) }
   }
 
   function updateField(key: string, value: string) {
@@ -139,13 +119,7 @@ export default function FooterPage() {
   }
 
   function updateNested(parent: string, key: string, value: string) {
-    setData({
-      ...data,
-      content: {
-        ...data.content,
-        [parent]: { ...data.content[parent], [key]: value }
-      }
-    })
+    setData({ ...data, content: { ...data.content, [parent]: { ...data.content[parent], [key]: value } } })
   }
 
   if (loading) return <div className="min-h-screen bg-[#11110f] flex items-center justify-center text-white/50">Cargando...</div>
@@ -153,7 +127,7 @@ export default function FooterPage() {
   return (
     <AdminSection
       title="Footer"
-      description="Edita toda la información del pie de página"
+      description="Edita el pie de página. El catalán se genera automáticamente al guardar."
       onSave={saveData}
       saving={saving}
       error={error}
@@ -164,16 +138,10 @@ export default function FooterPage() {
           <h3 className="text-white/60 text-sm font-semibold mb-4">Descripción</h3>
           <div>
             <label className="block text-white/50 text-sm mb-1">Descripción (ES)</label>
-            <textarea
-              value={data.content.description || ''}
-              onChange={(e) => updateField('description', e.target.value)}
-              rows={2}
+            <textarea value={data.content.description || ''} onChange={(e) => updateField('description', e.target.value)} rows={2}
               className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm resize-y"
-              placeholder="Diseñamos y construimos espacios con intención."
-            />
-            {data.content.translations?.description && (
-              <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.description}</p>
-            )}
+              placeholder="Diseñamos y construimos espacios con intención." />
+            <p className="text-white/30 text-xs mt-1 italic">CA (auto): {data.content.translations?.description || '—'}</p>
           </div>
         </div>
 
@@ -182,23 +150,13 @@ export default function FooterPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-white/50 text-sm mb-1">Teléfono</label>
-              <input
-                type="text"
-                value={data.content.contact?.phone || ''}
-                onChange={(e) => updateNested('contact', 'phone', e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm"
-                placeholder="+34 600 000 000"
-              />
+              <input type="text" value={data.content.contact?.phone || ''} onChange={(e) => updateNested('contact', 'phone', e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="+34 600 000 000" />
             </div>
             <div>
               <label className="block text-white/50 text-sm mb-1">Email</label>
-              <input
-                type="email"
-                value={data.content.contact?.email || ''}
-                onChange={(e) => updateNested('contact', 'email', e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm"
-                placeholder="info@renovactiva.com"
-              />
+              <input type="email" value={data.content.contact?.email || ''} onChange={(e) => updateNested('contact', 'email', e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="info@renovactiva.com" />
             </div>
           </div>
         </div>
@@ -208,40 +166,21 @@ export default function FooterPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-white/50 text-sm mb-1">Calle</label>
-              <input
-                type="text"
-                value={data.content.address?.street || ''}
-                onChange={(e) => updateNested('address', 'street', e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm"
-                placeholder="Carrer Exemple 123"
-              />
-              {data.content.translations?.address?.street && (
-                <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.address.street}</p>
-              )}
+              <input type="text" value={data.content.address?.street || ''} onChange={(e) => updateNested('address', 'street', e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="Carrer Exemple 123" />
+              <p className="text-white/30 text-xs mt-1 italic">CA (auto): {data.content.translations?.address?.street || '—'}</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-white/50 text-sm mb-1">Ciudad</label>
-                <input
-                  type="text"
-                  value={data.content.address?.city || ''}
-                  onChange={(e) => updateNested('address', 'city', e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm"
-                  placeholder="Barcelona"
-                />
-                {data.content.translations?.address?.city && (
-                  <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.address.city}</p>
-                )}
+                <input type="text" value={data.content.address?.city || ''} onChange={(e) => updateNested('address', 'city', e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="Barcelona" />
+                <p className="text-white/30 text-xs mt-1 italic">CA (auto): {data.content.translations?.address?.city || '—'}</p>
               </div>
               <div>
                 <label className="block text-white/50 text-sm mb-1">Código Postal</label>
-                <input
-                  type="text"
-                  value={data.content.address?.postal || ''}
-                  onChange={(e) => updateNested('address', 'postal', e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm"
-                  placeholder="08001"
-                />
+                <input type="text" value={data.content.address?.postal || ''} onChange={(e) => updateNested('address', 'postal', e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="08001" />
               </div>
             </div>
           </div>
@@ -250,17 +189,10 @@ export default function FooterPage() {
         <div className="border-b border-white/10 pb-6">
           <h3 className="text-white/60 text-sm font-semibold mb-4">Horario</h3>
           <div>
-            <label className="block text-white/50 text-sm mb-1">Horario de atención</label>
-            <input
-              type="text"
-              value={data.content.schedule || ''}
-              onChange={(e) => updateField('schedule', e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm"
-              placeholder="Lun - Vie: 9:00 - 18:00"
-            />
-            {data.content.translations?.schedule && (
-              <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.schedule}</p>
-            )}
+            <label className="block text-white/50 text-sm mb-1">Horario (ES)</label>
+            <input type="text" value={data.content.schedule || ''} onChange={(e) => updateField('schedule', e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="Lun - Vie: 9:00 - 18:00" />
+            <p className="text-white/30 text-xs mt-1 italic">CA (auto): {data.content.translations?.schedule || '—'}</p>
           </div>
         </div>
 
@@ -269,43 +201,23 @@ export default function FooterPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-white/50 text-sm mb-1">Instagram</label>
-              <input
-                type="text"
-                value={data.content.social?.instagram || ''}
-                onChange={(e) => updateNested('social', 'instagram', e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm"
-                placeholder="https://instagram.com/..."
-              />
+              <input type="text" value={data.content.social?.instagram || ''} onChange={(e) => updateNested('social', 'instagram', e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="https://instagram.com/..." />
             </div>
             <div>
               <label className="block text-white/50 text-sm mb-1">LinkedIn</label>
-              <input
-                type="text"
-                value={data.content.social?.linkedin || ''}
-                onChange={(e) => updateNested('social', 'linkedin', e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm"
-                placeholder="https://linkedin.com/..."
-              />
+              <input type="text" value={data.content.social?.linkedin || ''} onChange={(e) => updateNested('social', 'linkedin', e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="https://linkedin.com/..." />
             </div>
             <div>
               <label className="block text-white/50 text-sm mb-1">YouTube</label>
-              <input
-                type="text"
-                value={data.content.social?.youtube || ''}
-                onChange={(e) => updateNested('social', 'youtube', e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm"
-                placeholder="https://youtube.com/..."
-              />
+              <input type="text" value={data.content.social?.youtube || ''} onChange={(e) => updateNested('social', 'youtube', e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="https://youtube.com/..." />
             </div>
             <div>
               <label className="block text-white/50 text-sm mb-1">Facebook</label>
-              <input
-                type="text"
-                value={data.content.social?.facebook || ''}
-                onChange={(e) => updateNested('social', 'facebook', e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm"
-                placeholder="https://facebook.com/..."
-              />
+              <input type="text" value={data.content.social?.facebook || ''} onChange={(e) => updateNested('social', 'facebook', e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="https://facebook.com/..." />
             </div>
           </div>
         </div>
@@ -313,17 +225,10 @@ export default function FooterPage() {
         <div>
           <h3 className="text-white/60 text-sm font-semibold mb-4">Copyright</h3>
           <div>
-            <label className="block text-white/50 text-sm mb-1">Texto del copyright (ES)</label>
-            <input
-              type="text"
-              value={data.content.copyright || ''}
-              onChange={(e) => updateField('copyright', e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm"
-              placeholder="© 2025 Renovactiva SL. Todos los derechos reservados."
-            />
-            {data.content.translations?.copyright && (
-              <p className="text-white/40 text-xs mt-1">CA: {data.content.translations.copyright}</p>
-            )}
+            <label className="block text-white/50 text-sm mb-1">Texto (ES)</label>
+            <input type="text" value={data.content.copyright || ''} onChange={(e) => updateField('copyright', e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="© 2025 Renovactiva SL. Todos los derechos reservados." />
+            <p className="text-white/30 text-xs mt-1 italic">CA (auto): {data.content.translations?.copyright || '—'}</p>
           </div>
         </div>
       </div>
