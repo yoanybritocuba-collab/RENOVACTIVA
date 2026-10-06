@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import Groq from 'groq-sdk'
+
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY || '',
+})
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,28 +16,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Usar MyMemory API (gratuita, sin key)
-    // https://mymemory.translated.net/doc/spec.php
-    const sourceLang = 'es'
-    const targetLang = targetLanguage === 'ca' ? 'ca' : 'en'
-    
-    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; RenovactivaBot/1.0)'
-      }
-    })
-
-    if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`)
+    if (!text.trim()) {
+      return NextResponse.json({ translation: '' })
     }
 
-    const data = await response.json()
-    
-    // MyMemory devuelve: { responseData: { translatedText: "..." } }
-    const translation = data?.responseData?.translatedText || text
+    const targetLangName = targetLanguage === 'ca' ? 'catalán' : 'inglés'
+
+    const completion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: 'system',
+          content: `Eres un traductor profesional español → ${targetLangName}. Traduce el texto del usuario al ${targetLangName}, manteniendo el tono, estilo y puntuación. Devuelve SOLO la traducción, sin explicaciones ni comillas adicionales. Si el texto ya está en ${targetLangName}, devuélvelo tal cual.`
+        },
+        {
+          role: 'user',
+          content: text
+        }
+      ],
+      model: 'openai/gpt-oss-20b',
+      temperature: 0.3,
+      max_tokens: 2048,
+    })
+
+    const translation = completion.choices[0]?.message?.content?.trim() || text
 
     return NextResponse.json({ translation })
   } catch (error) {
