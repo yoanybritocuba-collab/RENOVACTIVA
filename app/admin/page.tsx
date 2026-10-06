@@ -1,516 +1,316 @@
 ﻿'use client'
 
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import AdminSection from '@/components/admin/AdminSection'
-import ImageUploader from '@/components/admin/ImageUploader'
-import { useTranslation } from '@/lib/useTranslation'
-import { Plus, Trash2, ArrowUp, ArrowDown, Link2, ImageIcon } from 'lucide-react'
+import { 
+  LayoutDashboard, Menu, X, Eye, EyeOff, ExternalLink, LogOut,
+  Home, FolderOpen, Wrench, Mail, Image, Star, LayoutGrid, BarChart3,
+  KeyRound, ListOrdered
+} from 'lucide-react'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
+const ADMIN_EMAIL = 'info@renovactiva.com'
+const ADMIN_PASSWORD = 'Barcelona2026'
 
-const DEFAULT_STEPS = [
-  { n: '01', es: 'Escuchamos', ca: 'Escoltem', desc_es: 'Entendemos tu visión, tus necesidades y la forma en que quieres vivir.', desc_ca: 'Entenem la teva visió, les teves necessitats i la forma en què vols viure.' },
-  { n: '02', es: 'Diseñamos', ca: 'Dissenyem', desc_es: 'Convertimos las ideas en un proyecto claro, bello y posible.', desc_ca: 'Convertim les idees en un projecte clar, bonic i possible.' },
-  { n: '03', es: 'Construimos', ca: 'Construïm', desc_es: 'Coordinamos cada gremio y cuidamos cada acabado.', desc_ca: 'Coordinem cada gremi i cuidem cada acabat.' },
-  { n: '04', es: 'Entregamos', ca: 'Lliurem', desc_es: 'Te entregamos un espacio listo para empezar una nueva etapa.', desc_ca: "Et lliurem un espai a punt per començar una nova etapa." },
-].map((s) => ({
-  id: `step-${s.n}`,
-  number: s.n,
-  title: { es: s.es, ca: s.ca },
-  subtitle: { es: '', ca: '' },
-  description: { es: s.desc_es, ca: s.desc_ca },
-  bullets: { es: [] as string[], ca: [] as string[] },
-  image: '',
-  href: '',
-}))
+const SECTIONS = [
+  { href: '/admin/hero',         label: 'Hero',           icon: Home,         desc: 'Título, subtítulo, imágenes' },
+  { href: '/admin/services',     label: 'Servicios',      icon: Wrench,       desc: 'Los 3 servicios y sus datos' },
+  { href: '/admin/metodo',       label: 'Nuestro método', icon: ListOrdered,  desc: 'Los 4 pasos del método' },
+  { href: '/admin/projects',     label: 'Proyectos',      icon: LayoutGrid,   desc: 'Proyectos destacados' },
+  { href: '/admin/trabajos',     label: 'Trabajos',       icon: FolderOpen,   desc: 'Galería de trabajos reales' },
+  { href: '/admin/stats',        label: 'Números',        icon: BarChart3,    desc: 'Contadores y estadísticas' },
+  { href: '/admin/testimonials', label: 'Testimonios',    icon: Star,         desc: 'Opiniones de clientes' },
+  { href: '/admin/reviews',      label: 'Reseñas',        icon: KeyRound,     desc: 'Códigos y gestión de reseñas' },
+  { href: '/admin/contact',      label: 'Contacto',       icon: Mail,         desc: 'Datos del formulario' },
+  { href: '/admin/footer',       label: 'Footer',         icon: Image,        desc: 'Datos del pie de página' },
+]
 
-const EMPTY_CONTENT = {
-  eyebrow: { es: 'Nuestro método', ca: 'El nostre mètode' },
-  title: { es: 'La excelencia', ca: "L'excel·lència" },
-  titleItalic: { es: 'es un proceso.', ca: 'és un procés.' },
-  intro: { es: '', ca: '' },
-  steps: DEFAULT_STEPS as any[],
-}
-
-export default function MetodoAdminPage() {
+export default function AdminDashboard() {
+  const [user, setUser] = useState<{ email?: string } | null>(null)
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [stats, setStats] = useState({ 
+    totalSections: 0, 
+    totalProjects: 0, 
+    totalServices: 0, 
+    totalTestimonials: 0,
+    reviewCodesPending: 0,
+    reviewCodesUsed: 0
+  })
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [notice, setNotice] = useState('')
-  const { translate } = useTranslation()
+  const [showPassword, setShowPassword] = useState(false)
 
-  const [data, setData] = useState<any>({ id: '', content: EMPTY_CONTENT })
+  useEffect(() => {
+    const savedAuth = localStorage.getItem('adminAuth')
+    if (savedAuth === 'true') {
+      setUser({ email: ADMIN_EMAIL })
+      loadStats()
+    }
+    setLoading(false)
+  }, [])
 
-  useEffect(() => { loadData() }, [])
-
-  async function loadData() {
+  async function loadStats() {
     try {
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/site_content?section=eq.metodo&select=*`,
-        {
-          headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
-          cache: 'no-store',
-        }
-      )
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content?select=section,content`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      })
       if (!res.ok) throw new Error('Error al cargar')
-      const result = await res.json()
-      if (result.length > 0) {
-        const metodo = result[0]
-        const c = metodo.content || {}
-        setData({
-          id: metodo.id,
-          content: {
-            eyebrow: c.eyebrow || EMPTY_CONTENT.eyebrow,
-            title: c.title || EMPTY_CONTENT.title,
-            titleItalic: c.titleItalic || EMPTY_CONTENT.titleItalic,
-            intro: c.intro || EMPTY_CONTENT.intro,
-            steps: (c.steps && c.steps.length > 0 ? c.steps : DEFAULT_STEPS).map((s: any) => ({ href: '', ...s })),
-          },
-        })
-        if (!c.steps || c.steps.length === 0) {
-          setNotice('Se han cargado los 4 pasos por defecto. Pulsa Guardar para publicarlos.')
-        }
-      } else {
-        setNotice('La sección "método" no existía. Se han cargado los 4 pasos por defecto. Pulsa Guardar para crearla.')
-      }
-    } catch (err) {
-      setError('Error: ' + (err as Error).message)
-    } finally {
-      setLoading(false)
-    }
-  }
+      const data = await res.json()
+      const projects = data.find((d: any) => d.section === 'projects')
+      const services = data.find((d: any) => d.section === 'services')
+      const testimonials = data.find((d: any) => d.section === 'testimonials')
 
-  async function saveData() {
-    setSaving(true); setError(''); setNotice('Traduciendo y guardando...')
-    try {
-      const contentToSave = JSON.parse(JSON.stringify(data.content))
-
-      for (const key of ['eyebrow', 'title', 'titleItalic', 'intro'] as const) {
-        const field = contentToSave[key]
-        if (field?.es && !field?.ca) {
-          contentToSave[key] = { ...field, ca: await translate(field.es, 'ca') }
-        }
-      }
-
-      const translatedSteps = await Promise.all(
-        (contentToSave.steps || []).map(async (step: any) => {
-          const newStep = { ...step }
-          if (step.title?.es && !step.title?.ca) {
-            newStep.title = { ...step.title, ca: await translate(step.title.es, 'ca') }
-          }
-          if (step.subtitle?.es && !step.subtitle?.ca) {
-            newStep.subtitle = { ...step.subtitle, ca: await translate(step.subtitle.es, 'ca') }
-          }
-          if (step.description?.es && !step.description?.ca) {
-            newStep.description = { ...step.description, ca: await translate(step.description.es, 'ca') }
-          }
-          if (step.bullets?.es?.length && (!step.bullets?.ca || step.bullets.ca.length === 0)) {
-            const caBullets = await Promise.all(
-              step.bullets.es.map((b: string) => translate(b, 'ca'))
-            )
-            newStep.bullets = { ...step.bullets, ca: caBullets }
-          }
-          return newStep
-        })
-      )
-      contentToSave.steps = translatedSteps
-
-      const headers = {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-      }
-
-      let newId = data.id
-      if (data.id) {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content?id=eq.${data.id}`, {
-          method: 'PATCH',
-          headers: { ...headers, Prefer: 'return=minimal' },
-          body: JSON.stringify({ content: contentToSave, updated_at: new Date().toISOString() }),
-        })
-        if (!res.ok) throw new Error('Error al guardar (' + res.status + ')')
-      } else {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content`, {
-          method: 'POST',
-          headers: { ...headers, Prefer: 'return=representation' },
-          body: JSON.stringify({
-            section: 'metodo',
-            content: contentToSave,
-            updated_at: new Date().toISOString(),
-          }),
-        })
-        if (!res.ok) throw new Error('Error al crear la sección (' + res.status + ')')
-        const created = await res.json()
-        newId = created?.[0]?.id || ''
-      }
-
-      setData({ id: newId, content: contentToSave })
-
+      let reviewCodesPending = 0
+      let reviewCodesUsed = 0
       try {
-        await fetch('/api/revalidate', { method: 'POST' })
+        const codesRes = await fetch(`${SUPABASE_URL}/rest/v1/review_codes?select=usado`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
+          cache: 'no-store'
+        })
+        if (codesRes.ok) {
+          const codesData = await codesRes.json()
+          reviewCodesUsed = codesData.filter((c: any) => c.usado === true).length
+          reviewCodesPending = codesData.filter((c: any) => c.usado === false).length
+        }
       } catch (e) {
-        console.warn('Revalidate falló:', e)
+        console.warn('No se pudieron cargar los códigos de reseña:', e)
       }
 
-      setNotice('Método guardado y traducido correctamente ✅')
-      setTimeout(() => setNotice(''), 3500)
+      setStats({
+        totalSections: data.length,
+        totalProjects: projects?.content?.items?.length || 0,
+        totalServices: services?.content?.items?.length || 0,
+        totalTestimonials: testimonials?.content?.items?.length || 0,
+        reviewCodesPending,
+        reviewCodesUsed
+      })
     } catch (err) {
-      setError((err as Error).message)
-    } finally {
-      setSaving(false)
+      console.error('Error:', err)
     }
   }
 
-  function updateField(key: string, lang: string, value: string) {
-    setData({
-      ...data,
-      content: {
-        ...data.content,
-        [key]: { ...data.content[key], [lang]: value },
-      },
-    })
-  }
-
-  function updateStep(index: number, key: string, value: any) {
-    const newSteps = [...(data.content.steps || [])]
-    newSteps[index] = { ...newSteps[index], [key]: value }
-    setData({ ...data, content: { ...data.content, steps: newSteps } })
-  }
-
-  function updateStepNested(index: number, parent: string, lang: string, value: string) {
-    const newSteps = [...(data.content.steps || [])]
-    newSteps[index] = {
-      ...newSteps[index],
-      [parent]: { ...newSteps[index][parent], [lang]: value },
+  async function signIn(e: React.FormEvent) {
+    e.preventDefault()
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      localStorage.setItem('adminAuth', 'true')
+      setUser({ email: ADMIN_EMAIL })
+      loadStats()
+    } else {
+      setError('Credenciales incorrectas')
     }
-    setData({ ...data, content: { ...data.content, steps: newSteps } })
   }
 
-  function updateStepBullets(index: number, lang: string, bulletsText: string) {
-    const bulletsArray = bulletsText.split('\n').filter((b) => b.trim() !== '')
-    const newSteps = [...(data.content.steps || [])]
-    newSteps[index] = {
-      ...newSteps[index],
-      bullets: { ...newSteps[index].bullets, [lang]: bulletsArray },
-    }
-    setData({ ...data, content: { ...data.content, steps: newSteps } })
+  function goToWeb() {
+    window.location.href = '/'
   }
 
-  function updateStepImage(index: number, images: string[]) {
-    const newSteps = [...(data.content.steps || [])]
-    newSteps[index] = { ...newSteps[index], image: images[0] || '' }
-    setData({ ...data, content: { ...data.content, steps: newSteps } })
+  function cerrarSesion() {
+    localStorage.removeItem('adminAuth')
+    setUser(null)
   }
 
-  function addStep() {
-    const newSteps = [...(data.content.steps || [])]
-    newSteps.push({
-      id: `step-${Date.now()}`,
-      number: String(newSteps.length + 1).padStart(2, '0'),
-      title: { es: '', ca: '' },
-      subtitle: { es: '', ca: '' },
-      description: { es: '', ca: '' },
-      bullets: { es: [], ca: [] },
-      image: '',
-      href: '',
-    })
-    setData({ ...data, content: { ...data.content, steps: newSteps } })
-    setTimeout(() => {
-      const el = document.getElementById(`step-${newSteps.length - 1}`)
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 100)
-  }
+  if (loading) return <div className="min-h-screen bg-[#11110f] flex items-center justify-center text-white/50">Cargando...</div>
 
-  function removeStep(index: number) {
-    if (!confirm('¿Seguro que quieres eliminar este paso?')) return
-    const newSteps = (data.content.steps || []).filter((_: any, i: number) => i !== index)
-    setData({ ...data, content: { ...data.content, steps: newSteps } })
-  }
-
-  function moveStep(index: number, direction: 'up' | 'down') {
-    const newSteps = [...(data.content.steps || [])]
-    const target = direction === 'up' ? index - 1 : index + 1
-    if (target < 0 || target >= newSteps.length) return
-    ;[newSteps[index], newSteps[target]] = [newSteps[target], newSteps[index]]
-    setData({ ...data, content: { ...data.content, steps: newSteps } })
-  }
-
-  if (loading)
+  if (!user) {
     return (
-      <div className="min-h-screen bg-[#11110f] flex items-center justify-center text-white/50">
-        Cargando...
-      </div>
+      <main className="min-h-screen bg-[#11110f] flex items-center justify-center px-4">
+        <form onSubmit={signIn} className="w-full max-w-md border border-white/10 bg-[#0b0b0a] p-8 rounded-xl">
+          <h1 className="font-serif text-2xl" style={{ color: '#ad742a' }}>
+            RENOVACTIVA<span style={{ color: '#042133' }}> SL</span>
+          </h1>
+          <p className="text-white/40 text-sm mt-1">Panel de administración</p>
+
+          <button
+            type="button"
+            onClick={goToWeb}
+            className="mt-2 flex items-center justify-center gap-2 w-full border border-white/15 px-4 py-2 text-white/60 hover:bg-white/5 transition-colors rounded-lg text-sm"
+          >
+            <ExternalLink className="size-4" />
+            Ir a la web
+          </button>
+
+          <div className="mt-6 space-y-4">
+            <div>
+              <label className="block text-white/50 text-sm mb-1">Correo</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="info@renovactiva.com"
+                className="w-full bg-transparent border border-white/15 px-4 py-3 text-white rounded-lg focus:border-[#d7bd77] outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-white/50 text-sm mb-1">Contraseña</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full bg-transparent border border-white/15 px-4 py-3 text-white rounded-lg focus:border-[#d7bd77] outline-none pr-12"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                </button>
+              </div>
+            </div>
+            {error && <p className="text-red-400 text-sm">{error}</p>}
+            <button className="w-full bg-[#d7bd77] py-3 text-[#11110f] font-medium rounded-lg hover:bg-white transition-colors">
+              Entrar
+            </button>
+          </div>
+        </form>
+      </main>
     )
+  }
 
   return (
-    <AdminSection
-      title="Método"
-      description="Gestiona los pasos del método Renovactiva, sus imágenes y enlaces"
-      onSave={saveData}
-      saving={saving}
-      error={error}
-      notice={notice}
-    >
-      <div className="space-y-8">
-        {/* CABECERA */}
-        <div className="border border-white/10 rounded-xl p-5 bg-white/[.02] space-y-4">
-          <h3 className="text-white/60 text-sm font-semibold mb-2">Cabecera de la sección</h3>
+    <main className="min-h-screen bg-[#11110f] text-[#f3f0e9]">
+      <button onClick={() => setSidebarOpen(!sidebarOpen)} className="fixed top-4 left-4 z-50 md:hidden bg-[#0b0b0a] border border-white/10 rounded-lg p-2 text-white/70">
+        {sidebarOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+      </button>
 
-          <div>
-            <label className="block text-white/50 text-xs mb-1">Eyebrow (ES)</label>
-            <input
-              type="text"
-              value={data.content.eyebrow.es || ''}
-              onChange={(e) => updateField('eyebrow', 'es', e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
-              placeholder="Nuestro método"
-            />
-            {data.content.eyebrow.ca && (
-              <p className="text-white/40 text-xs mt-1">CA: {data.content.eyebrow.ca}</p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-white/50 text-xs mb-1">Título (ES)</label>
-              <input
-                type="text"
-                value={data.content.title.es || ''}
-                onChange={(e) => updateField('title', 'es', e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
-                placeholder="La excelencia"
-              />
-              {data.content.title.ca && (
-                <p className="text-white/40 text-xs mt-1">CA: {data.content.title.ca}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-white/50 text-xs mb-1">Título cursiva (ES)</label>
-              <input
-                type="text"
-                value={data.content.titleItalic.es || ''}
-                onChange={(e) => updateField('titleItalic', 'es', e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
-                placeholder="es un proceso."
-              />
-              {data.content.titleItalic.ca && (
-                <p className="text-white/40 text-xs mt-1">CA: {data.content.titleItalic.ca}</p>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-white/50 text-xs mb-1">Introducción (ES)</label>
-            <textarea
-              value={data.content.intro.es || ''}
-              onChange={(e) => updateField('intro', 'es', e.target.value)}
-              rows={3}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
-              placeholder="Cada proyecto es único..."
-            />
-            {data.content.intro.ca && (
-              <p className="text-white/40 text-xs mt-1">CA: {data.content.intro.ca}</p>
-            )}
-          </div>
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-white/10 bg-[#0b0b0a] flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+        
+        <div className="p-6 pb-4 flex-shrink-0">
+          <Link href="/" className="font-serif text-lg">
+            <span style={{ color: '#ad742a' }}>RENOVACTIVA</span>
+            <span style={{ color: '#042133' }}> SL</span>
+          </Link>
+          <p className="text-[9px] uppercase tracking-[.2em] text-white/30 mt-1">Panel de administración</p>
         </div>
 
-        {/* BOTÓN AÑADIR */}
-        <button
-          onClick={addStep}
-          className="w-full flex items-center justify-center gap-2 bg-[#d7bd77] px-6 py-4 text-[#11110f] rounded-xl hover:bg-white transition-colors text-base font-medium"
-        >
-          <Plus className="size-5" /> Añadir paso
-        </button>
+        <nav className="flex-1 overflow-y-auto px-4 pb-4 space-y-1">
+          <Link href="/admin" className="flex items-center gap-3 bg-[#d7bd77] px-4 py-3 text-[#15140f] rounded-lg font-medium">
+            <LayoutDashboard className="size-4" /> Dashboard
+          </Link>
 
-        <div className="flex items-center justify-between">
-          <h3 className="text-white/60 text-sm font-semibold">
-            Pasos ({(data.content.steps || []).length})
-          </h3>
+          <div className="pt-4 pb-2 px-4">
+            <p className="text-[9px] uppercase tracking-[.2em] text-white/25">Secciones de la web</p>
+          </div>
+
+          {SECTIONS.map((s) => {
+            const Icon = s.icon
+            return (
+              <Link
+                key={s.href}
+                href={s.href}
+                className="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 hover:text-white rounded-lg transition-colors"
+              >
+                <Icon className="size-4" />
+                <span>{s.label}</span>
+              </Link>
+            )
+          })}
+        </nav>
+
+        <div className="p-4 pt-3 flex-shrink-0 border-t border-white/10 space-y-2">
+          <button
+            onClick={goToWeb}
+            className="flex items-center justify-center gap-2 w-full bg-[#d7bd77]/20 border border-[#d7bd77]/40 px-4 py-2.5 text-[#d7bd77] rounded-lg hover:bg-[#d7bd77] hover:text-[#11110f] transition-colors text-sm font-medium"
+          >
+            <ExternalLink className="size-4" />
+            Ir a la web
+          </button>
+          <button
+            onClick={cerrarSesion}
+            className="flex items-center justify-center gap-2 w-full bg-red-500/10 border border-red-500/30 px-4 py-2.5 text-red-400 rounded-lg hover:bg-red-500 hover:text-white transition-colors text-sm font-medium"
+          >
+            <LogOut className="size-4" />
+            Cerrar sesión
+          </button>
         </div>
+      </aside>
 
-        {/* LISTA DE PASOS */}
-        <div className="space-y-6">
-          {(data.content.steps || []).map((step: any, index: number) => (
-            <div
-              key={step.id || index}
-              id={`step-${index}`}
-              className="border border-white/10 rounded-xl p-5 bg-white/[.02] space-y-4 scroll-mt-20"
+      {sidebarOpen && <div className="fixed inset-0 z-30 bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)} />}
+
+      <section className="md:ml-64 min-h-screen">
+        <header className="border-b border-white/10 px-6 py-4 lg:px-10">
+          <div className="flex items-center justify-between ml-12 md:ml-0">
+            <div>
+              <p className="text-[10px] uppercase tracking-[.2em] text-white/40">{user.email}</p>
+              <h1 className="font-serif text-2xl">Dashboard</h1>
+            </div>
+          </div>
+        </header>
+        <div className="p-6 lg:p-10">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="border border-white/10 bg-white/[.02] p-6 rounded-xl">
+              <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Secciones</p>
+              <strong className="block mt-2 font-serif text-4xl text-[#d7bd77]">{stats.totalSections}</strong>
+            </div>
+            <div className="border border-white/10 bg-white/[.02] p-6 rounded-xl">
+              <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Trabajos</p>
+              <strong className="block mt-2 font-serif text-4xl text-[#d7bd77]">{stats.totalProjects}</strong>
+            </div>
+            <div className="border border-white/10 bg-white/[.02] p-6 rounded-xl">
+              <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Servicios</p>
+              <strong className="block mt-2 font-serif text-4xl text-[#d7bd77]">{stats.totalServices}</strong>
+            </div>
+            <div className="border border-white/10 bg-white/[.02] p-6 rounded-xl">
+              <p className="text-[10px] uppercase tracking-[.16em] text-white/40">Testimonios</p>
+              <strong className="block mt-2 font-serif text-4xl text-[#d7bd77]">{stats.totalTestimonials}</strong>
+            </div>
+
+            <Link 
+              href="/admin/reviews"
+              className="group border border-[#10B77F]/30 bg-[#10B77F]/[.03] hover:border-[#10B77F] hover:bg-[#10B77F]/[.08] p-6 rounded-xl transition-all duration-300"
             >
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <h3 className="text-[#d7bd77] font-serif text-lg">
-                  Paso {index + 1} — {step.number || ''}
-                </h3>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => moveStep(index, 'up')}
-                    disabled={index === 0}
-                    className="text-white/50 hover:text-white p-1 disabled:opacity-30"
-                    title="Subir"
+              <p className="text-[10px] uppercase tracking-[.16em] text-[#10B77F] flex items-center gap-1.5">
+                <KeyRound className="size-3" />
+                Reseñas
+              </p>
+              <div className="mt-2 flex items-baseline gap-2">
+                <strong className="font-serif text-4xl text-[#d7bd77] group-hover:text-[#10B77F] transition-colors">
+                  {stats.reviewCodesPending}
+                </strong>
+                <span className="text-xs text-white/40">pendientes</span>
+              </div>
+              <p className="text-[10px] text-white/40 mt-1">
+                {stats.reviewCodesUsed} usados
+              </p>
+            </Link>
+          </div>
+
+          {/* TARJETAS GRANDES DE TODAS LAS SECCIONES */}
+          <div className="mt-10">
+            <h2 className="font-serif text-2xl mb-6">Secciones editables</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {SECTIONS.map((s) => {
+                const Icon = s.icon
+                return (
+                  <Link
+                    key={s.href}
+                    href={s.href}
+                    className="group border border-white/10 bg-white/[.02] hover:border-[#d7bd77]/60 hover:bg-white/[.04] p-6 rounded-xl transition-all duration-300"
                   >
-                    <ArrowUp className="size-4" />
-                  </button>
-                  <button
-                    onClick={() => moveStep(index, 'down')}
-                    disabled={index === (data.content.steps || []).length - 1}
-                    className="text-white/50 hover:text-white p-1 disabled:opacity-30"
-                    title="Bajar"
-                  >
-                    <ArrowDown className="size-4" />
-                  </button>
-                  <button
-                    onClick={() => removeStep(index)}
-                    className="text-red-400 hover:text-red-300 p-1 flex items-center gap-1 text-sm"
-                  >
-                    <Trash2 className="size-4" /> Eliminar
-                  </button>
-                </div>
-              </div>
-
-              {/* NÚMERO + ENLACE */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-white/50 text-xs mb-1">Número</label>
-                  <input
-                    type="text"
-                    value={step.number || ''}
-                    onChange={(e) => updateStep(index, 'number', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
-                    placeholder="01"
-                  />
-                </div>
-                <div>
-                  <label className="block text-white/50 text-xs mb-1 flex items-center gap-1.5">
-                    <Link2 className="size-3.5" />
-                    Enlace al hacer clic en la imagen (opcional)
-                  </label>
-                  <input
-                    type="text"
-                    value={step.href || ''}
-                    onChange={(e) => updateStep(index, 'href', e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
-                    placeholder="/contacto  o  https://..."
-                  />
-                  <p className="text-white/30 text-[11px] mt-1">
-                    Si empieza por <code className="text-[#d7bd77]">/</code> abre una página interna.
-                    Si empieza por <code className="text-[#d7bd77]">https://</code> se abre en otra pestaña.
-                  </p>
-                </div>
-              </div>
-
-              {/* IMAGEN */}
-              <div>
-                <label className="block text-white/50 text-xs mb-2 flex items-center gap-1.5">
-                  <ImageIcon className="size-3.5" />
-                  Imagen del paso
-                </label>
-                <ImageUploader
-                  images={step.image ? [step.image] : []}
-                  onChange={(imgs) => updateStepImage(index, imgs)}
-                  folder={`metodo/step-${index + 1}`}
-                  maxImages={1}
-                  allowVideos={false}
-                />
-                <div className="mt-2">
-                  <label className="block text-white/40 text-[11px] mb-1">
-                    O pega una URL de imagen directamente:
-                  </label>
-                  <input
-                    type="text"
-                    value={step.image || ''}
-                    onChange={(e) => updateStepImage(index, [e.target.value])}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:border-[#d7bd77] outline-none"
-                    placeholder="https://..."
-                  />
-                </div>
-              </div>
-
-              {/* ES */}
-              <div className="border-l-2 border-[#d7bd77]/30 pl-3 space-y-2">
-                <p className="text-[#d7bd77] text-xs font-bold">🇪🇸 Español</p>
-                <input
-                  type="text"
-                  value={step.title?.es || ''}
-                  onChange={(e) => updateStepNested(index, 'title', 'es', e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
-                  placeholder="Escuchamos"
-                />
-                <input
-                  type="text"
-                  value={step.subtitle?.es || ''}
-                  onChange={(e) => updateStepNested(index, 'subtitle', 'es', e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
-                  placeholder="Subtítulo corto (ej: Primera fase)"
-                />
-                <textarea
-                  value={step.description?.es || ''}
-                  onChange={(e) => updateStepNested(index, 'description', 'es', e.target.value)}
-                  rows={3}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
-                  placeholder="Descripción larga del paso..."
-                />
-                <div>
-                  <label className="block text-white/40 text-xs mb-1">
-                    Bullets ES (uno por línea)
-                  </label>
-                  <textarea
-                    value={(step.bullets?.es || []).join('\n')}
-                    onChange={(e) => updateStepBullets(index, 'es', e.target.value)}
-                    rows={3}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
-                    placeholder={'Visita sin compromiso\nEscuchamos tus ideas\nPropuesta personalizada'}
-                  />
-                </div>
-              </div>
-
-              {/* CA */}
-              <div className="border-l-2 border-white/10 pl-3 space-y-2">
-                <p className="text-white/40 text-xs font-bold">🇨🇦 Català (auto-traducido)</p>
-                <input
-                  type="text"
-                  value={step.title?.ca || ''}
-                  onChange={(e) => updateStepNested(index, 'title', 'ca', e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
-                  placeholder="Escoltem"
-                />
-                <input
-                  type="text"
-                  value={step.subtitle?.ca || ''}
-                  onChange={(e) => updateStepNested(index, 'subtitle', 'ca', e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
-                  placeholder="Primera fase"
-                />
-                <textarea
-                  value={step.description?.ca || ''}
-                  onChange={(e) => updateStepNested(index, 'description', 'ca', e.target.value)}
-                  rows={3}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
-                  placeholder="Descripció llarga..."
-                />
-                <div>
-                  <label className="block text-white/40 text-xs mb-1">
-                    Bullets CA (uno por línea)
-                  </label>
-                  <textarea
-                    value={(step.bullets?.ca || []).join('\n')}
-                    onChange={(e) => updateStepBullets(index, 'ca', e.target.value)}
-                    rows={3}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
-                    placeholder={'Visita sense compromís\nEscoltem les teves idees'}
-                  />
-                </div>
-              </div>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center justify-center size-11 rounded-lg bg-[#d7bd77]/10 border border-[#d7bd77]/30 group-hover:bg-[#d7bd77]/20 transition-colors">
+                        <Icon className="size-5 text-[#d7bd77]" />
+                      </div>
+                      <ExternalLink className="size-4 text-white/20 group-hover:text-[#d7bd77] transition-colors" />
+                    </div>
+                    <h3 className="font-serif text-xl text-white group-hover:text-[#d7bd77] transition-colors mb-1">
+                      {s.label}
+                    </h3>
+                    <p className="text-xs text-white/40 leading-relaxed">{s.desc}</p>
+                  </Link>
+                )
+              })}
             </div>
-          ))}
-
-          {(!data.content.steps || data.content.steps.length === 0) && (
-            <div className="text-center py-12 border border-white/10 rounded-xl bg-white/[.02]">
-              <p className="text-white/40 mb-2">No hay pasos todavía</p>
-              <p className="text-white/30 text-sm">Pulsa "Añadir paso" para crear el primero</p>
-            </div>
-          )}
+          </div>
         </div>
-      </div>
-    </AdminSection>
+      </section>
+    </main>
   )
 }
