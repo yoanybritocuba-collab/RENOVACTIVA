@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import AdminSection from '@/components/admin/AdminSection'
 import ImageUploader from '@/components/admin/ImageUploader'
 import { useTranslation } from '@/lib/useTranslation'
-import { Plus, Trash2, ArrowUp, ArrowDown, ImageIcon, Link as LinkIcon } from 'lucide-react'
+import { Plus, Trash2, ArrowUp, ArrowDown, ImageIcon, Link as LinkIcon, Images } from 'lucide-react'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
@@ -63,7 +63,7 @@ const DEFAULT_STEPS = [
   longDescription: { es: '', ca: '' },
   bullets: { es: [] as string[], ca: [] as string[] },
   image: s.img,
-  href: '',
+  gallery: [] as string[],
 }))
 
 const EMPTY_CONTENT = {
@@ -104,7 +104,7 @@ export default function MetodoAdminPage() {
           slug: s.slug || makeSlug(s.title?.es || ''),
           shortDescription: s.shortDescription || s.description || { es: '', ca: '' },
           longDescription: s.longDescription || { es: '', ca: '' },
-          href: s.href || '',
+          gallery: Array.isArray(s.gallery) ? s.gallery : [],
         }))
         setData({
           id: metodo.id,
@@ -246,6 +246,12 @@ export default function MetodoAdminPage() {
     setData({ ...data, content: { ...data.content, steps: newSteps } })
   }
 
+  function updateStepGallery(index: number, images: string[]) {
+    const newSteps = [...(data.content.steps || [])]
+    newSteps[index] = { ...newSteps[index], gallery: images }
+    setData({ ...data, content: { ...data.content, steps: newSteps } })
+  }
+
   function addStep() {
     const newSteps = [...(data.content.steps || [])]
     newSteps.push({
@@ -258,7 +264,7 @@ export default function MetodoAdminPage() {
       longDescription: { es: '', ca: '' },
       bullets: { es: [], ca: [] },
       image: '',
-      href: '',
+      gallery: [],
     })
     setData({ ...data, content: { ...data.content, steps: newSteps } })
   }
@@ -405,14 +411,15 @@ export default function MetodoAdminPage() {
                 </div>
               </div>
 
+              {/* IMAGEN PRINCIPAL */}
               <div>
                 <label className="block text-white/50 text-xs mb-2 flex items-center gap-1.5">
-                  <ImageIcon className="size-3.5" /> Imagen
+                  <ImageIcon className="size-3.5" /> Imagen principal
                 </label>
                 <ImageUploader
                   images={step.image ? [step.image] : []}
                   onChange={(imgs) => updateStepImage(index, imgs)}
-                  folder={`metodo/step-${index + 1}`}
+                  folder={`metodo/${step.slug || 'step-' + (index + 1)}/main`}
                   maxImages={1}
                   allowVideos={false}
                 />
@@ -428,6 +435,24 @@ export default function MetodoAdminPage() {
                 </div>
               </div>
 
+              {/* GALERÍA */}
+              <div>
+                <label className="block text-white/50 text-xs mb-2 flex items-center gap-1.5">
+                  <Images className="size-3.5" /> Galería (fotos adicionales)
+                </label>
+                <ImageUploader
+                  images={step.gallery || []}
+                  onChange={(imgs) => updateStepGallery(index, imgs)}
+                  folder={`metodo/${step.slug || 'step-' + (index + 1)}/gallery`}
+                  maxImages={12}
+                  allowVideos={false}
+                />
+                <p className="text-white/30 text-[11px] mt-1">
+                  Estas fotos salen en la sub-página del paso. Puedes añadir hasta 12.
+                </p>
+              </div>
+
+              {/* ES */}
               <div className="border-l-2 border-[#d7bd77]/30 pl-3 space-y-2">
                 <p className="text-[#d7bd77] text-xs font-bold">🇪🇸 Español</p>
                 <input
@@ -444,19 +469,21 @@ export default function MetodoAdminPage() {
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none"
                   placeholder="Subtítulo corto"
                 />
-                <label className="block text-white/40 text-xs">Descripción corta (lista /metodo)</label>
+                <label className="block text-white/40 text-xs">Resumen (sale en Home y lista)</label>
                 <textarea
                   value={step.shortDescription?.es || ''}
                   onChange={(e) => updateStepNested(index, 'shortDescription', 'es', e.target.value)}
                   rows={2}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
+                  placeholder="Una frase corta. Se cortará automáticamente en Home si es muy larga."
                 />
-                <label className="block text-white/40 text-xs">Descripción larga (sub-página)</label>
+                <label className="block text-white/40 text-xs">Descripción larga (sale en la sub-página)</label>
                 <textarea
                   value={step.longDescription?.es || ''}
                   onChange={(e) => updateStepNested(index, 'longDescription', 'es', e.target.value)}
-                  rows={4}
+                  rows={5}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
+                  placeholder="Explicación ampliada del paso..."
                 />
                 <label className="block text-white/40 text-xs">Bullets ES (uno por línea)</label>
                 <textarea
@@ -467,6 +494,7 @@ export default function MetodoAdminPage() {
                 />
               </div>
 
+              {/* CA */}
               <div className="border-l-2 border-white/10 pl-3 space-y-2">
                 <p className="text-white/40 text-xs font-bold">🇨🇦 Català</p>
                 <input
@@ -490,7 +518,7 @@ export default function MetodoAdminPage() {
                 <textarea
                   value={step.longDescription?.ca || ''}
                   onChange={(e) => updateStepNested(index, 'longDescription', 'ca', e.target.value)}
-                  rows={4}
+                  rows={5}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#d7bd77] outline-none resize-y"
                 />
                 <textarea

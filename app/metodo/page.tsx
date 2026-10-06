@@ -10,6 +10,12 @@ import { TopNav } from '@/components/TopNav'
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
 
+function truncate(text: string, max = 120) {
+  if (!text) return ''
+  if (text.length <= max) return text
+  return text.slice(0, max).trimEnd() + '...'
+}
+
 const FALLBACK_STEPS = [
   { id: 'step-01', slug: 'escuchamos', number: '01', title: { es: 'Escuchamos', ca: 'Escoltem' }, shortDescription: { es: 'Entendemos tu visión, tus necesidades y la forma en que quieres vivir.', ca: 'Entenem la teva visió, les teves necessitats i la forma en què vols viure.' } },
   { id: 'step-02', slug: 'disenamos', number: '02', title: { es: 'Diseñamos', ca: 'Dissenyem' }, shortDescription: { es: 'Convertimos las ideas en un proyecto claro, bello y posible.', ca: 'Convertim les idees en un projecte clar, bonic i possible.' } },
@@ -119,7 +125,8 @@ export default function MetodoPage() {
           <div className="border-t border-white/10">
             {steps.map((step: any, index: number) => {
               const stepTitle = ca ? step.title?.ca || step.title?.es : step.title?.es
-              const stepDesc = ca ? step.shortDescription?.ca || step.shortDescription?.es : step.shortDescription?.es
+              const rawDesc = ca ? step.shortDescription?.ca || step.shortDescription?.es : step.shortDescription?.es
+              const stepDesc = truncate(rawDesc, 120)
               const stepNumber = step.number || String(index + 1).padStart(2, '0')
 
               return (

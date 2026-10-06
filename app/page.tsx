@@ -31,6 +31,12 @@ const FALLBACK_METHOD_STEPS = [
   { id: 'step-04', slug: 'entregamos', number: '04', title: { es: 'Entregamos', ca: 'Lliurem' }, shortDescription: { es: 'Te entregamos un espacio listo para empezar una nueva etapa.', ca: 'Et lliurem un espai a punt per començar una nova etapa.' } },
 ]
 
+function truncate(text: string, max = 120) {
+  if (!text) return ''
+  if (text.length <= max) return text
+  return text.slice(0, max).trimEnd() + '...'
+}
+
 export default function Home() {
   const [loading, setLoading] = useState(true)
   const [heroData, setHeroData] = useState<any>(null)
@@ -508,7 +514,8 @@ export default function Home() {
           <div className="method-list">
             {methodSteps.map((step: any, index: number) => {
               const stepTitle = ca ? (step.title?.ca || step.title?.es) : step.title?.es
-              const stepDesc = ca ? (step.shortDescription?.ca || step.shortDescription?.es) : step.shortDescription?.es
+              const rawDesc = ca ? (step.shortDescription?.ca || step.shortDescription?.es) : step.shortDescription?.es
+              const stepDesc = truncate(rawDesc, 120)
               const stepNumber = step.number || String(index + 1).padStart(2, '0')
               const href = step.slug ? `/metodo/${step.slug}` : '#metodo'
 

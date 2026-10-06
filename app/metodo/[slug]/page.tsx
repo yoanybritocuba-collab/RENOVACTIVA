@@ -82,6 +82,7 @@ export default function PasoPage() {
   const shortDesc = ca ? step.shortDescription?.ca || step.shortDescription?.es : step.shortDescription?.es
   const longDesc = ca ? step.longDescription?.ca || step.longDescription?.es : step.longDescription?.es
   const bullets = ca ? step.bullets?.ca || step.bullets?.es || [] : step.bullets?.es || []
+  const gallery = Array.isArray(step.gallery) ? step.gallery.filter((g: string) => g && g.trim()) : []
   const nextTitle = nextStep ? (ca ? nextStep.title?.ca || nextStep.title?.es : nextStep.title?.es) : null
   const prevTitle = prevStep ? (ca ? prevStep.title?.ca || prevStep.title?.es : prevStep.title?.es) : null
 
@@ -177,6 +178,37 @@ export default function PasoPage() {
         </div>
       </section>
 
+      {/* GALERÍA DE FOTOS */}
+      {gallery.length > 0 && (
+        <section className="border-t border-white/10 bg-[#0A0A0A] px-6 lg:px-10 py-16 lg:py-20">
+          <div className="mx-auto max-w-[1380px]">
+            <h2 className="text-[10px] uppercase tracking-[0.32em] text-[#d7bd77] mb-8">
+              {ca ? 'Galeria' : 'Galería'}
+            </h2>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+              {gallery.map((img: string, i: number) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.6, delay: i * 0.06 }}
+                  className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10 hover:border-[#10B77F]/50 transition-colors"
+                >
+                  <img
+                    src={img}
+                    alt={`${stepTitle} ${i + 1}`}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* PREV / NEXT */}
       {(prevStep || nextStep) && (
         <section className="border-t border-white/10 bg-[#0D0D0D] px-6 lg:px-10 py-10">
           <div className="mx-auto max-w-[1380px] grid grid-cols-2 gap-4">
@@ -220,6 +252,7 @@ export default function PasoPage() {
         </section>
       )}
 
+      {/* CTA FINAL */}
       <section className="relative border-t border-white/10 bg-[#080808] px-6 py-20 lg:px-10 lg:py-28">
         <div className="mx-auto max-w-[1380px] text-center">
           <h3 className="font-serif text-4xl lg:text-6xl text-white mb-6">
