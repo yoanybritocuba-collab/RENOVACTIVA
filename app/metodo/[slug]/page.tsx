@@ -177,7 +177,6 @@ export default function PasoPage() {
         </div>
       </section>
 
-      {/* NAV PREV / NEXT */}
       {(prevStep || nextStep) && (
         <section className="border-t border-white/10 bg-[#0D0D0D] px-6 lg:px-10 py-10">
           <div className="mx-auto max-w-[1380px] grid grid-cols-2 gap-4">
@@ -221,7 +220,6 @@ export default function PasoPage() {
         </section>
       )}
 
-      {/* CTA FINAL */}
       <section className="relative border-t border-white/10 bg-[#080808] px-6 py-20 lg:px-10 lg:py-28">
         <div className="mx-auto max-w-[1380px] text-center">
           <h3 className="font-serif text-4xl lg:text-6xl text-white mb-6">

@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from 'next/navigation'
 import { ArrowLeft, Home } from 'lucide-react'
 import { useEffect, useRef } from 'react'
+import { getPreviousRoute } from '@/lib/usePreviousRoute'
 
 export function FloatingNav() {
   const router = useRouter()
@@ -10,54 +11,38 @@ export function FloatingNav() {
   const backPressesRef = useRef(0)
   const lastPressTimeRef = useRef(0)
 
-  // ============================================================
-  // Sistema anti-salida: 3 pulsaciones en la HOME para salir
-  // ============================================================
   useEffect(() => {
-    const isHome = pathname === '/'
-    if (!isHome) {
+    if (typeof window === 'undefined') return
+    if (pathname !== '/') {
       backPressesRef.current = 0
       return
     }
 
-    if (typeof window !== 'undefined') {
-      window.history.pushState({ trap: true }, '', window.location.href)
-    }
+    window.history.pushState({ trap: true }, '', window.location.href)
 
     function handlePopState() {
-      if (typeof window !== 'undefined') {
-        window.history.pushState({ trap: true }, '', window.location.href)
-      }
-      handleBackPress()
+      if (typeof window === 'undefined') return
+      window.history.pushState({ trap: true }, '', window.location.href)
+      registerBackPress()
     }
 
     window.addEventListener('popstate', handlePopState)
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState)
-    }
+    return () => window.removeEventListener('popstate', handlePopState)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname])
 
-  function handleBackPress() {
+  function registerBackPress() {
     const now = Date.now()
     const elapsed = now - lastPressTimeRef.current
-
-    if (elapsed > 2000) {
-      backPressesRef.current = 0
-    }
-
+    if (elapsed > 2000) backPressesRef.current = 0
     lastPressTimeRef.current = now
     backPressesRef.current += 1
 
     if (backPressesRef.current >= 3) {
       backPressesRef.current = 0
-      if (typeof window !== 'undefined') {
-        window.history.go(-3)
-      }
+      if (typeof window !== 'undefined') window.history.go(-3)
       return
     }
-
     showWarning(backPressesRef.current)
   }
 
@@ -109,40 +94,32 @@ export function FloatingNav() {
     setTimeout(() => el.remove(), 2000)
   }
 
-  // ✅ Botón ATRÁS: va a la página anterior donde estabas
   function goBack() {
-    const now = Date.now()
-    const elapsed = now - lastPressTimeRef.current
+    if (typeof window === 'undefined') return
 
-    if (elapsed > 2000) {
-      backPressesRef.current = 0
-    }
-
-    lastPressTimeRef.current = now
-    backPressesRef.current += 1
-
-    if (backPressesRef.current >= 3) {
-      backPressesRef.current = 0
-      if (typeof window !== 'undefined') {
-        router.back()
-        setTimeout(() => {
-          window.history.back()
-          window.history.back()
-        }, 50)
-      }
+    if (pathname === '/') {
+      registerBackPress()
       return
     }
 
-    if (typeof window !== 'undefined') {
-      router.back()
+    const prev = getPreviousRoute()
+
+    if (prev && prev !== pathname && prev !== '/') {
+      router.push(prev)
+    } else if (pathname.startsWith('/metodo/')) {
+      router.push('/metodo')
+    } else if (pathname.startsWith('/reformas-')) {
+      router.push('/servicios')
+    } else if (prev === '/') {
+      router.push('/')
+    } else {
+      router.push('/')
     }
   }
 
-  // ✅ Botón HOME: lleva a la pantalla de inicio INMEDIATAMENTE
   function goHome() {
     backPressesRef.current = 0
     lastPressTimeRef.current = 0
-    // Salto instantáneo a la home (sin esperas)
     if (typeof window !== 'undefined') {
       window.location.href = '/'
     }
@@ -150,7 +127,6 @@ export function FloatingNav() {
 
   return (
     <div className="fixed bottom-2 left-2 z-[90] flex flex-col gap-1 items-start">
-      {/* Botón Volver (arriba) */}
       <button
         onClick={goBack}
         aria-label="Volver atrás"
@@ -160,7 +136,6 @@ export function FloatingNav() {
         <ArrowLeft className="size-3 transition-transform duration-300 group-hover:-translate-x-0.5" />
       </button>
 
-      {/* Botón Home (abajo) */}
       <button
         onClick={goHome}
         aria-label="Ir al inicio"
