@@ -13,15 +13,8 @@ const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
 
 const ICON_MAP: Record<string, any> = {
-  briefcase: Briefcase,
-  award: Award,
-  users: Users,
-  home: HomeIcon,
-  trending: TrendingUp,
-  star: Star,
-  heart: Heart,
-  target: Target,
-  zap: Zap,
+  briefcase: Briefcase, award: Award, users: Users, home: HomeIcon,
+  trending: TrendingUp, star: Star, heart: Heart, target: Target, zap: Zap,
 }
 
 const FALLBACK_METHOD_STEPS = [
@@ -35,6 +28,12 @@ function truncate(text: string, max = 120) {
   if (!text) return ''
   if (text.length <= max) return text
   return text.slice(0, max).trimEnd() + '...'
+}
+
+function pickText(field: any, lang: 'es' | 'ca', fallback = ''): string {
+  if (!field) return fallback
+  if (typeof field === 'string') return field
+  return field[lang] || field.es || field.ca || fallback
 }
 
 export default function Home() {
@@ -53,12 +52,9 @@ export default function Home() {
 
   const [contactModalOpen, setContactModalOpen] = useState(false)
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false)
-
   const [selectedProject, setSelectedProject] = useState<any>(null)
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
-
   const [openFaq, setOpenFaq] = useState<number | null>(0)
-
   const [testimonialPage, setTestimonialPage] = useState(0)
   const [mobileTestimonialIndex, setMobileTestimonialIndex] = useState(0)
 
@@ -90,7 +86,6 @@ export default function Home() {
       const headerHeight = 80
       const top = el.getBoundingClientRect().top + window.scrollY - headerHeight
       window.scrollTo({ top, behavior: 'instant' as ScrollBehavior })
-
       el.style.opacity = '0'
       el.style.transform = 'translateY(30px) scale(0.98)'
       el.style.transition = 'opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)'
@@ -166,7 +161,6 @@ export default function Home() {
       const rect = grid.getBoundingClientRect()
       isHoveringRef.current = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom
     }
-
     const onWheel = (e: WheelEvent) => {
       if (!isHoveringRef.current) return
       const totalPages = Math.max(1, Math.ceil(totalItems / 3))
@@ -178,7 +172,6 @@ export default function Home() {
       setTestimonialPage((prev) => { if (e.deltaY > 0) return (prev + 1) % totalPages; return (prev - 1 + totalPages) % totalPages })
       setTimeout(() => { wheelLockRef.current = false }, 450)
     }
-
     const onTouchStart = (e: TouchEvent) => {
       const carousel = mobileCarouselRef.current
       if (!carousel) return
@@ -188,7 +181,6 @@ export default function Home() {
       if (isInside) { touchStartRef.current = { x: touch.clientX, y: touch.clientY, active: true } }
       else { touchStartRef.current = null }
     }
-
     const onTouchEnd = (e: TouchEvent) => {
       if (!touchStartRef.current || !touchStartRef.current.active) { touchStartRef.current = null; return }
       const touch = e.changedTouches[0]
@@ -200,7 +192,6 @@ export default function Home() {
       }
       touchStartRef.current = null
     }
-
     document.addEventListener('mousemove', onMouseMove, { passive: true })
     document.addEventListener('wheel', onWheel, { passive: false })
     document.addEventListener('touchstart', onTouchStart, { passive: true })
@@ -215,41 +206,27 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-
     const isMobile = window.matchMedia('(max-width: 1023px)').matches
     if (!isMobile) return
-
     const timeoutId = setTimeout(() => {
       const rows = document.querySelectorAll('.method-row')
       if (rows.length === 0) return
-
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('is-active')
-            } else {
-              entry.target.classList.remove('is-active')
-            }
+            if (entry.isIntersecting) entry.target.classList.add('is-active')
+            else entry.target.classList.remove('is-active')
           })
         },
-        {
-          rootMargin: '-35% 0px -35% 0px',
-          threshold: 0,
-        }
+        { rootMargin: '-35% 0px -35% 0px', threshold: 0 }
       )
-
       rows.forEach((row) => observer.observe(row))
       ;(window as any).__methodObserver = observer
     }, 300)
-
     return () => {
       clearTimeout(timeoutId)
       const observer = (window as any).__methodObserver
-      if (observer) {
-        observer.disconnect()
-        ;(window as any).__methodObserver = null
-      }
+      if (observer) { observer.disconnect(); (window as any).__methodObserver = null }
     }
   }, [loading, methodData])
 
@@ -277,7 +254,6 @@ export default function Home() {
   const heroImages = heroData?.images || ['', '', '']
   const heroTrans = heroData?.translations || {}
   const footerTrans = footerData?.translations || {}
-  const servicesTrans = servicesSection?.translations || {}
   const testimonialsTrans = testimonialsData?.translations || {}
   const testimonialsItems = testimonialsData?.items || []
 
@@ -305,15 +281,9 @@ export default function Home() {
       ]
 
   const methodSteps = methodData?.steps?.length > 0 ? methodData.steps : FALLBACK_METHOD_STEPS
-  const methodEyebrow = ca
-    ? (methodData?.eyebrow?.ca || methodData?.eyebrow?.es || 'El nostre mètode')
-    : (methodData?.eyebrow?.es || 'Nuestro método')
-  const methodTitle = ca
-    ? (methodData?.title?.ca || methodData?.title?.es || "L'excel·lència")
-    : (methodData?.title?.es || 'La excelencia')
-  const methodTitleItalic = ca
-    ? (methodData?.titleItalic?.ca || methodData?.titleItalic?.es || 'és un procés.')
-    : (methodData?.titleItalic?.es || 'es un proceso.')
+  const methodEyebrow = ca ? (methodData?.eyebrow?.ca || methodData?.eyebrow?.es || 'El nostre mètode') : (methodData?.eyebrow?.es || 'Nuestro método')
+  const methodTitle = ca ? (methodData?.title?.ca || methodData?.title?.es || "L'excel·lència") : (methodData?.title?.es || 'La excelencia')
+  const methodTitleItalic = ca ? (methodData?.titleItalic?.ca || methodData?.titleItalic?.es || 'és un procés.') : (methodData?.titleItalic?.es || 'es un proceso.')
 
   const faqs = [
     { qEs: '¿Cuánto tarda una reforma integral?', qCa: 'Quant triga una reforma integral?', aEs: 'Depende del tamaño y la complejidad, pero una reforma integral de un piso medio suele tardar entre 2 y 4 meses. En la primera visita te damos un plazo estimado.', aCa: 'Depèn de la mida i la complexitat, però una reforma integral d\'un pis mitjà sol trigar entre 2 i 4 mesos. A la primera visita et donem un termini estimat.' },
@@ -381,10 +351,8 @@ export default function Home() {
         {heroImages.map((image: string, index: number) => (
           <div key={index} className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${index === activeHero ? 'opacity-100' : 'opacity-0'}`} style={{ backgroundImage: `url(${image})`, backgroundPosition: 'center', backgroundSize: 'cover' }} />
         ))}
-
         <motion.div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/10 to-transparent md:from-black/40 md:via-black/15 md:to-transparent z-[11]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2, delay: 0.3 }} />
         <motion.div className="absolute inset-0 bg-gradient-to-t from-[#080808]/35 via-transparent to-transparent md:from-[#080808]/50 md:via-transparent md:to-black/5 z-[12]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2, delay: 0.3 }} />
-
         <div className="relative z-20 mx-auto w-full max-w-[1380px] px-6 pb-12 pt-24 lg:px-10 lg:pb-28 lg:pt-40">
           <div className="max-w-3xl">
             <motion.div className="mb-7 flex items-center gap-4" initial={{ opacity: 0, x: -600 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}>
@@ -393,7 +361,6 @@ export default function Home() {
                 {ca ? (heroTrans.eyebrow || heroData?.eyebrow || 'Arquitectura · Interiorisme · Construcció') : (heroData?.eyebrow || 'Arquitectura · Interiorismo · Construcción')}
               </p>
             </motion.div>
-
             <h1 className="max-w-3xl font-serif text-3xl leading-[1.15] tracking-[-0.03em] sm:text-4xl md:text-5xl lg:text-[72px] text-hero-title pb-4" style={{ textTransform: 'uppercase' }}>
               {titleWords.map((word: string, index: number) => (
                 <span key={index} className="inline-block align-bottom" style={{ marginRight: '0.25em' }}>
@@ -403,32 +370,24 @@ export default function Home() {
                 </span>
               ))}
             </h1>
-
             <motion.p className="mt-8 max-w-md text-base leading-relaxed text-[#d7bd77] text-hero-description" initial={{ opacity: 0, x: 600 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.6, delay: 2.2, ease: [0.16, 1, 0.3, 1] }}>
               {ca ? (heroTrans.description || heroData?.description || "Reformes d'alt nivell per a habitatges, locals i oficines.") : (heroData?.description || 'Reformas de alto nivel para viviendas, locales y oficinas.')}
             </motion.p>
-
             <div className="mt-10 flex flex-wrap items-center gap-5">
               <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 3.2, ease: [0.22, 1, 0.36, 1] }}>
                 <motion.button type="button" onClick={() => scrollToSection('contacto')} className="group relative inline-flex items-center gap-5 bg-[#d7bd77] px-6 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-[#141310] overflow-hidden cursor-pointer" whileHover={{ scale: 1.03 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}>
                   <span className="absolute inset-0 bg-[#10B77F] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]" />
-                  <span className="relative z-10">
-                    {ca ? (heroTrans.cta || heroData?.cta || 'Parlem del teu projecte') : (heroData?.cta || 'Hablemos de tu proyecto')}
-                  </span>
+                  <span className="relative z-10">{ca ? (heroTrans.cta || heroData?.cta || 'Parlem del teu projecte') : (heroData?.cta || 'Hablemos de tu proyecto')}</span>
                   <ArrowUpRight className="relative z-10 size-4 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
                 </motion.button>
               </motion.div>
-
               <motion.button type="button" onClick={() => scrollToSection('proyectos')} className="group inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/95 hover:text-[#10B77F] transition-colors text-hero-eyebrow cursor-pointer" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 3.5, ease: [0.22, 1, 0.36, 1] }}>
                 <Play className="size-4 fill-current transition-transform duration-300 group-hover:scale-110" /> 
                 {ca ? 'Veure projectes' : 'Ver proyectos'}
               </motion.button>
             </div>
-
             <motion.div className="mt-16 hidden lg:flex flex-col items-start gap-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 4.0 }}>
-              <span className="text-[10px] uppercase tracking-[0.3em] text-white/70 text-hero-eyebrow">
-                {ca ? 'Descobreix' : 'Descubre'}
-              </span>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-white/70 text-hero-eyebrow">{ca ? 'Descobreix' : 'Descubre'}</span>
               <div className="relative h-12 w-px bg-white/20 overflow-hidden">
                 <motion.div className="absolute top-0 left-0 w-full h-1/2 bg-[#10B77F]" animate={{ y: ['-100%', '200%'] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }} />
               </div>
@@ -442,25 +401,28 @@ export default function Home() {
         <div className="relative mx-auto max-w-[1380px]">
           <div className="mb-16 lg:mb-20">
             <motion.p className="eyebrow" initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
-              {ca ? (servicesTrans.eyebrow || servicesSection?.eyebrow || 'El que fem') : (servicesSection?.eyebrow || 'Lo que hacemos')}
+              {pickText(servicesSection?.eyebrow, ca ? 'ca' : 'es', ca ? 'El que fem' : 'Lo que hacemos')}
             </motion.p>
             <motion.h2 className="mt-4 font-serif text-5xl leading-[0.95] tracking-[-0.03em] sm:text-6xl lg:text-7xl xl:text-8xl" initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
-              {ca 
-                ? <>{servicesTrans.title || servicesSection?.title || 'Una visió'}<br /><i className="text-[#10B77F]">{servicesTrans.titleItalic || servicesSection?.titleItalic || 'sense límits.'}</i></>
-                : <>{servicesSection?.title || 'Una visión'}<br /><i className="text-[#10B77F]">{servicesSection?.titleItalic || 'sin límites.'}</i></>
-              }
+              {pickText(servicesSection?.title, ca ? 'ca' : 'es', ca ? 'Una visió' : 'Una visión')}
+              <br />
+              <i className="text-[#10B77F]">{pickText(servicesSection?.titleItalic, ca ? 'ca' : 'es', ca ? 'sense límits.' : 'sin límites.')}</i>
             </motion.h2>
           </div>
 
           <div className="space-y-0">
             {servicesData.slice(0, 4).map((service: any, index: number) => {
               const imageUrl = service.images?.[0] || service.image || ''
-              const title = service.title?.[language] || ''
-              const copy = service.copy?.[language] || ''
+              const title = pickText(service.title, ca ? 'ca' : 'es', '')
+              const copy = pickText(service.copy, ca ? 'ca' : 'es', '')
+              const area2 = service.area2 || {}
+              const area2Image = area2.image || ''
+              const hasArea2 = area2Image && (area2.title?.es || area2.title?.ca)
+
               return (
                 <motion.div key={index} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}>
                   <Link href={service.href || '#'} className="service-row group relative block border-t border-white/10 py-8 lg:py-12 transition-all duration-500 hover:border-[#10B77F] hover:shadow-[0_0_40px_-5px_rgba(16,183,127,0.4)]">
-                    <div className="grid grid-cols-1 lg:grid-cols-[120px_1fr_1.4fr_200px] gap-4 lg:gap-8 items-center">
+                    <div className={`grid grid-cols-1 gap-4 lg:gap-8 items-center ${hasArea2 ? 'lg:grid-cols-[120px_1fr_1.4fr_240px]' : 'lg:grid-cols-[120px_1fr_1.4fr_200px]'}`}>
                       <div className="flex lg:justify-start">
                         <span className="service-number font-serif text-6xl lg:text-8xl leading-none text-[#10B77F] transition-all duration-500 group-hover:text-[#d7bd77] group-hover:scale-105 origin-left">{service.number}</span>
                       </div>
@@ -470,18 +432,44 @@ export default function Home() {
                       <div className="lg:pr-8">
                         <p className="text-sm leading-relaxed text-white/70 transition-colors duration-500 group-hover:text-white/95 max-w-md">{copy}</p>
                       </div>
-                      <div className="hidden lg:block relative h-[180px] overflow-hidden rounded-lg">
-                        <div className="absolute inset-0 bg-cover bg-center opacity-0 scale-110 transition-all duration-700 group-hover:opacity-100 group-hover:scale-100" style={{ backgroundImage: `url(${imageUrl})` }} />
-                        <div className="absolute inset-0 border border-transparent rounded-lg transition-all duration-500 group-hover:border-[#10B77F]/60" />
-                      </div>
-                      <div className="lg:hidden relative h-[200px] overflow-hidden rounded-lg mt-4">
-                        <div className="absolute inset-0 bg-cover bg-center opacity-90" style={{ backgroundImage: `url(${imageUrl})` }} />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D0D]/50 to-transparent" />
-                        <div className="absolute inset-0 border border-[#10B77F]/40 rounded-lg" />
-                      </div>
-                      <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 hidden lg:flex items-center gap-2 text-[#10B77F] group-hover:text-[#d7bd77]">
-                        <ArrowUpRight className="size-6 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
-                      </div>
+
+                      {/* 1 foto normal */}
+                      {!hasArea2 && (
+                        <>
+                          <div className="hidden lg:block relative h-[180px] overflow-hidden rounded-lg">
+                            <div className="absolute inset-0 bg-cover bg-center opacity-0 scale-110 transition-all duration-700 group-hover:opacity-100 group-hover:scale-100" style={{ backgroundImage: `url(${imageUrl})` }} />
+                            <div className="absolute inset-0 border border-transparent rounded-lg transition-all duration-500 group-hover:border-[#10B77F]/60" />
+                          </div>
+                          <div className="lg:hidden relative h-[200px] overflow-hidden rounded-lg mt-4">
+                            <div className="absolute inset-0 bg-cover bg-center opacity-90" style={{ backgroundImage: `url(${imageUrl})` }} />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D0D]/50 to-transparent" />
+                            <div className="absolute inset-0 border border-[#10B77F]/40 rounded-lg" />
+                          </div>
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 hidden lg:flex items-center gap-2 text-[#10B77F] group-hover:text-[#d7bd77]">
+                            <ArrowUpRight className="size-6 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
+                          </div>
+                        </>
+                      )}
+
+                      {/* 2 fotos pequeñas (misma fila) */}
+                      {hasArea2 && (
+                        <div className="flex gap-3 justify-start lg:justify-end">
+                          <div className="relative w-[105px] h-[105px] lg:w-[110px] lg:h-[110px] overflow-hidden rounded-lg border border-[#10B77F]/30 group-hover:border-[#10B77F] transition-all duration-500">
+                            <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url(${imageUrl})` }} />
+                            <div className="absolute inset-0 bg-black/40" />
+                            <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-black/70 backdrop-blur-sm">
+                              <p className="text-[9px] uppercase tracking-[0.14em] text-center text-white/90 font-medium">{ca ? 'Locals' : 'Locales'}</p>
+                            </div>
+                          </div>
+                          <div className="relative w-[105px] h-[105px] lg:w-[110px] lg:h-[110px] overflow-hidden rounded-lg border border-[#10B77F]/30 group-hover:border-[#10B77F] transition-all duration-500">
+                            <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url(${area2Image})` }} />
+                            <div className="absolute inset-0 bg-black/40" />
+                            <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-black/70 backdrop-blur-sm">
+                              <p className="text-[9px] uppercase tracking-[0.14em] text-center text-white/90 font-medium">{ca ? 'Oficines' : 'Oficinas'}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className="absolute bottom-0 left-0 h-px w-0 bg-[#10B77F] transition-all duration-700 group-hover:w-full group-hover:bg-[#d7bd77]" />
                   </Link>
@@ -510,7 +498,6 @@ export default function Home() {
               {methodTitle}<br /><i>{methodTitleItalic}</i>
             </motion.h2>
           </div>
-
           <div className="method-list">
             {methodSteps.map((step: any, index: number) => {
               const stepTitle = ca ? (step.title?.ca || step.title?.es) : step.title?.es
@@ -518,16 +505,8 @@ export default function Home() {
               const stepDesc = truncate(rawDesc, 120)
               const stepNumber = step.number || String(index + 1).padStart(2, '0')
               const href = step.slug ? `/metodo/${step.slug}` : '#metodo'
-
               return (
-                <motion.div 
-                  key={step.id || index} 
-                  className="method-row group relative py-10 px-2"
-                  initial={{ opacity: 0, y: 20 }} 
-                  whileInView={{ opacity: 1, y: 0 }} 
-                  viewport={{ once: true, amount: 0.4 }} 
-                  transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                >
+                <motion.div key={step.id || index} className="method-row group relative py-10 px-2" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}>
                   <Link href={href} className="block">
                     <span className="method-divider" aria-hidden="true" />
                     <span className="method-bg-number" aria-hidden="true">{stepNumber}</span>
@@ -538,9 +517,7 @@ export default function Home() {
                       </h3>
                       <div className="method-desc-wrap relative">
                         <span className="method-desc-bar" aria-hidden="true" />
-                        <p className="method-desc text-sm lg:text-base leading-relaxed text-white/65 group-hover:text-white/85 transition-colors duration-500">
-                          {stepDesc}
-                        </p>
+                        <p className="method-desc text-sm lg:text-base leading-relaxed text-white/65 group-hover:text-white/85 transition-colors duration-500">{stepDesc}</p>
                       </div>
                     </div>
                   </Link>
@@ -568,7 +545,6 @@ export default function Home() {
             </motion.h2>
           </div>
         </div>
-
         <div className="grid gap-5 lg:grid-cols-3">
           {(projectsData.length > 0 ? projectsData.slice(0, 4) : [
             { title: 'Casa Paseo del Prado', type: 'Vivienda integral', image: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1400&q=85', images: ['https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1400&q=85'] },
@@ -612,9 +588,7 @@ export default function Home() {
                   <div className="stat-number font-serif text-5xl lg:text-7xl leading-none text-[#10B77F]">
                     {stat.number}<span className="text-3xl lg:text-5xl">{stat.suffix}</span>
                   </div>
-                  <p className="mt-3 text-[11px] lg:text-xs uppercase tracking-[0.2em] text-white/60 transition-colors duration-500 group-hover:text-white/90">
-                    {ca ? stat.labelCa : stat.labelEs}
-                  </p>
+                  <p className="mt-3 text-[11px] lg:text-xs uppercase tracking-[0.2em] text-white/60 transition-colors duration-500 group-hover:text-white/90">{ca ? stat.labelCa : stat.labelEs}</p>
                 </motion.div>
               )
             })}
@@ -628,9 +602,7 @@ export default function Home() {
           <div className="mb-10 sm:mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
             <div>
               <motion.p className="eyebrow" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
-                {ca
-                  ? (testimonialsTrans.eyebrow?.ca || testimonialsData?.eyebrow?.ca || 'El que diuen els nostres clients')
-                  : (testimonialsData?.eyebrow?.es || 'Lo que dicen nuestros clientes')}
+                {ca ? (testimonialsTrans.eyebrow?.ca || testimonialsData?.eyebrow?.ca || 'El que diuen els nostres clients') : (testimonialsData?.eyebrow?.es || 'Lo que dicen nuestros clientes')}
               </motion.p>
               <motion.h2 className="mt-3 sm:mt-4 font-serif text-3xl sm:text-5xl leading-[0.95] tracking-[-0.03em] lg:text-6xl" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
                 {ca 
@@ -640,7 +612,6 @@ export default function Home() {
               </motion.h2>
             </div>
           </div>
-
           <div ref={testimonialGridRef} className="hidden lg:block">
             <AnimatePresence mode="wait">
               <motion.div key={testimonialPage} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} className="grid gap-6 lg:grid-cols-3">
@@ -661,7 +632,6 @@ export default function Home() {
                 ))}
               </motion.div>
             </AnimatePresence>
-
             {totalTestimonialPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-10">
                 {Array.from({ length: totalTestimonialPages }).map((_, i) => (
@@ -669,14 +639,12 @@ export default function Home() {
                 ))}
               </div>
             )}
-
             {totalTestimonialPages > 1 && (
               <p className="text-center mt-6 text-[10px] uppercase tracking-[0.2em] text-white/30">
                 {ca ? 'Posa el cursor sobre les targetes i usa la roda del ratolí' : 'Pon el cursor sobre las tarjetas y usa la rueda del ratón'}
               </p>
             )}
           </div>
-
           <div ref={mobileCarouselRef} className="lg:hidden">
             <AnimatePresence mode="wait">
               {currentMobileTestimonial && (
@@ -723,7 +691,6 @@ export default function Home() {
               {ca ? 'Només per a clients que han treballat amb nosaltres.' : 'Solo para clientes que han trabajado con nosotros.'}
             </motion.p>
           </div>
-
           <motion.div className="relative p-8 lg:p-10 rounded-2xl border border-[#10B77F]/40 bg-[#0A0A0A] transition-all duration-500 hover:border-[#10B77F] hover:shadow-[0_0_60px_10px_rgba(16,183,127,0.35)]" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
             {reviewSuccess ? (
               <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-8">
@@ -824,7 +791,6 @@ export default function Home() {
               }
             </motion.h2>
           </div>
-
           <div className="space-y-0 divide-y divide-white/10">
             {faqs.map((faq, index) => {
               const isOpen = openFaq === index
@@ -856,7 +822,6 @@ export default function Home() {
       <section id="contacto" className="relative overflow-hidden bg-[#d7bd77] px-6 py-24 text-[#141310] lg:px-10 lg:py-32">
         <motion.div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-[#10B77F]/10 blur-3xl" initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }} />
         <motion.div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-[#10B77F]/10 blur-3xl" initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 1.5, delay: 0.3, ease: [0.22, 1, 0.36, 1] }} />
-
         <div className="relative mx-auto flex max-w-[1380px] flex-col justify-between gap-12 lg:flex-row lg:items-end">
           <div>
             <motion.p className="eyebrow !text-[#141310]/60" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
@@ -867,9 +832,7 @@ export default function Home() {
             </motion.h2>
           </div>
           <motion.div className="max-w-sm" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
-            <p className="text-sm leading-relaxed text-[#141310]/70">
-              {ca ? "Explica'ns la teva idea." : 'Cuéntanos tu idea.'}
-            </p>
+            <p className="text-sm leading-relaxed text-[#141310]/70">{ca ? "Explica'ns la teva idea." : 'Cuéntanos tu idea.'}</p>
             <motion.button type="button" onClick={() => setContactModalOpen(true)} className="contact-button group mt-7 inline-flex items-center gap-3 bg-[#000000] text-white px-6 py-3 rounded-lg text-[11px] uppercase tracking-[0.2em] font-medium cursor-pointer" whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}>
               <span className="flex items-center gap-3">
                 {ca ? 'Demanar pressupost' : 'Solicitar presupuesto'}
@@ -883,7 +846,6 @@ export default function Home() {
       {/* 10. FOOTER */}
       <footer className="relative bg-[#080808] px-6 py-14 lg:px-10">
         <motion.div className="absolute top-0 left-0 h-px bg-gradient-to-r from-[#10B77F] via-[#10B77F]/40 to-transparent" initial={{ width: 0 }} whileInView={{ width: '100%' }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }} />
-
         <div className="mx-auto max-w-[1380px]">
           <div className="flex flex-col justify-between gap-10 border-b border-white/10 pb-12 md:flex-row">
             <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
@@ -897,40 +859,24 @@ export default function Home() {
                 {ca ? (footerTrans.description || footerData?.description || 'Dissenyem i construïm espais amb intenció.') : (footerData?.description || 'Diseñamos y construimos espacios con intención.')}
               </p>
             </motion.div>
-
             <motion.div className="grid grid-cols-2 gap-x-8 gap-y-8 text-sm" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}>
               <div className="min-w-0">
                 <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77] font-semibold">{ca ? 'Contacte' : 'Contacto'}</p>
-
-                <a
-                  href={`tel:${(footerData?.contact?.phone || '+34600000000').replace(/\s/g, '')}`}
-                  className="group flex items-center gap-2 mb-3 text-[#10B77F] hover:text-[#d7bd77] transition-colors break-words"
-                >
+                <a href={`tel:${(footerData?.contact?.phone || '+34600000000').replace(/\s/g, '')}`} className="group flex items-center gap-2 mb-3 text-[#10B77F] hover:text-[#d7bd77] transition-colors break-words">
                   <Phone className="size-4 flex-shrink-0 text-[#d7bd77] group-hover:text-[#10B77F] transition-colors" />
                   <span className="text-sm break-all">{footerData?.contact?.phone || '+34 600 000 000'}</span>
                 </a>
-
-                <button
-                  type="button"
-                  onClick={() => setContactModalOpen(true)}
-                  className="group flex items-center gap-2 mb-3 text-[#10B77F] hover:text-[#d7bd77] transition-colors w-full text-left cursor-pointer break-words"
-                >
+                <button type="button" onClick={() => setContactModalOpen(true)} className="group flex items-center gap-2 mb-3 text-[#10B77F] hover:text-[#d7bd77] transition-colors w-full text-left cursor-pointer break-words">
                   <Mail className="size-4 flex-shrink-0 text-[#d7bd77] group-hover:text-[#10B77F] transition-colors" />
                   <span className="text-sm break-all">{footerData?.contact?.email || 'info@renovactiva.com'}</span>
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => setWhatsAppModalOpen(true)}
-                  className="group flex items-center gap-2 text-[#10B77F] hover:text-[#d7bd77] transition-colors w-full text-left cursor-pointer break-words"
-                >
+                <button type="button" onClick={() => setWhatsAppModalOpen(true)} className="group flex items-center gap-2 text-[#10B77F] hover:text-[#d7bd77] transition-colors w-full text-left cursor-pointer break-words">
                   <svg viewBox="0 0 24 24" className="size-4 flex-shrink-0 fill-[#d7bd77] group-hover:fill-[#10B77F] transition-colors">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
                   </svg>
                   <span className="text-sm break-all">{footerData?.contact?.phone || '+34 722 454 020'}</span>
                 </button>
               </div>
-
               <div className="min-w-0">
                 <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77] font-semibold">{ca ? "Visita'ns" : 'Visítanos'}</p>
                 <p className="text-white/75 text-sm">{ca ? (footerTrans.address?.street || footerData?.address?.street || 'Carrer Exemple 123') : (footerData?.address?.street || 'Carrer Exemple 123')}</p>
@@ -944,11 +890,8 @@ export default function Home() {
               </div>
             </motion.div>
           </div>
-
           <motion.div className="hidden sm:flex flex-row justify-between gap-5 pt-7 text-[10px] uppercase tracking-[0.18em] text-white/45" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
-            <p>
-              {ca ? (footerTrans.copyright || footerData?.copyright || '© 2025 Renovactiva SL. Tots els drets reservats.') : (footerData?.copyright || '© 2025 Renovactiva SL. Todos los derechos reservados.')}
-            </p>
+            <p>{ca ? (footerTrans.copyright || footerData?.copyright || '© 2025 Renovactiva SL. Tots els drets reservats.') : (footerData?.copyright || '© 2025 Renovactiva SL. Todos los derechos reservados.')}</p>
             <div className="flex gap-5">
               {footerData?.social?.instagram && (<a href={footerData.social.instagram} target="_blank" rel="noopener noreferrer" className="footer-link">Instagram</a>)}
               {footerData?.social?.linkedin && (<a href={footerData.social.linkedin} target="_blank" rel="noopener noreferrer" className="footer-link">LinkedIn</a>)}
@@ -956,13 +899,8 @@ export default function Home() {
               {footerData?.social?.facebook && (<a href={footerData.social.facebook} target="_blank" rel="noopener noreferrer" className="footer-link">Facebook</a>)}
             </div>
           </motion.div>
-
           <div className="flex justify-center pt-6">
-            <Link
-              href="/admin"
-              aria-label="Admin"
-              className="inline-flex size-6 items-center justify-center rounded text-white/15 transition-colors duration-300 hover:text-[#d7bd77]"
-            >
+            <Link href="/admin" aria-label="Admin" className="inline-flex size-6 items-center justify-center rounded text-white/15 transition-colors duration-300 hover:text-[#d7bd77]">
               <Shield className="size-3" />
             </Link>
           </div>
@@ -1020,17 +958,8 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <ContactModal
-        open={contactModalOpen}
-        onClose={() => setContactModalOpen(false)}
-        lang={ca ? 'ca' : 'es'}
-      />
-
-      <WhatsAppModal
-        open={whatsAppModalOpen}
-        onClose={() => setWhatsAppModalOpen(false)}
-        lang={ca ? 'ca' : 'es'}
-      />
+      <ContactModal open={contactModalOpen} onClose={() => setContactModalOpen(false)} lang={ca ? 'ca' : 'es'} />
+      <WhatsAppModal open={whatsAppModalOpen} onClose={() => setWhatsAppModalOpen(false)} lang={ca ? 'ca' : 'es'} />
     </main>
   )
 }

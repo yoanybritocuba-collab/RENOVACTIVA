@@ -3,7 +3,6 @@
 import { useRouter, usePathname } from 'next/navigation'
 import { ArrowLeft, Home } from 'lucide-react'
 import { useEffect, useRef } from 'react'
-import { getPreviousRoute } from '@/lib/usePreviousRoute'
 
 export function FloatingNav() {
   const router = useRouter()
@@ -11,9 +10,15 @@ export function FloatingNav() {
   const backPressesRef = useRef(0)
   const lastPressTimeRef = useRef(0)
 
+  // ============================================================
+  // Sistema anti-salida SOLO cuando estamos en la Home
+  // 3 pulsaciones en menos de 2 segundos → sale de la web
+  // ============================================================
   useEffect(() => {
     if (typeof window === 'undefined') return
-    if (pathname !== '/') {
+
+    const isHome = pathname === '/'
+    if (!isHome) {
       backPressesRef.current = 0
       return
     }
@@ -94,6 +99,9 @@ export function FloatingNav() {
     setTimeout(() => el.remove(), 2000)
   }
 
+  // Botón VOLVER (flotante)
+  // - Fuera de Home → 1 paso atrás con historial nativo (restaura scroll)
+  // - En Home → cuenta 3 pulsaciones para salir
   function goBack() {
     if (typeof window === 'undefined') return
 
@@ -102,19 +110,7 @@ export function FloatingNav() {
       return
     }
 
-    const prev = getPreviousRoute()
-
-    if (prev && prev !== pathname && prev !== '/') {
-      router.push(prev)
-    } else if (pathname.startsWith('/metodo/')) {
-      router.push('/metodo')
-    } else if (pathname.startsWith('/reformas-')) {
-      router.push('/servicios')
-    } else if (prev === '/') {
-      router.push('/')
-    } else {
-      router.push('/')
-    }
+    window.history.back()
   }
 
   function goHome() {
