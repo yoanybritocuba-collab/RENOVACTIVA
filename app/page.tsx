@@ -422,7 +422,7 @@ export default function Home() {
               return (
                 <motion.div key={index} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}>
                   <Link href={service.href || '#'} className="service-row group relative block border-t border-white/10 py-8 lg:py-12 transition-all duration-500 hover:border-[#10B77F] hover:shadow-[0_0_40px_-5px_rgba(16,183,127,0.4)]">
-                    <div className={`grid grid-cols-1 gap-4 lg:gap-8 items-center ${hasArea2 ? 'lg:grid-cols-[120px_1fr_1.4fr_240px]' : 'lg:grid-cols-[120px_1fr_1.4fr_200px]'}`}>
+                    <div className={`grid grid-cols-1 gap-4 lg:gap-8 items-center ${hasArea2 ? 'lg:grid-cols-[120px_1fr_1.2fr_420px]' : 'lg:grid-cols-[120px_1fr_1.4fr_200px]'}`}>
                       <div className="flex lg:justify-start">
                         <span className="service-number font-serif text-6xl lg:text-8xl leading-none text-[#10B77F] transition-all duration-500 group-hover:text-[#d7bd77] group-hover:scale-105 origin-left">{service.number}</span>
                       </div>
@@ -433,7 +433,6 @@ export default function Home() {
                         <p className="text-sm leading-relaxed text-white/70 transition-colors duration-500 group-hover:text-white/95 max-w-md">{copy}</p>
                       </div>
 
-                      {/* 1 foto normal */}
                       {!hasArea2 && (
                         <>
                           <div className="hidden lg:block relative h-[180px] overflow-hidden rounded-lg">
@@ -451,17 +450,16 @@ export default function Home() {
                         </>
                       )}
 
-                      {/* 2 fotos pequeñas (misma fila) */}
                       {hasArea2 && (
-                        <div className="flex gap-3 justify-start lg:justify-end">
-                          <div className="relative w-[105px] h-[105px] lg:w-[110px] lg:h-[110px] overflow-hidden rounded-lg border border-[#10B77F]/30 group-hover:border-[#10B77F] transition-all duration-500">
+                        <div className="flex gap-4 justify-start lg:justify-end">
+                          <div className="relative w-[160px] h-[180px] lg:w-[180px] lg:h-[180px] overflow-hidden rounded-lg border border-[#10B77F]/30 group-hover:border-[#10B77F] transition-all duration-500">
                             <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url(${imageUrl})` }} />
                             <div className="absolute inset-0 bg-black/40" />
                             <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-black/70 backdrop-blur-sm">
                               <p className="text-[9px] uppercase tracking-[0.14em] text-center text-white/90 font-medium">{ca ? 'Locals' : 'Locales'}</p>
                             </div>
                           </div>
-                          <div className="relative w-[105px] h-[105px] lg:w-[110px] lg:h-[110px] overflow-hidden rounded-lg border border-[#10B77F]/30 group-hover:border-[#10B77F] transition-all duration-500">
+                          <div className="relative w-[160px] h-[180px] lg:w-[180px] lg:h-[180px] overflow-hidden rounded-lg border border-[#10B77F]/30 group-hover:border-[#10B77F] transition-all duration-500">
                             <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url(${area2Image})` }} />
                             <div className="absolute inset-0 bg-black/40" />
                             <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-black/70 backdrop-blur-sm">
