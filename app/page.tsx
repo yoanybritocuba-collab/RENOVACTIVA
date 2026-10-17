@@ -452,17 +452,15 @@ export default function Home() {
 
                       {hasArea2 && (
                         <div className="flex gap-4 justify-start lg:justify-end">
-                          <div className="relative w-[160px] h-[180px] lg:w-[180px] lg:h-[180px] overflow-hidden rounded-lg border border-[#10B77F]/30 group-hover:border-[#10B77F] transition-all duration-500">
-                            <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url(${imageUrl})` }} />
-                            <div className="absolute inset-0 bg-black/40" />
-                            <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-black/70 backdrop-blur-sm">
+                          <div className="relative w-[160px] h-[180px] lg:w-[180px] lg:h-[180px] overflow-hidden rounded-lg">
+                            <div className="absolute inset-0 bg-cover bg-center opacity-0 scale-110 transition-all duration-700 group-hover:opacity-100 group-hover:scale-100" style={{ backgroundImage: `url(${imageUrl})` }} />
+                            <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-black/70 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                               <p className="text-[9px] uppercase tracking-[0.14em] text-center text-white/90 font-medium">{ca ? 'Locals' : 'Locales'}</p>
                             </div>
                           </div>
-                          <div className="relative w-[160px] h-[180px] lg:w-[180px] lg:h-[180px] overflow-hidden rounded-lg border border-[#10B77F]/30 group-hover:border-[#10B77F] transition-all duration-500">
-                            <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url(${area2Image})` }} />
-                            <div className="absolute inset-0 bg-black/40" />
-                            <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-black/70 backdrop-blur-sm">
+                          <div className="relative w-[160px] h-[180px] lg:w-[180px] lg:h-[180px] overflow-hidden rounded-lg">
+                            <div className="absolute inset-0 bg-cover bg-center opacity-0 scale-110 transition-all duration-700 group-hover:opacity-100 group-hover:scale-100" style={{ backgroundImage: `url(${area2Image})` }} />
+                            <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-black/70 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                               <p className="text-[9px] uppercase tracking-[0.14em] text-center text-white/90 font-medium">{ca ? 'Oficines' : 'Oficinas'}</p>
                             </div>
                           </div>
@@ -842,45 +840,45 @@ export default function Home() {
       </section>
 
       {/* 10. FOOTER */}
-      <footer className="relative bg-[#080808] px-6 py-14 lg:px-10">
+      <footer className="relative bg-white px-6 py-14 lg:px-10">
         <motion.div className="absolute top-0 left-0 h-px bg-gradient-to-r from-[#10B77F] via-[#10B77F]/40 to-transparent" initial={{ width: 0 }} whileInView={{ width: '100%' }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }} />
         <div className="mx-auto max-w-[1380px]">
-          <div className="flex flex-col justify-between gap-10 border-b border-white/10 pb-12 md:flex-row">
+          <div className="flex flex-col justify-between gap-10 border-b border-black/10 pb-12 md:flex-row">
             <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
               <Link href="/" className="flex items-center gap-3 group">
                 <img src="/logo.png" alt="Renovactiva" className="h-12 w-auto transition-transform duration-500 group-hover:scale-105" />
-                <span className="font-serif text-xl uppercase tracking-[0.28em] text-[#d7bd77] transition-colors duration-500 group-hover:text-[#10B77F]" style={{ textTransform: 'uppercase' }}>
+                <span className="font-serif text-xl uppercase tracking-[0.28em] text-[#ad742a] transition-colors duration-500 group-hover:text-[#10B77F]" style={{ textTransform: 'uppercase' }}>
                   RENOVACTIVA<span className="text-[#042133]"> SL</span>
                 </span>
               </Link>
-              <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/55">
+              <p className="mt-5 max-w-xs text-sm leading-relaxed text-black/60">
                 {ca ? (footerTrans.description || footerData?.description || 'Dissenyem i construïm espais amb intenció.') : (footerData?.description || 'Diseñamos y construimos espacios con intención.')}
               </p>
             </motion.div>
             <motion.div className="grid grid-cols-2 gap-x-8 gap-y-8 text-sm" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}>
               <div className="min-w-0">
-                <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77] font-semibold">{ca ? 'Contacte' : 'Contacto'}</p>
-                <a href={`tel:${(footerData?.contact?.phone || '+34600000000').replace(/\s/g, '')}`} className="group flex items-center gap-2 mb-3 text-[#10B77F] hover:text-[#d7bd77] transition-colors break-words">
-                  <Phone className="size-4 flex-shrink-0 text-[#d7bd77] group-hover:text-[#10B77F] transition-colors" />
+                <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-[#ad742a] font-semibold">{ca ? 'Contacte' : 'Contacto'}</p>
+                <a href={`tel:${(footerData?.contact?.phone || '+34600000000').replace(/\s/g, '')}`} className="group flex items-center gap-2 mb-3 text-black/70 hover:text-[#ad742a] transition-colors break-words">
+                  <Phone className="size-4 flex-shrink-0 text-[#ad742a] group-hover:text-[#10B77F] transition-colors" />
                   <span className="text-sm break-all">{footerData?.contact?.phone || '+34 600 000 000'}</span>
                 </a>
-                <button type="button" onClick={() => setContactModalOpen(true)} className="group flex items-center gap-2 mb-3 text-[#10B77F] hover:text-[#d7bd77] transition-colors w-full text-left cursor-pointer break-words">
-                  <Mail className="size-4 flex-shrink-0 text-[#d7bd77] group-hover:text-[#10B77F] transition-colors" />
+                <button type="button" onClick={() => setContactModalOpen(true)} className="group flex items-center gap-2 mb-3 text-black/70 hover:text-[#ad742a] transition-colors w-full text-left cursor-pointer break-words">
+                  <Mail className="size-4 flex-shrink-0 text-[#ad742a] group-hover:text-[#10B77F] transition-colors" />
                   <span className="text-sm break-all">{footerData?.contact?.email || 'info@renovactiva.com'}</span>
                 </button>
-                <button type="button" onClick={() => setWhatsAppModalOpen(true)} className="group flex items-center gap-2 text-[#10B77F] hover:text-[#d7bd77] transition-colors w-full text-left cursor-pointer break-words">
-                  <svg viewBox="0 0 24 24" className="size-4 flex-shrink-0 fill-[#d7bd77] group-hover:fill-[#10B77F] transition-colors">
+                <button type="button" onClick={() => setWhatsAppModalOpen(true)} className="group flex items-center gap-2 text-black/70 hover:text-[#ad742a] transition-colors w-full text-left cursor-pointer break-words">
+                  <svg viewBox="0 0 24 24" className="size-4 flex-shrink-0 fill-[#ad742a] group-hover:fill-[#10B77F] transition-colors">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
                   </svg>
                   <span className="text-sm break-all">{footerData?.contact?.phone || '+34 722 454 020'}</span>
                 </button>
               </div>
               <div className="min-w-0">
-                <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-[#d7bd77] font-semibold">{ca ? "Visita'ns" : 'Visítanos'}</p>
-                <p className="text-white/75 text-sm">{ca ? (footerTrans.address?.street || footerData?.address?.street || 'Carrer Exemple 123') : (footerData?.address?.street || 'Carrer Exemple 123')}</p>
-                <p className="text-white/75 text-sm">{footerData?.address?.postal || '08001'}{' '}{ca ? (footerTrans.address?.city || footerData?.address?.city || 'Barcelona') : (footerData?.address?.city || 'Barcelona')}</p>
+                <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-[#ad742a] font-semibold">{ca ? "Visita'ns" : 'Visítanos'}</p>
+                <p className="text-black/70 text-sm">{ca ? (footerTrans.address?.street || footerData?.address?.street || 'Carrer Exemple 123') : (footerData?.address?.street || 'Carrer Exemple 123')}</p>
+                <p className="text-black/70 text-sm">{footerData?.address?.postal || '08001'}{' '}{ca ? (footerTrans.address?.city || footerData?.address?.city || 'Barcelona') : (footerData?.address?.city || 'Barcelona')}</p>
                 {footerData?.schedule && (
-                  <p className="mt-3 flex items-start gap-2 text-white/75 text-sm">
+                  <p className="mt-3 flex items-start gap-2 text-black/70 text-sm">
                     <span className="flex-shrink-0">🕒</span>
                     <span>{ca ? (footerTrans.schedule || footerData.schedule) : footerData.schedule}</span>
                   </p>
@@ -888,18 +886,24 @@ export default function Home() {
               </div>
             </motion.div>
           </div>
-          <motion.div className="hidden sm:flex flex-row justify-between gap-5 pt-7 text-[10px] uppercase tracking-[0.18em] text-white/45" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
+          <motion.div className="hidden sm:flex flex-row justify-between gap-5 pt-7 text-[10px] uppercase tracking-[0.18em] text-black/50" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
             <p>{ca ? (footerTrans.copyright || footerData?.copyright || '© 2025 Renovactiva SL. Tots els drets reservats.') : (footerData?.copyright || '© 2025 Renovactiva SL. Todos los derechos reservados.')}</p>
             <div className="flex gap-5">
-              {footerData?.social?.instagram && (<a href={footerData.social.instagram} target="_blank" rel="noopener noreferrer" className="footer-link">Instagram</a>)}
-              {footerData?.social?.linkedin && (<a href={footerData.social.linkedin} target="_blank" rel="noopener noreferrer" className="footer-link">LinkedIn</a>)}
-              {footerData?.social?.youtube && (<a href={footerData.social.youtube} target="_blank" rel="noopener noreferrer" className="footer-link">YouTube</a>)}
-              {footerData?.social?.facebook && (<a href={footerData.social.facebook} target="_blank" rel="noopener noreferrer" className="footer-link">Facebook</a>)}
+              {footerData?.social?.instagram && (<a href={footerData.social.instagram} target="_blank" rel="noopener noreferrer" className="text-black/50 hover:text-[#ad742a] transition-colors">Instagram</a>)}
+              {footerData?.social?.linkedin && (<a href={footerData.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-black/50 hover:text-[#ad742a] transition-colors">LinkedIn</a>)}
+              {footerData?.social?.youtube && (<a href={footerData.social.youtube} target="_blank" rel="noopener noreferrer" className="text-black/50 hover:text-[#ad742a] transition-colors">YouTube</a>)}
+              {footerData?.social?.facebook && (<a href={footerData.social.facebook} target="_blank" rel="noopener noreferrer" className="text-black/50 hover:text-[#ad742a] transition-colors">Facebook</a>)}
             </div>
           </motion.div>
+          
+          {/* ✅ ADMIN SUPER OCULTO */}
           <div className="flex justify-center pt-6">
-            <Link href="/admin" aria-label="Admin" className="inline-flex size-6 items-center justify-center rounded text-white/15 transition-colors duration-300 hover:text-[#d7bd77]">
-              <Shield className="size-3" />
+            <Link 
+              href="/admin" 
+              aria-label="Admin" 
+              className="group inline-flex items-center justify-center size-8 opacity-0 hover:opacity-100 transition-opacity duration-300"
+            >
+              <Shield className="size-4 text-black/20 group-hover:text-[#ad742a] transition-colors duration-300" />
             </Link>
           </div>
         </div>

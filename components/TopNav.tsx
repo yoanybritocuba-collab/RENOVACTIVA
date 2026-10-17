@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { useLanguage } from '@/components/language-provider'
+import { ContactModal } from '@/components/ContactModal'
 
 type TopNavProps = {
   variant?: 'light' | 'dark'
@@ -20,11 +21,13 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [navVisible, setNavVisible] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
+  
+  // Estado local para el modal (para que funcione en todas las páginas)
+  const [localModalOpen, setLocalModalOpen] = useState(false)
 
   const light = variant === 'light'
   const isHome = pathname === '/'
 
-  // ✅ Detectar móvil
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.matchMedia('(max-width: 1023px)').matches)
@@ -34,7 +37,6 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // ✅ Bloquear scroll cuando el panel móvil está abierto
   useEffect(() => {
     if (menuOpen) {
       document.body.style.overflow = 'hidden'
@@ -44,7 +46,6 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
 
-  // ✅ Mostrar/ocultar barra según cursor
   useEffect(() => {
     if (isHome || isMobile) {
       setNavVisible(true)
@@ -88,21 +89,17 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
   function handleContactModal() {
     setMenuOpen(false)
     if (onOpenContactModal) {
+      // Si la página nos pasa su propia función (como en Home), la usamos
       onOpenContactModal()
     } else {
-      router.push('/contacto')
+      // Si no, abrimos el modal local (para el resto de páginas)
+      setLocalModalOpen(true)
     }
   }
 
-  // ✅ Enlaces del menú (colores oscuros porque la barra es blanca)
   const navLinkClass = 'relative inline-flex items-center px-3 py-2 text-[#141310]/75 hover:text-[#ad742a] transition-colors'
-
-  // ✅ Icono hamburguesa (oscuro)
   const menuBtnClass = 'text-[#141310]/80 hover:text-[#141310]'
-
-  // ✅ Panel móvil
   const panelBg = 'bg-white border-black/10'
-
   const panelLinkClass = 'block w-full text-left px-6 py-4 text-[#141310]/80 hover:bg-[#d7bd77]/10 hover:text-[#ad742a] transition-colors text-sm uppercase tracking-[0.18em] border-b border-black/5'
 
   return (
@@ -111,24 +108,16 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
         className={`fixed inset-x-0 top-0 z-50 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           navVisible ? 'translate-y-0' : '-translate-y-full'
         }`}
-        style={{
-          background: '#FFFFFF',
-        }}
+        style={{ background: '#FFFFFF' }}
       >
         <div className="mx-auto flex max-w-[1380px] items-center justify-between px-4 py-3 lg:px-10 lg:py-4">
-          {/* ✅ LOGO + NOMBRE */}
           <Link href="/" className="ml-2 lg:-ml-28 flex items-center gap-3 flex-shrink-0">
-            <img 
-              src="/logo.png" 
-              alt="Renovactiva" 
-              className="h-10 w-auto lg:h-14" 
-            />
+            <img src="/logo.png" alt="Renovactiva" className="h-10 w-auto lg:h-14" />
             <span className="font-serif text-sm uppercase tracking-[0.18em] text-[#ad742a] sm:text-base lg:text-xl lg:tracking-[0.28em] whitespace-nowrap">
               RENOVACTIVA<span className="text-[#042133]"> SL</span>
             </span>
           </Link>
 
-          {/* ✅ MENÚ ESCRITORIO */}
           <nav className="hidden lg:flex items-center gap-2 xl:gap-4 text-[11px] uppercase tracking-[0.2em]">
             <button type="button" onClick={goToServicios} className={navLinkClass}>
               {ca ? 'SERVEIS' : 'SERVICIOS'}
@@ -164,7 +153,6 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
         </div>
       </header>
 
-      {/* ✅ PANEL LATERAL MÓVIL */}
       {menuOpen && (
         <>
           <div
@@ -176,9 +164,7 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
             className={`fixed top-0 right-0 z-[101] h-full w-[280px] ${panelBg} border-l shadow-2xl lg:hidden flex flex-col animate-in slide-in-from-right duration-300`}
           >
             <div className="flex items-center justify-between px-6 py-5 border-b border-black/10">
-              <span className="font-serif text-lg tracking-[0.2em] text-[#ad742a]">
-                MENÚ
-              </span>
+              <span className="font-serif text-lg tracking-[0.2em] text-[#ad742a]">MENÚ</span>
               <button
                 aria-label="Cerrar menú"
                 onClick={() => setMenuOpen(false)}
@@ -215,6 +201,13 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
           </div>
         </>
       )}
+
+      {/* ✅ MODAL LOCAL (para las páginas que no pasan su propia función) */}
+      <ContactModal
+        open={localModalOpen}
+        onClose={() => setLocalModalOpen(false)}
+        lang={ca ? 'ca' : 'es'}
+      />
     </>
   )
 }
