@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { X, User, MessageSquare, MapPin, CheckCircle2, ShieldCheck, Lock, Clock, Check } from 'lucide-react'
+import { X, User, MessageSquare, MapPin, CheckCircle2, ShieldCheck, Lock, Clock } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Turnstile } from '@marsidev/react-turnstile'
 import type { TurnstileInstance } from '@marsidev/react-turnstile'
@@ -298,52 +298,19 @@ Gracias.`
                       </span>
                     </label>
 
-                    {/* ✅ TURNSTILE CORREGIDO PARA MÓVILES */}
-                    <div className="mb-3 sm:mb-4">
-                      <div className="h-0 overflow-hidden relative">
-                        <Turnstile
-                          ref={turnstileRef}
-                          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
-                          options={{
-                            theme: 'light',
-                            size: 'invisible',
-                          }}
-                          onSuccess={() => setVerificado(true)}
-                          onError={() => setVerificado(false)}
-                          onExpire={() => setVerificado(false)}
-                        />
-                      </div>
-
-                      <AnimatePresence>
-                        {verificado && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -5 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -5 }}
-                            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                            className="flex items-center gap-3 sm:gap-4 py-3 sm:py-4 px-4 sm:px-5 rounded-xl bg-gray-50 border border-[#10B77F]/30"
-                          >
-                            <div className="flex-shrink-0 flex items-center justify-center size-8 sm:size-9 rounded-full bg-[#10B77F]/15">
-                              <Check className="size-4 sm:size-5 text-[#10B77F]" strokeWidth={3} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs sm:text-sm font-semibold text-[#0a1a3a] leading-tight">
-                                {isCa ? 'Comprovació intel·ligent' : 'Comprobación inteligente'}
-                              </p>
-                              <p className="text-[11px] sm:text-xs text-gray-500 leading-tight mt-0.5">
-                                {isCa ? 'Hem verificat que ets humà' : 'Hemos verificado que eres humano'}
-                              </p>
-                            </div>
-                            <div className="flex-shrink-0 opacity-60">
-                              <img
-                                src="https://www.cloudflare.com/img/logo-cloudflare-dark.svg"
-                                alt="Cloudflare"
-                                className="h-3 sm:h-4 w-auto"
-                              />
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                    {/* ✅ TURNSTILE CORREGIDO (VISIBLE Y ADAPTADO A MÓVIL) */}
+                    <div className="mb-3 sm:mb-4 flex justify-center">
+                      <Turnstile
+                        key={open ? 'open' : 'closed'}
+                        ref={turnstileRef}
+                        siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
+                        options={{
+                          theme: 'light',
+                        }}
+                        onSuccess={() => setVerificado(true)}
+                        onError={() => setVerificado(false)}
+                        onExpire={() => setVerificado(false)}
+                      />
                     </div>
 
                     <div className="flex items-center justify-center gap-4 sm:gap-6 mb-4 sm:mb-5 text-gray-400">
@@ -361,6 +328,7 @@ Gracias.`
                     <button
                       type="button"
                       onClick={abrirWhatsApp}
+                      disabled={!verificado}
                       className="group relative w-full inline-flex items-center justify-center gap-2 sm:gap-3 bg-[#25D366] hover:bg-[#1faa53] text-white px-5 sm:px-6 py-3 sm:py-4 rounded-xl font-bold uppercase tracking-[0.15em] text-xs sm:text-sm transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01] hover:shadow-lg"
                     >
                       <svg viewBox="0 0 24 24" className="size-4 sm:size-5 fill-current">
