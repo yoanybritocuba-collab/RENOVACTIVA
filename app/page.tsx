@@ -58,6 +58,10 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(0)
   const [testimonialPage, setTestimonialPage] = useState(0)
   const [mobileTestimonialIndex, setMobileTestimonialIndex] = useState(0)
+  
+  // 🔥 NUEVO ESTADO PARA EL BOTÓN DE ADMIN
+  const [adminTaps, setAdminTaps] = useState(0)
+  const adminTapTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const testimonialGridRef = useRef<HTMLDivElement>(null)
   const mobileCarouselRef = useRef<HTMLDivElement>(null)
@@ -101,6 +105,27 @@ export default function Home() {
         el.style.transition = ''
       }, 900)
     }
+  }
+
+  // 🔥 FUNCIÓN PARA DETECTAR 3 TOQUES
+  const handleAdminTap = () => {
+    setAdminTaps((prev) => {
+      const next = prev + 1
+      if (next >= 3) {
+        // Al llegar a 3, reseteamos y dejamos que el enlace funcione
+        return 3
+      }
+      return next
+    })
+
+    if (adminTapTimeoutRef.current) {
+      clearTimeout(adminTapTimeoutRef.current)
+    }
+
+    // Si en 1 segundo no llega a 3 toques, reseteamos el contador
+    adminTapTimeoutRef.current = setTimeout(() => {
+      setAdminTaps(0)
+    }, 1000)
   }
 
   useEffect(() => {
@@ -839,15 +864,26 @@ export default function Home() {
             </div>
           </motion.div>
           
-          {/* ✅ ADMIN SUPER OCULTO */}
+          {/* ✅ ADMIN SUPER OCULTO - APARECE CON 3 TOQUES EN MÓVIL O HOVER EN PC */}
           <div className="flex justify-center pt-6">
-            <Link 
-              href="/admin" 
-              aria-label="Admin" 
-              className="group inline-flex items-center justify-center size-8 opacity-0 hover:opacity-100 transition-opacity duration-300"
+            <div 
+              onClick={handleAdminTap}
+              className="group inline-flex items-center justify-center size-12 cursor-pointer"
             >
-              <Shield className="size-4 text-black/20 group-hover:text-[#ad742a] transition-colors duration-300" />
-            </Link>
+              <Link 
+                href="/admin" 
+                aria-label="Admin" 
+                className={`inline-flex items-center justify-center size-8 transition-opacity duration-300 ${adminTaps >= 3 ? 'opacity-100' : 'opacity-0 sm:group-hover:opacity-100'}`}
+                onClick={(e) => {
+                  // Si en móvil no ha llegado a 3 toques, bloqueamos la navegación
+                  if (adminTaps < 3 && window.innerWidth < 640) {
+                    e.preventDefault()
+                  }
+                }}
+              >
+                <Shield className={`size-4 transition-colors duration-300 ${adminTaps >= 3 ? 'text-[#ad742a]' : 'text-black/20 group-hover:text-[#ad742a]'}`} />
+              </Link>
+            </div>
           </div>
         </div>
       </footer>
