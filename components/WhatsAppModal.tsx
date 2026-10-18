@@ -156,7 +156,6 @@ Gracias.`
 
   return (
     <>
-      {/* MODAL PRINCIPAL */}
       <AnimatePresence>
         {open && !privacidadOpen && (
           <motion.div
@@ -299,10 +298,9 @@ Gracias.`
                       </span>
                     </label>
 
-                    {/* ✅ CLOUDFLARE TURNSTILE — INVISIBLE + MENSAJE PROPIO */}
+                    {/* ✅ TURNSTILE CORREGIDO PARA MÓVILES */}
                     <div className="mb-3 sm:mb-4">
-                      {/* Turnstile invisible */}
-                      <div style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+                      <div className="h-0 overflow-hidden relative">
                         <Turnstile
                           ref={turnstileRef}
                           siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
@@ -316,7 +314,6 @@ Gracias.`
                         />
                       </div>
 
-                      {/* Caja personalizada con check verde + logo Cloudflare */}
                       <AnimatePresence>
                         {verificado && (
                           <motion.div
@@ -329,18 +326,14 @@ Gracias.`
                             <div className="flex-shrink-0 flex items-center justify-center size-8 sm:size-9 rounded-full bg-[#10B77F]/15">
                               <Check className="size-4 sm:size-5 text-[#10B77F]" strokeWidth={3} />
                             </div>
-
                             <div className="flex-1 min-w-0">
                               <p className="text-xs sm:text-sm font-semibold text-[#0a1a3a] leading-tight">
                                 {isCa ? 'Comprovació intel·ligent' : 'Comprobación inteligente'}
                               </p>
                               <p className="text-[11px] sm:text-xs text-gray-500 leading-tight mt-0.5">
-                                {isCa
-                                  ? 'Hem verificat que ets humà'
-                                  : 'Hemos verificado que eres humano'}
+                                {isCa ? 'Hem verificat que ets humà' : 'Hemos verificado que eres humano'}
                               </p>
                             </div>
-
                             <div className="flex-shrink-0 opacity-60">
                               <img
                                 src="https://www.cloudflare.com/img/logo-cloudflare-dark.svg"
@@ -368,7 +361,6 @@ Gracias.`
                     <button
                       type="button"
                       onClick={abrirWhatsApp}
-                      disabled={!verificado}
                       className="group relative w-full inline-flex items-center justify-center gap-2 sm:gap-3 bg-[#25D366] hover:bg-[#1faa53] text-white px-5 sm:px-6 py-3 sm:py-4 rounded-xl font-bold uppercase tracking-[0.15em] text-xs sm:text-sm transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01] hover:shadow-lg"
                     >
                       <svg viewBox="0 0 24 24" className="size-4 sm:size-5 fill-current">
@@ -411,7 +403,6 @@ Gracias.`
               onClick={(e) => e.stopPropagation()}
             >
               <div className="h-1.5 bg-[#d7bd77]" />
-
               <button
                 onClick={() => setPrivacidadOpen(false)}
                 aria-label="Cerrar"
@@ -421,7 +412,6 @@ Gracias.`
               </button>
 
               <div className="px-4 sm:px-6 py-5 sm:py-7 max-h-[70vh] overflow-y-auto">
-
                 <div className="mb-4 sm:mb-6 pr-8 sm:pr-10">
                   <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.24em] text-[#d7bd77] font-semibold mb-1.5 sm:mb-2">
                     {isCa ? 'Informació legal' : 'Información legal'}
@@ -435,71 +425,28 @@ Gracias.`
                 </div>
 
                 <div className="space-y-4 sm:space-y-6 text-xs sm:text-sm text-gray-700 leading-relaxed">
-
                   <section>
-                    <h3 className="font-bold text-[#0a1a3a] mb-2 text-sm sm:text-base">
-                      1. {isCa ? 'Responsable del tractament' : 'Responsable del tratamiento'}
-                    </h3>
+                    <h3 className="font-bold text-[#0a1a3a] mb-2 text-sm sm:text-base">1. {isCa ? 'Responsable del tractament' : 'Responsable del tratamiento'}</h3>
                     <p className="mb-1"><strong>Renovactiva SL</strong></p>
-                    <p className="mb-1">
-                      Email:{' '}
-                      <a href="mailto:info@renovactiva.com" className="text-[#d7bd77] hover:underline">
-                        info@renovactiva.com
-                      </a>
-                    </p>
-                    <p>
-                      {isCa ? 'Telèfon' : 'Teléfono'}:{' '}
-                      <a href="tel:+34722454020" className="text-[#d7bd77] hover:underline">
-                        +34 722 454 020
-                      </a>
-                    </p>
+                    <p className="mb-1">Email: <a href="mailto:info@renovactiva.com" className="text-[#d7bd77] hover:underline">info@renovactiva.com</a></p>
+                    <p>{isCa ? 'Telèfon' : 'Teléfono'}: <a href="tel:+34722454020" className="text-[#d7bd77] hover:underline">+34 722 454 020</a></p>
                   </section>
-
                   <section>
-                    <h3 className="font-bold text-[#0a1a3a] mb-2 text-sm sm:text-base">
-                      2. {isCa ? 'Finalitat del tractament' : 'Finalidad del tratamiento'}
-                    </h3>
-                    <p>
-                      {isCa
-                        ? 'Les dades personals que ens facilita seran utilitzades per contactar-lo i atendre la seva sol·licitud d\'informació.'
-                        : 'Los datos personales que nos facilita serán utilizados para contactarle y atender su solicitud de información.'}
-                    </p>
+                    <h3 className="font-bold text-[#0a1a3a] mb-2 text-sm sm:text-base">2. {isCa ? 'Finalitat del tractament' : 'Finalidad del tratamiento'}</h3>
+                    <p>{isCa ? 'Les dades personals que ens facilita seran utilitzades per contactar-lo i atendre la seva sol·licitud d\'informació.' : 'Los datos personales que nos facilita serán utilizados para contactarle y atender su solicitud de información.'}</p>
                   </section>
-
                   <section>
-                    <h3 className="font-bold text-[#0a1a3a] mb-2 text-sm sm:text-base">
-                      3. {isCa ? 'Legitimació' : 'Legitimación'}
-                    </h3>
-                    <p>
-                      {isCa
-                        ? 'La base legal és el seu consentiment explícit.'
-                        : 'La base legal es su consentimiento explícito.'}
-                    </p>
+                    <h3 className="font-bold text-[#0a1a3a] mb-2 text-sm sm:text-base">3. {isCa ? 'Legitimació' : 'Legitimación'}</h3>
+                    <p>{isCa ? 'La base legal és el seu consentiment explícit.' : 'La base legal es su consentimiento explícito.'}</p>
                   </section>
-
                   <section>
-                    <h3 className="font-bold text-[#0a1a3a] mb-2 text-sm sm:text-base">
-                      4. {isCa ? 'Conservació' : 'Conservación'}
-                    </h3>
-                    <p>
-                      {isCa
-                        ? 'Les dades es conservaran durant el temps necessari per atendre la sol·licitud.'
-                        : 'Los datos se conservarán durante el tiempo necesario para atender la solicitud.'}
-                    </p>
+                    <h3 className="font-bold text-[#0a1a3a] mb-2 text-sm sm:text-base">4. {isCa ? 'Conservació' : 'Conservación'}</h3>
+                    <p>{isCa ? 'Les dades es conservaran durant el temps necessari per atendre la sol·licitud.' : 'Los datos se conservarán durante el tiempo necesario para atender la solicitud.'}</p>
                   </section>
-
                   <section>
-                    <h3 className="font-bold text-[#0a1a3a] mb-2 text-sm sm:text-base">
-                      5. {isCa ? 'Drets' : 'Derechos'}
-                    </h3>
-                    <p>
-                      {isCa ? 'Pot exercir els seus drets enviant un correu a ' : 'Puede ejercer sus derechos enviando un email a '}
-                      <a href="mailto:info@renovactiva.com" className="text-[#d7bd77] hover:underline">
-                        info@renovactiva.com
-                      </a>.
-                    </p>
+                    <h3 className="font-bold text-[#0a1a3a] mb-2 text-sm sm:text-base">5. {isCa ? 'Drets' : 'Derechos'}</h3>
+                    <p>{isCa ? 'Pot exercir els seus drets enviant un correu a ' : 'Puede ejercer sus derechos enviando un email a '}<a href="mailto:info@renovactiva.com" className="text-[#d7bd77] hover:underline">info@renovactiva.com</a>.</p>
                   </section>
-
                 </div>
 
                 <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
@@ -512,12 +459,9 @@ Gracias.`
                     <span className="text-base sm:text-lg">→</span>
                   </button>
                   <p className="mt-2 sm:mt-3 text-center text-[10px] sm:text-xs text-gray-400">
-                    {isCa
-                      ? 'En acceptar, es marcarà automàticament la casella.'
-                      : 'Al aceptar, se marcará automáticamente la casilla.'}
+                    {isCa ? 'En acceptar, es marcarà automàticament la casella.' : 'Al aceptar, se marcará automáticamente la casilla.'}
                   </p>
                 </div>
-
               </div>
             </motion.div>
           </motion.div>
