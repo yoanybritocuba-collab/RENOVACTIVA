@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { X, User, Phone, Mail, MessageSquare, CheckCircle2, ShieldCheck, Clock, Lock, Loader2, Check } from 'lucide-react'
+import { X, User, Phone, Mail, MessageSquare, CheckCircle2, ShieldCheck, Clock, Lock, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Turnstile } from '@marsidev/react-turnstile'
 import type { TurnstileInstance } from '@marsidev/react-turnstile'
@@ -322,7 +322,7 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
                       </span>
                     </label>
 
-                    {/* ✅ TURNSTILE CORREGIDO (VISIBLE Y ADAPTADO A MÓVIL) */}
+                    {/* ✅ TURNSTILE CORREGIDO */}
                     <div className="mb-3 sm:mb-4 flex justify-center">
                       <Turnstile
                         key={open ? 'open' : 'closed'}
@@ -349,11 +349,12 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
                       </div>
                     )}
 
+                    {/* 🔥 BOTÓN DE ENVIAR MEJORADO */}
                     <button
                       type="button"
                       onClick={enviar}
                       disabled={enviando || !verificado}
-                      className="group relative w-full inline-flex items-center justify-center gap-2 sm:gap-3 bg-[#d7bd77] hover:bg-[#d7bd77]/85 text-white px-5 sm:px-6 py-3 sm:py-4 rounded-xl font-bold uppercase tracking-[0.15em] text-xs sm:text-sm transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01] hover:shadow-lg"
+                      className="group relative w-full inline-flex items-center justify-center gap-2 sm:gap-3 bg-[#ad742a] hover:bg-[#10B77F] text-white px-5 sm:px-6 py-3 sm:py-4 rounded-xl font-bold uppercase tracking-[0.15em] text-xs sm:text-sm transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed shadow-md hover:shadow-[0_0_20px_rgba(16,183,127,0.5)] hover:scale-[1.02]"
                     >
                       {enviando ? (
                         <>
@@ -363,7 +364,7 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
                       ) : (
                         <>
                           {isCa ? 'Enviar' : 'Enviar'}
-                          <span className="text-base sm:text-lg">→</span>
+                          <span className="text-base sm:text-lg group-hover:translate-x-1 transition-transform">→</span>
                         </>
                       )}
                     </button>
@@ -458,10 +459,10 @@ export function ContactModal({ open, onClose, lang = 'es', prefill }: ContactMod
                   <button
                     type="button"
                     onClick={aceptarPrivacidad}
-                    className="w-full inline-flex items-center justify-center gap-2 sm:gap-3 bg-[#d7bd77] hover:bg-[#d7bd77]/85 text-white px-5 sm:px-6 py-3 sm:py-4 rounded-xl font-bold uppercase tracking-[0.15em] text-xs sm:text-sm transition-all duration-300 hover:scale-[1.01] hover:shadow-lg"
+                    className="w-full inline-flex items-center justify-center gap-2 sm:gap-3 bg-[#ad742a] hover:bg-[#10B77F] text-white px-5 sm:px-6 py-3 sm:py-4 rounded-xl font-bold uppercase tracking-[0.15em] text-xs sm:text-sm transition-all duration-300 shadow-md hover:shadow-[0_0_20px_rgba(16,183,127,0.5)] hover:scale-[1.02]"
                   >
                     {isCa ? 'Acceptar i continuar' : 'Aceptar y continuar'}
-                    <span className="text-base sm:text-lg">→</span>
+                    <span className="text-base sm:text-lg group-hover:translate-x-1 transition-transform">→</span>
                   </button>
                   <p className="mt-2 sm:mt-3 text-center text-[10px] sm:text-xs text-gray-400">
                     {isCa ? 'En acceptar, es marcarà automàticament la casella.' : 'Al aceptar, se marcará automáticamente la casilla.'}
