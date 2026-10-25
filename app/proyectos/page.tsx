@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowLeft, Camera } from 'lucide-react'
+import { ArrowLeft, Camera, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useLanguage } from '@/components/language-provider'
 import { TopNav } from '@/components/TopNav'
 
@@ -15,6 +15,10 @@ export default function ProyectosPage() {
   const ca = language === 'ca'
   const [projects, setProjects] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+
+  // Estados para la galería
+  const [selectedProject, setSelectedProject] = useState<any>(null)
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
 
   useEffect(() => {
     async function loadProjects() {
@@ -40,6 +44,27 @@ export default function ProyectosPage() {
     }
     loadProjects()
   }, [])
+
+  // Lógica de teclado y scroll
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (!selectedProject) return
+      if (e.key === 'Escape') { setSelectedProject(null) }
+      else if (e.key === 'ArrowLeft') { prevPhoto() }
+      else if (e.key === 'ArrowRight') { nextPhoto() }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedProject])
+
+  useEffect(() => {
+    if (selectedProject) { document.body.style.overflow = 'hidden' }
+    else { document.body.style.overflow = '' }
+    return () => { document.body.style.overflow = '' }
+  }, [selectedProject])
+
+  const nextPhoto = () => { if (!selectedProject) return; const total = selectedProject.images?.length || 1; setCurrentPhotoIndex(prev => prev < total - 1 ? prev + 1 : 0) }
+  const prevPhoto = () => { if (!selectedProject) return; const total = selectedProject.images?.length || 1; setCurrentPhotoIndex(prev => prev > 0 ? prev - 1 : total - 1) }
 
   return (
     <main className="min-h-screen bg-[#080808] text-[#f3f0e9]">
@@ -94,12 +119,13 @@ export default function ProyectosPage() {
                 return (
                   <motion.div
                     key={index}
+                    onClick={() => { setSelectedProject(project); setCurrentPhotoIndex(0) }}
+                    className={`group relative overflow-hidden rounded-lg min-h-[400px] border border-[#10B77F]/30 transition-all duration-500 hover:border-[#10B77F] hover:shadow-[0_0_60px_10px_rgba(16,183,127,0.55)] cursor-pointer ${
+                      isWide ? 'lg:col-span-2' : 'lg:col-span-1'
+                    }`}
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.1 + index * 0.05, ease: [0.22, 1, 0.36, 1] }}
-                    className={`group relative overflow-hidden rounded-lg min-h-[400px] border border-[#10B77F]/30 transition-all duration-500 hover:border-[#10B77F] hover:shadow-[0_0_60px_10px_rgba(16,183,127,0.55)] ${
-                      isWide ? 'lg:col-span-2' : 'lg:col-span-1'
-                    }`}
                   >
                     <div
                       className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
@@ -130,6 +156,59 @@ export default function ProyectosPage() {
           )}
         </div>
       </section>
+
+      {/* MODAL GALERÍA */}
+      <AnimatePresence>
+        {selectedProject && (
+          <motion.div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-0 sm:p-4 lg:p-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} onClick={() => setSelectedProject(null)}>
+            <motion.div className="relative w-full h-full sm:max-w-6xl sm:max-h-[90vh] sm:rounded-2xl overflow-hidden bg-[#0A0A0A] border border-[#10B77F]/30 shadow-[0_0_80px_20px_rgba(16,183,127,0.3)] flex flex-col" initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} onClick={(e) => e.stopPropagation()}>
+              <div className="relative flex items-center justify-between gap-4 border-b border-white/10 px-4 sm:px-6 py-3 sm:py-4 bg-black/50 backdrop-blur-sm z-20">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-medium truncate">{selectedProject.type}</p>
+                  <h3 className="font-serif text-lg sm:text-2xl text-white truncate">{selectedProject.title}</h3>
+                </div>
+                <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+                  <div className="hidden sm:flex items-center gap-2 text-[#d7bd77]">
+                    <Camera className="size-4" />
+                    <span className="text-sm font-medium">{currentPhotoIndex + 1} / {selectedProject.images?.length || 1}</span>
+                  </div>
+                  <button onClick={() => setSelectedProject(null)} className="flex items-center justify-center size-9 sm:size-10 rounded-full border border-white/20 hover:border-[#10B77F] hover:bg-[#10B77F]/20 text-white/80 hover:text-white transition-all duration-300" aria-label="Cerrar galería">
+                    <X className="size-5" />
+                  </button>
+                </div>
+              </div>
+              <div className="relative flex-1 flex items-center justify-center overflow-hidden bg-black select-none">
+                <AnimatePresence mode="wait">
+                  <motion.img key={currentPhotoIndex} src={selectedProject.images?.[currentPhotoIndex] || selectedProject.image || ''} alt={`${selectedProject.title} - ${currentPhotoIndex + 1}`} className="max-w-full max-h-full object-contain" initial={{ opacity: 0, scale: 1.05 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.2} onDragEnd={(e, { offset }) => { const swipe = offset.x; if (swipe < -50) nextPhoto(); else if (swipe > 50) prevPhoto() }} />
+                </AnimatePresence>
+                {/* FLECHAS: Ocultas en móvil (hidden), visibles desde sm en adelante (sm:flex) */}
+                {(selectedProject.images?.length || 1) > 1 && (
+                  <button onClick={(e) => { e.stopPropagation(); prevPhoto() }} className="hidden sm:flex absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 items-center justify-center size-11 sm:size-14 rounded-full bg-black/60 backdrop-blur-sm border border-[#10B77F]/50 hover:border-[#10B77F] hover:bg-[#10B77F]/30 text-white transition-all duration-300 group z-10" aria-label="Foto anterior">
+                    <ChevronLeft className="size-6 sm:size-7 transition-transform duration-300 group-hover:-translate-x-0.5" />
+                  </button>
+                )}
+                {(selectedProject.images?.length || 1) > 1 && (
+                  <button onClick={(e) => { e.stopPropagation(); nextPhoto() }} className="hidden sm:flex absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 items-center justify-center size-11 sm:size-14 rounded-full bg-black/60 backdrop-blur-sm border border-[#10B77F]/50 hover:border-[#10B77F] hover:bg-[#10B77F]/30 text-white transition-all duration-300 group z-10" aria-label="Foto siguiente">
+                    <ChevronRight className="size-6 sm:size-7 transition-transform duration-300 group-hover:translate-x-0.5" />
+                  </button>
+                )}
+              </div>
+              {(selectedProject.images?.length || 1) > 1 && (
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2 py-3 sm:py-4 px-4 bg-black/50 backdrop-blur-sm overflow-x-auto">
+                  {selectedProject.images?.map((_: string, i: number) => (
+                    <button key={i} onClick={(e) => { e.stopPropagation(); setCurrentPhotoIndex(i) }} className={`flex-shrink-0 rounded-full transition-all duration-300 ${i === currentPhotoIndex ? 'w-6 sm:w-8 h-2 bg-[#10B77F]' : 'w-2 h-2 bg-white/30 hover:bg-[#d7bd77]/70'}`} aria-label={`Ir a foto ${i + 1}`} />
+                  ))}
+                </div>
+              )}
+              <div className="sm:hidden flex items-center justify-center gap-2 py-2 text-[#d7bd77] text-xs border-t border-white/10 bg-black/50">
+                <Camera className="size-3" />
+                <span>{currentPhotoIndex + 1} / {selectedProject.images?.length || 1}</span>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </main>
   )
 }
