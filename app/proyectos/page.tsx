@@ -178,9 +178,30 @@ export default function ProyectosPage() {
                 </div>
               </div>
               <div className="relative flex-1 flex items-center justify-center overflow-hidden bg-black select-none">
-                <AnimatePresence mode="wait">
-                  <motion.img key={currentPhotoIndex} src={selectedProject.images?.[currentPhotoIndex] || selectedProject.image || ''} alt={`${selectedProject.title} - ${currentPhotoIndex + 1}`} className="max-w-full max-h-full object-contain" initial={{ opacity: 0, scale: 1.05 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.2} onDragEnd={(e, { offset }) => { const swipe = offset.x; if (swipe < -50) nextPhoto(); else if (swipe > 50) prevPhoto() }} />
+                
+                {/* 👇 AQUÍ ESTÁ LA ANIMACIÓN CORREGIDA PARA EVITAR EL NEGRO 👇 */}
+                <AnimatePresence mode="popLayout">
+                  <motion.img 
+                    key={currentPhotoIndex} 
+                    src={selectedProject.images?.[currentPhotoIndex] || selectedProject.image || ''} 
+                    alt={`${selectedProject.title} - ${currentPhotoIndex + 1}`} 
+                    className="absolute max-w-full max-h-full object-contain" 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    exit={{ opacity: 0 }} 
+                    transition={{ duration: 0.15, ease: "linear" }} 
+                    drag="x" 
+                    dragConstraints={{ left: 0, right: 0 }} 
+                    dragElastic={0.2} 
+                    onDragEnd={(e, { offset }) => { 
+                      const swipe = offset.x; 
+                      if (swipe < -50) nextPhoto(); 
+                      else if (swipe > 50) prevPhoto() 
+                    }} 
+                  />
                 </AnimatePresence>
+                {/* 👆 FIN DE LA ANIMACIÓN CORREGIDA 👆 */}
+
                 {/* FLECHAS: Ocultas en móvil (hidden), visibles desde sm en adelante (sm:flex) */}
                 {(selectedProject.images?.length || 1) > 1 && (
                   <button onClick={(e) => { e.stopPropagation(); prevPhoto() }} className="hidden sm:flex absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 items-center justify-center size-11 sm:size-14 rounded-full bg-black/60 backdrop-blur-sm border border-[#10B77F]/50 hover:border-[#10B77F] hover:bg-[#10B77F]/30 text-white transition-all duration-300 group z-10" aria-label="Foto anterior">
