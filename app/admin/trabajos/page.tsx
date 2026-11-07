@@ -19,11 +19,12 @@ interface Trabajo {
   fecha: string
   destacado: boolean
   orden: number
+  traducciones?: any
 }
 
 const emptyTrabajo: Trabajo = {
   titulo: '', tipo: '', descripcion: '', categoria: '',
-  imagenes: [], cliente: '', fecha: '', destacado: false, orden: 0
+  imagenes: [], cliente: '', fecha: '', destacado: false, orden: 0, traducciones: {}
 }
 
 export default function AdminTrabajos() {
@@ -43,7 +44,10 @@ export default function AdminTrabajos() {
   const [renameCatMode, setRenameCatMode] = useState(false)
   const [renameCatValue, setRenameCatValue] = useState('')
 
-  useEffect(() => { loadTrabajos(); loadCategorias() }, [])
+  useEffect(() => { 
+    loadTrabajos(); 
+    loadCategorias() 
+  }, [])
 
   useEffect(() => {
     if (modalOpen) document.body.style.overflow = 'hidden'
@@ -70,6 +74,7 @@ export default function AdminTrabajos() {
             imagenes: Array.isArray(t.imagenes) ? t.imagenes : [],
             cliente: t.cliente || '', fecha: t.fecha || '',
             destacado: t.destacado || false, orden: t.orden || 0,
+            traducciones: t.traducciones || {}
           }))
         : []
       setTrabajos(cleanData)
@@ -220,29 +225,49 @@ export default function AdminTrabajos() {
   }
 
   async function saveTrabajo() {
-    setSaving(true); setError(''); setNotice('Guardando...')
+    setSaving(true); setError(''); setNotice('Traduciendo y guardando...')
     try {
       if (!form.categoria.trim()) throw new Error('La categoría es obligatoria')
+
+      // 1. TRADUCIR TEXTO CON LA IA (Groq)
+      const [titulo_ca, tipo_ca, descripcion_ca] = await Promise.all([
+        translateText(form.titulo),
+        translateText(form.tipo),
+        translateText(form.descripcion)
+      ])
+
       const method = form.id ? 'PATCH' : 'POST'
       const url = form.id ? `${SUPABASE_URL}/rest/v1/trabajos?id=eq.${form.id}` : `${SUPABASE_URL}/rest/v1/trabajos`
+      
       const payload = {
-        titulo: form.titulo.trim(), tipo: form.tipo.trim(),
-        descripcion: form.descripcion.trim(), categoria: form.categoria.trim(),
-        imagenes: form.imagenes || [], cliente: form.cliente.trim(),
-        fecha: form.fecha, destacado: form.destacado, orden: form.orden,
-        updated_at: new Date().toISOString()
+        titulo: form.titulo.trim(), 
+        tipo: form.tipo.trim(),
+        descripcion: form.descripcion.trim(), 
+        categoria: form.categoria.trim(),
+        imagenes: form.imagenes || [], 
+        cliente: form.cliente.trim(),
+        fecha: form.fecha, 
+        destacado: form.destacado, 
+        orden: form.orden,
+        updated_at: new Date().toISOString(),
+        // 2. GUARDAR LAS TRADUCCIONES EN EL NUEVO CAMPO JSON
+        traducciones: {
+          ca: { titulo: titulo_ca, tipo: tipo_ca, descripcion: descripcion_ca }
+        }
       }
+
       const res = await fetch(url, {
         method,
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
         body: JSON.stringify(payload)
       })
       if (!res.ok) { const errText = await res.text(); throw new Error(`Error ${res.status}: ${errText}`) }
+      
       setModalOpen(false); setEditing(null); setForm(emptyTrabajo)
       setNewCatMode(false); setNewCatName(''); setRenameCatMode(false); setRenameCatValue('')
       await loadTrabajos()
       try { await fetch('/api/revalidate', { method: 'POST' }) } catch {}
-      setNotice('✅ Trabajo guardado correctamente')
+      setNotice('✅ Trabajo guardado y traducido correctamente')
       setTimeout(() => setNotice(''), 4000)
     } catch (err) { setError('❌ ' + (err as Error).message) }
     finally { setSaving(false) }
@@ -271,6 +296,7 @@ export default function AdminTrabajos() {
       descripcion: trabajo.descripcion || '', categoria: trabajo.categoria || '',
       imagenes: trabajo.imagenes || [], cliente: trabajo.cliente || '',
       fecha: trabajo.fecha || '', destacado: trabajo.destacado || false, orden: trabajo.orden || 0,
+      traducciones: trabajo.traducciones || {}
     })
     setError(''); setNewCatMode(false); setNewCatName('')
     setRenameCatMode(false); setRenameCatValue(''); setModalOpen(true)
