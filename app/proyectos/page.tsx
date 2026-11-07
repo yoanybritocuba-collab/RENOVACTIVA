@@ -10,30 +10,41 @@ import { TopNav } from '@/components/TopNav'
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
 
-// Diccionario de traducciones para los valores que vienen de Supabase
+// Diccionario basado EXACTAMENTE en tus datos reales de Supabase
 const TRANSLATIONS: Record<string, { es: string; ca: string }> = {
-  // Tipos de trabajo
-  'Casa Unifamiliar': { es: 'Casa Unifamiliar', ca: 'Casa Unifamiliar' },
-  'Piso': { es: 'Piso', ca: 'Pis' },
-  'Local Comercial': { es: 'Local Comercial', ca: 'Local Comercial' },
-  'Oficina': { es: 'Oficina', ca: 'Oficina' },
-  'Nave Industrial': { es: 'Nave Industrial', ca: 'Nau Industrial' },
-  'Edificio': { es: 'Edificio', ca: 'Edifici' },
-  'Comunidad': { es: 'Comunidad', ca: 'Comunitat' },
-  // Categorías
-  'Viviendas': { es: 'Viviendas', ca: 'Habitatges' },
-  'Locales': { es: 'Locales', ca: 'Locals' },
-  'Oficinas': { es: 'Oficinas', ca: 'Oficines' },
-  'Fincas': { es: 'Fincas', ca: 'Finques' },
-  'Comunidades': { es: 'Comunidades', ca: 'Comunitats' },
-  'Reformas': { es: 'Reformas', ca: 'Reformes' },
-  'Obra Nueva': { es: 'Obra Nueva', ca: 'Obra Nova' },
+  // --- TIPOS ---
+  'casa unifamiliar': { es: 'Casa Unifamiliar', ca: 'Casa Unifamiliar' },
+  'comunidad de propietarios': { es: 'Comunidad de Propietarios', ca: 'Comunitat de Propietaris' },
+  'comunidad de propietario': { es: 'Comunidad de Propietarios', ca: 'Comunitat de Propietaris' }, // Por si falta la S
+  'piso': { es: 'Piso', ca: 'Pis' },
+  'local comercial': { es: 'Local Comercial', ca: 'Local Comercial' },
+  'oficina': { es: 'Oficina', ca: 'Oficina' },
+  'nave industrial': { es: 'Nave Industrial', ca: 'Nau Industrial' },
+  'edificio': { es: 'Edificio', ca: 'Edifici' },
+  // --- CATEGORÍAS ---
+  'viviendas': { es: 'Viviendas', ca: 'Habitatges' },
+  'edificios': { es: 'Edificios', ca: 'Edificis' },
+  'locales': { es: 'Locales', ca: 'Locals' },
+  'oficinas': { es: 'Oficinas', ca: 'Oficines' },
+  'fincas': { es: 'Fincas', ca: 'Finques' },
+  'comunidades': { es: 'Comunidades', ca: 'Comunitats' },
+  'reformas': { es: 'Reformas', ca: 'Reformes' },
+  'obra nueva': { es: 'Obra Nueva', ca: 'Obra Nova' },
 }
 
 function translate(value: string | null | undefined, lang: 'es' | 'ca'): string {
   if (!value) return ''
-  const entry = TRANSLATIONS[value]
-  return entry ? entry[lang] : value
+  
+  // Normalizamos: pasamos a minúsculas y quitamos espacios extra
+  const key = value.trim().toLowerCase()
+  const entry = TRANSLATIONS[key]
+  
+  if (entry) {
+    return entry[lang]
+  }
+  
+  // Si no está en el diccionario, devolvemos el original (con la primera letra en mayúscula)
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
 }
 
 export default function ProyectosPage() {
