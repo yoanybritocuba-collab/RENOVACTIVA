@@ -29,12 +29,19 @@ export default function ProyectosPage() {
         })
         if (res.ok) {
           const data = await res.json()
-          setProjects(data.map((t: any) => ({
-            title: t.titulo,
-            type: t.tipo,
-            image: t.imagenes?.[0] || '',
-            images: t.imagenes || [],
-          })))
+          setProjects(data.map((t: any) => {
+            // AQUÍ LEEMOS LO QUE GUARDA TU SISTEMA DE TRADUCCIÓN AUTOMÁTICA
+            const caData = t.traducciones?.ca || {}
+
+            return {
+              title: t.titulo,
+              title_ca: caData.titulo || null, // Título traducido
+              type: t.tipo,
+              type_ca: caData.tipo || null, // Tipo traducido
+              image: t.imagenes?.[0] || '',
+              images: t.imagenes || [],
+            }
+          }))
         }
       } catch (err) {
         console.error('Error cargando proyectos:', err)
@@ -43,7 +50,7 @@ export default function ProyectosPage() {
       }
     }
     loadProjects()
-  }, [])
+  }, [ca]) // Recargamos si cambia el idioma
 
   // Lógica de teclado y scroll
   useEffect(() => {
@@ -106,7 +113,7 @@ export default function ProyectosPage() {
           </motion.div>
 
           {loading ? (
-            <div className="text-white/50 text-center py-20">Cargando proyectos...</div>
+            <div className="text-white/50 text-center py-20">{ca ? 'Carregant projectes...' : 'Cargando proyectos...'}</div>
           ) : projects.length === 0 ? (
             <div className="text-white/50 text-center py-20">
               {ca ? 'Pròximament...' : 'Próximamente...'}
@@ -116,6 +123,11 @@ export default function ProyectosPage() {
               {projects.map((project, index) => {
                 const isWide = index % 4 === 0 || index % 4 === 3
                 const photoCount = project.images?.length || 1
+                
+                // Si estamos en catalán, usamos el texto de la IA. Si no hay, usamos el español.
+                const displayTitle = ca ? (project.title_ca || project.title) : project.title
+                const displayType = ca ? (project.type_ca || project.type) : project.type
+
                 return (
                   <motion.div
                     key={index}
@@ -142,11 +154,11 @@ export default function ProyectosPage() {
                       <div className="flex items-center gap-3 mb-3">
                         <span className="block w-8 h-px bg-[#10B77F]" />
                         <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-medium">
-                          {project.type}
+                          {displayType}
                         </p>
                       </div>
                       <h3 className="font-serif text-3xl text-white group-hover:text-[#d7bd77] transition-colors duration-500">
-                        {project.title}
+                        {displayTitle}
                       </h3>
                     </div>
                   </motion.div>
@@ -164,8 +176,12 @@ export default function ProyectosPage() {
             <motion.div className="relative w-full h-full sm:max-w-6xl sm:max-h-[90vh] sm:rounded-2xl overflow-hidden bg-[#0A0A0A] border border-[#10B77F]/30 shadow-[0_0_80px_20px_rgba(16,183,127,0.3)] flex flex-col" initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} onClick={(e) => e.stopPropagation()}>
               <div className="relative flex items-center justify-between gap-4 border-b border-white/10 px-4 sm:px-6 py-3 sm:py-4 bg-black/50 backdrop-blur-sm z-20">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-medium truncate">{selectedProject.type}</p>
-                  <h3 className="font-serif text-lg sm:text-2xl text-white truncate">{selectedProject.title}</h3>
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-medium truncate">
+                    {ca ? (selectedProject.type_ca || selectedProject.type) : selectedProject.type}
+                  </p>
+                  <h3 className="font-serif text-lg sm:text-2xl text-white truncate">
+                    {ca ? (selectedProject.title_ca || selectedProject.title) : selectedProject.title}
+                  </h3>
                 </div>
                 <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
                   <div className="hidden sm:flex items-center gap-2 text-[#d7bd77]">
@@ -179,7 +195,6 @@ export default function ProyectosPage() {
               </div>
               <div className="relative flex-1 flex items-center justify-center overflow-hidden bg-black select-none">
                 
-                {/* 👇 AQUÍ ESTÁ LA ANIMACIÓN CORREGIDA PARA EVITAR EL NEGRO 👇 */}
                 <AnimatePresence mode="popLayout">
                   <motion.img 
                     key={currentPhotoIndex} 
@@ -200,9 +215,7 @@ export default function ProyectosPage() {
                     }} 
                   />
                 </AnimatePresence>
-                {/* 👆 FIN DE LA ANIMACIÓN CORREGIDA 👆 */}
 
-                {/* FLECHAS: Ocultas en móvil (hidden), visibles desde sm en adelante (sm:flex) */}
                 {(selectedProject.images?.length || 1) > 1 && (
                   <button onClick={(e) => { e.stopPropagation(); prevPhoto() }} className="hidden sm:flex absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 items-center justify-center size-11 sm:size-14 rounded-full bg-black/60 backdrop-blur-sm border border-[#10B77F]/50 hover:border-[#10B77F] hover:bg-[#10B77F]/30 text-white transition-all duration-300 group z-10" aria-label="Foto anterior">
                     <ChevronLeft className="size-6 sm:size-7 transition-transform duration-300 group-hover:-translate-x-0.5" />
