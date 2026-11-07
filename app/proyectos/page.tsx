@@ -10,6 +10,32 @@ import { TopNav } from '@/components/TopNav'
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
 
+// Diccionario de traducciones para los valores que vienen de Supabase
+const TRANSLATIONS: Record<string, { es: string; ca: string }> = {
+  // Tipos de trabajo
+  'Casa Unifamiliar': { es: 'Casa Unifamiliar', ca: 'Casa Unifamiliar' },
+  'Piso': { es: 'Piso', ca: 'Pis' },
+  'Local Comercial': { es: 'Local Comercial', ca: 'Local Comercial' },
+  'Oficina': { es: 'Oficina', ca: 'Oficina' },
+  'Nave Industrial': { es: 'Nave Industrial', ca: 'Nau Industrial' },
+  'Edificio': { es: 'Edificio', ca: 'Edifici' },
+  'Comunidad': { es: 'Comunidad', ca: 'Comunitat' },
+  // Categorías
+  'Viviendas': { es: 'Viviendas', ca: 'Habitatges' },
+  'Locales': { es: 'Locales', ca: 'Locals' },
+  'Oficinas': { es: 'Oficinas', ca: 'Oficines' },
+  'Fincas': { es: 'Fincas', ca: 'Finques' },
+  'Comunidades': { es: 'Comunidades', ca: 'Comunitats' },
+  'Reformas': { es: 'Reformas', ca: 'Reformes' },
+  'Obra Nueva': { es: 'Obra Nueva', ca: 'Obra Nova' },
+}
+
+function translate(value: string | null | undefined, lang: 'es' | 'ca'): string {
+  if (!value) return ''
+  const entry = TRANSLATIONS[value]
+  return entry ? entry[lang] : value
+}
+
 export default function ProyectosPage() {
   const { language } = useLanguage()
   const ca = language === 'ca'
@@ -32,6 +58,7 @@ export default function ProyectosPage() {
           setProjects(data.map((t: any) => ({
             title: t.titulo,
             type: t.tipo,
+            categoria: t.categoria,
             image: t.imagenes?.[0] || '',
             images: t.imagenes || [],
           })))
@@ -106,7 +133,9 @@ export default function ProyectosPage() {
           </motion.div>
 
           {loading ? (
-            <div className="text-white/50 text-center py-20">Cargando proyectos...</div>
+            <div className="text-white/50 text-center py-20">
+              {ca ? 'Carregant projectes...' : 'Cargando proyectos...'}
+            </div>
           ) : projects.length === 0 ? (
             <div className="text-white/50 text-center py-20">
               {ca ? 'Pròximament...' : 'Próximamente...'}
@@ -142,7 +171,7 @@ export default function ProyectosPage() {
                       <div className="flex items-center gap-3 mb-3">
                         <span className="block w-8 h-px bg-[#10B77F]" />
                         <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-medium">
-                          {project.type}
+                          {translate(project.type, ca ? 'ca' : 'es')}
                         </p>
                       </div>
                       <h3 className="font-serif text-3xl text-white group-hover:text-[#d7bd77] transition-colors duration-500">
@@ -164,7 +193,9 @@ export default function ProyectosPage() {
             <motion.div className="relative w-full h-full sm:max-w-6xl sm:max-h-[90vh] sm:rounded-2xl overflow-hidden bg-[#0A0A0A] border border-[#10B77F]/30 shadow-[0_0_80px_20px_rgba(16,183,127,0.3)] flex flex-col" initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} onClick={(e) => e.stopPropagation()}>
               <div className="relative flex items-center justify-between gap-4 border-b border-white/10 px-4 sm:px-6 py-3 sm:py-4 bg-black/50 backdrop-blur-sm z-20">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-medium truncate">{selectedProject.type}</p>
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-medium truncate">
+                    {translate(selectedProject.type, ca ? 'ca' : 'es')}
+                  </p>
                   <h3 className="font-serif text-lg sm:text-2xl text-white truncate">{selectedProject.title}</h3>
                 </div>
                 <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
@@ -172,14 +203,13 @@ export default function ProyectosPage() {
                     <Camera className="size-4" />
                     <span className="text-sm font-medium">{currentPhotoIndex + 1} / {selectedProject.images?.length || 1}</span>
                   </div>
-                  <button onClick={() => setSelectedProject(null)} className="flex items-center justify-center size-9 sm:size-10 rounded-full border border-white/20 hover:border-[#10B77F] hover:bg-[#10B77F]/20 text-white/80 hover:text-white transition-all duration-300" aria-label="Cerrar galería">
+                  <button onClick={() => setSelectedProject(null)} className="flex items-center justify-center size-9 sm:size-10 rounded-full border border-white/20 hover:border-[#10B77F] hover:bg-[#10B77F]/20 text-white/80 hover:text-white transition-all duration-300" aria-label={ca ? 'Tancar galeria' : 'Cerrar galería'}>
                     <X className="size-5" />
                   </button>
                 </div>
               </div>
               <div className="relative flex-1 flex items-center justify-center overflow-hidden bg-black select-none">
                 
-                {/* 👇 AQUÍ ESTÁ LA ANIMACIÓN CORREGIDA PARA EVITAR EL NEGRO 👇 */}
                 <AnimatePresence mode="popLayout">
                   <motion.img 
                     key={currentPhotoIndex} 
@@ -200,16 +230,14 @@ export default function ProyectosPage() {
                     }} 
                   />
                 </AnimatePresence>
-                {/* 👆 FIN DE LA ANIMACIÓN CORREGIDA 👆 */}
 
-                {/* FLECHAS: Ocultas en móvil (hidden), visibles desde sm en adelante (sm:flex) */}
                 {(selectedProject.images?.length || 1) > 1 && (
-                  <button onClick={(e) => { e.stopPropagation(); prevPhoto() }} className="hidden sm:flex absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 items-center justify-center size-11 sm:size-14 rounded-full bg-black/60 backdrop-blur-sm border border-[#10B77F]/50 hover:border-[#10B77F] hover:bg-[#10B77F]/30 text-white transition-all duration-300 group z-10" aria-label="Foto anterior">
+                  <button onClick={(e) => { e.stopPropagation(); prevPhoto() }} className="hidden sm:flex absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 items-center justify-center size-11 sm:size-14 rounded-full bg-black/60 backdrop-blur-sm border border-[#10B77F]/50 hover:border-[#10B77F] hover:bg-[#10B77F]/30 text-white transition-all duration-300 group z-10" aria-label={ca ? 'Foto anterior' : 'Foto anterior'}>
                     <ChevronLeft className="size-6 sm:size-7 transition-transform duration-300 group-hover:-translate-x-0.5" />
                   </button>
                 )}
                 {(selectedProject.images?.length || 1) > 1 && (
-                  <button onClick={(e) => { e.stopPropagation(); nextPhoto() }} className="hidden sm:flex absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 items-center justify-center size-11 sm:size-14 rounded-full bg-black/60 backdrop-blur-sm border border-[#10B77F]/50 hover:border-[#10B77F] hover:bg-[#10B77F]/30 text-white transition-all duration-300 group z-10" aria-label="Foto siguiente">
+                  <button onClick={(e) => { e.stopPropagation(); nextPhoto() }} className="hidden sm:flex absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 items-center justify-center size-11 sm:size-14 rounded-full bg-black/60 backdrop-blur-sm border border-[#10B77F]/50 hover:border-[#10B77F] hover:bg-[#10B77F]/30 text-white transition-all duration-300 group z-10" aria-label={ca ? 'Foto següent' : 'Foto siguiente'}>
                     <ChevronRight className="size-6 sm:size-7 transition-transform duration-300 group-hover:translate-x-0.5" />
                   </button>
                 )}
@@ -217,7 +245,7 @@ export default function ProyectosPage() {
               {(selectedProject.images?.length || 1) > 1 && (
                 <div className="flex items-center justify-center gap-1.5 sm:gap-2 py-3 sm:py-4 px-4 bg-black/50 backdrop-blur-sm overflow-x-auto">
                   {selectedProject.images?.map((_: string, i: number) => (
-                    <button key={i} onClick={(e) => { e.stopPropagation(); setCurrentPhotoIndex(i) }} className={`flex-shrink-0 rounded-full transition-all duration-300 ${i === currentPhotoIndex ? 'w-6 sm:w-8 h-2 bg-[#10B77F]' : 'w-2 h-2 bg-white/30 hover:bg-[#d7bd77]/70'}`} aria-label={`Ir a foto ${i + 1}`} />
+                    <button key={i} onClick={(e) => { e.stopPropagation(); setCurrentPhotoIndex(i) }} className={`flex-shrink-0 rounded-full transition-all duration-300 ${i === currentPhotoIndex ? 'w-6 sm:w-8 h-2 bg-[#10B77F]' : 'w-2 h-2 bg-white/30 hover:bg-[#d7bd77]/70'}`} aria-label={`${ca ? 'Anar a foto' : 'Ir a foto'} ${i + 1}`} />
                   ))}
                 </div>
               )}
