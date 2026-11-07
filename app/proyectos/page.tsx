@@ -10,18 +10,16 @@ import { TopNav } from '@/components/TopNav'
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
 
-// Diccionario basado EXACTAMENTE en tus datos reales de Supabase
+// Diccionario para los tipos (Casa Unifamiliar, etc.)
 const TRANSLATIONS: Record<string, { es: string; ca: string }> = {
-  // --- TIPOS ---
   'casa unifamiliar': { es: 'Casa Unifamiliar', ca: 'Casa Unifamiliar' },
   'comunidad de propietarios': { es: 'Comunidad de Propietarios', ca: 'Comunitat de Propietaris' },
-  'comunidad de propietario': { es: 'Comunidad de Propietarios', ca: 'Comunitat de Propietaris' }, // Por si falta la S
+  'comunidad de propietario': { es: 'Comunidad de Propietarios', ca: 'Comunitat de Propietaris' },
   'piso': { es: 'Piso', ca: 'Pis' },
   'local comercial': { es: 'Local Comercial', ca: 'Local Comercial' },
   'oficina': { es: 'Oficina', ca: 'Oficina' },
   'nave industrial': { es: 'Nave Industrial', ca: 'Nau Industrial' },
   'edificio': { es: 'Edificio', ca: 'Edifici' },
-  // --- CATEGORÍAS ---
   'viviendas': { es: 'Viviendas', ca: 'Habitatges' },
   'edificios': { es: 'Edificios', ca: 'Edificis' },
   'locales': { es: 'Locales', ca: 'Locals' },
@@ -32,18 +30,17 @@ const TRANSLATIONS: Record<string, { es: string; ca: string }> = {
   'obra nueva': { es: 'Obra Nueva', ca: 'Obra Nova' },
 }
 
+// Diccionario de respaldo por si la IA falla en los títulos
+const MANUAL_TITLE_TRANSLATIONS: Record<string, string> = {
+  "Rehabilitación de Cubierta Calle Beato Almató 19, Barcelona": "Rehabilitació de Coberta Carrer Beat Almató 19, Barcelona",
+  "Rehabilitación de Fachadas Calle Girona 32, La Pobla de Claramunt": "Rehabilitació de Façanes Carrer Girona 32, La Pobla de Claramunt",
+}
+
 function translate(value: string | null | undefined, lang: 'es' | 'ca'): string {
   if (!value) return ''
-  
-  // Normalizamos: pasamos a minúsculas y quitamos espacios extra
   const key = value.trim().toLowerCase()
   const entry = TRANSLATIONS[key]
-  
-  if (entry) {
-    return entry[lang]
-  }
-  
-  // Si no está en el diccionario, devolvemos el original (con la primera letra en mayúscula)
+  if (entry) return entry[lang]
   return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
 }
 
@@ -53,7 +50,6 @@ export default function ProyectosPage() {
   const [projects, setProjects] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Estados para la galería
   const [selectedProject, setSelectedProject] = useState<any>(null)
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
 
@@ -66,13 +62,17 @@ export default function ProyectosPage() {
         })
         if (res.ok) {
           const data = await res.json()
-          setProjects(data.map((t: any) => ({
-            title: t.titulo,
-            type: t.tipo,
-            categoria: t.categoria,
-            image: t.imagenes?.[0] || '',
-            images: t.imagenes || [],
-          })))
+          setProjects(data.map((t: any) => {
+            const caData = t.traducciones?.ca || {}
+            return {
+              title: t.titulo,
+              title_ca: caData.titulo || null,
+              type: t.tipo,
+              type_ca: caData.tipo || null,
+              image: t.imagenes?.[0] || '',
+              images: t.imagenes || [],
+            }
+          }))
         }
       } catch (err) {
         console.error('Error cargando proyectos:', err)
@@ -81,9 +81,16 @@ export default function ProyectosPage() {
       }
     }
     loadProjects()
-  }, [])
+  }, [ca])
 
-  // Lógica de teclado y scroll
+  // Función a prueba de fallos para el título
+  const getFinalTitle = (project: any) => {
+    if (!ca) return project.title
+    if (project.title_ca && project.title_ca !== project.title) return project.title_ca
+    if (MANUAL_TITLE_TRANSLATIONS[project.title]) return MANUAL_TITLE_TRANSLATIONS[project.title]
+    return project.title
+  }
+
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (!selectedProject) return
@@ -109,33 +116,18 @@ export default function ProyectosPage() {
       <TopNav variant="dark" />
 
       <section className="relative overflow-hidden pt-32 lg:pt-40 pb-20 lg:pb-28 px-6 lg:px-10">
-        <motion.div
-          className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-[#10B77F]/10 blur-3xl"
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-        />
+        <motion.div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-[#10B77F]/10 blur-3xl" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }} />
 
         <div className="relative mx-auto max-w-[1380px]">
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <Link
-              href="/"
-              className="inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.24em] text-[#d7bd77] hover:text-[#10B77F] transition-colors mb-10"
-            >
+            <Link href="/" className="inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.24em] text-[#d7bd77] hover:text-[#10B77F] transition-colors mb-10">
               <ArrowLeft className="size-4" />
               {ca ? 'Tornar a l\'inici' : 'Volver al inicio'}
             </Link>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="mb-14 lg:mb-20"
-          >
-            <p className="eyebrow">
-              {ca ? 'Una selecció' : 'Una selección'}
-            </p>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }} className="mb-14 lg:mb-20">
+            <p className="eyebrow">{ca ? 'Una selecció' : 'Una selección'}</p>
             <h1 className="mt-4 font-serif text-5xl leading-[0.95] tracking-[-0.03em] sm:text-6xl lg:text-7xl xl:text-8xl">
               {ca ? 'El resultat' : 'El resultado'}
               <br />
@@ -144,33 +136,17 @@ export default function ProyectosPage() {
           </motion.div>
 
           {loading ? (
-            <div className="text-white/50 text-center py-20">
-              {ca ? 'Carregant projectes...' : 'Cargando proyectos...'}
-            </div>
+            <div className="text-white/50 text-center py-20">{ca ? 'Carregant projectes...' : 'Cargando proyectos...'}</div>
           ) : projects.length === 0 ? (
-            <div className="text-white/50 text-center py-20">
-              {ca ? 'Pròximament...' : 'Próximamente...'}
-            </div>
+            <div className="text-white/50 text-center py-20">{ca ? 'Pròximament...' : 'Próximamente...'}</div>
           ) : (
             <div className="grid gap-5 lg:grid-cols-3">
               {projects.map((project, index) => {
                 const isWide = index % 4 === 0 || index % 4 === 3
                 const photoCount = project.images?.length || 1
                 return (
-                  <motion.div
-                    key={index}
-                    onClick={() => { setSelectedProject(project); setCurrentPhotoIndex(0) }}
-                    className={`group relative overflow-hidden rounded-lg min-h-[400px] border border-[#10B77F]/30 transition-all duration-500 hover:border-[#10B77F] hover:shadow-[0_0_60px_10px_rgba(16,183,127,0.55)] cursor-pointer ${
-                      isWide ? 'lg:col-span-2' : 'lg:col-span-1'
-                    }`}
-                    initial={{ opacity: 0, y: 40 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.1 + index * 0.05, ease: [0.22, 1, 0.36, 1] }}
-                  >
-                    <div
-                      className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                      style={{ backgroundImage: `url(${project.image})` }}
-                    />
+                  <motion.div key={index} onClick={() => { setSelectedProject(project); setCurrentPhotoIndex(0) }} className={`group relative overflow-hidden rounded-lg min-h-[400px] border border-[#10B77F]/30 transition-all duration-500 hover:border-[#10B77F] hover:shadow-[0_0_60px_10px_rgba(16,183,127,0.55)] cursor-pointer ${isWide ? 'lg:col-span-2' : 'lg:col-span-1'}`} initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 + index * 0.05, ease: [0.22, 1, 0.36, 1] }}>
+                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{ backgroundImage: `url(${project.image})` }} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
                     <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm border border-[#10B77F]/50 rounded-full px-3 py-1.5">
@@ -182,11 +158,11 @@ export default function ProyectosPage() {
                       <div className="flex items-center gap-3 mb-3">
                         <span className="block w-8 h-px bg-[#10B77F]" />
                         <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-medium">
-                          {translate(project.type, ca ? 'ca' : 'es')}
+                          {ca ? (project.type_ca || translate(project.type, 'ca')) : translate(project.type, 'es')}
                         </p>
                       </div>
                       <h3 className="font-serif text-3xl text-white group-hover:text-[#d7bd77] transition-colors duration-500">
-                        {project.title}
+                        {getFinalTitle(project)}
                       </h3>
                     </div>
                   </motion.div>
@@ -197,7 +173,6 @@ export default function ProyectosPage() {
         </div>
       </section>
 
-      {/* MODAL GALERÍA */}
       <AnimatePresence>
         {selectedProject && (
           <motion.div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-0 sm:p-4 lg:p-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} onClick={() => setSelectedProject(null)}>
@@ -205,9 +180,11 @@ export default function ProyectosPage() {
               <div className="relative flex items-center justify-between gap-4 border-b border-white/10 px-4 sm:px-6 py-3 sm:py-4 bg-black/50 backdrop-blur-sm z-20">
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-medium truncate">
-                    {translate(selectedProject.type, ca ? 'ca' : 'es')}
+                    {ca ? (selectedProject.type_ca || translate(selectedProject.type, 'ca')) : translate(selectedProject.type, 'es')}
                   </p>
-                  <h3 className="font-serif text-lg sm:text-2xl text-white truncate">{selectedProject.title}</h3>
+                  <h3 className="font-serif text-lg sm:text-2xl text-white truncate">
+                    {getFinalTitle(selectedProject)}
+                  </h3>
                 </div>
                 <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
                   <div className="hidden sm:flex items-center gap-2 text-[#d7bd77]">
@@ -220,28 +197,9 @@ export default function ProyectosPage() {
                 </div>
               </div>
               <div className="relative flex-1 flex items-center justify-center overflow-hidden bg-black select-none">
-                
                 <AnimatePresence mode="popLayout">
-                  <motion.img 
-                    key={currentPhotoIndex} 
-                    src={selectedProject.images?.[currentPhotoIndex] || selectedProject.image || ''} 
-                    alt={`${selectedProject.title} - ${currentPhotoIndex + 1}`} 
-                    className="absolute max-w-full max-h-full object-contain" 
-                    initial={{ opacity: 0 }} 
-                    animate={{ opacity: 1 }} 
-                    exit={{ opacity: 0 }} 
-                    transition={{ duration: 0.15, ease: "linear" }} 
-                    drag="x" 
-                    dragConstraints={{ left: 0, right: 0 }} 
-                    dragElastic={0.2} 
-                    onDragEnd={(e, { offset }) => { 
-                      const swipe = offset.x; 
-                      if (swipe < -50) nextPhoto(); 
-                      else if (swipe > 50) prevPhoto() 
-                    }} 
-                  />
+                  <motion.img key={currentPhotoIndex} src={selectedProject.images?.[currentPhotoIndex] || selectedProject.image || ''} alt={`${selectedProject.title} - ${currentPhotoIndex + 1}`} className="absolute max-w-full max-h-full object-contain" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15, ease: "linear" }} drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.2} onDragEnd={(e, { offset }) => { const swipe = offset.x; if (swipe < -50) nextPhoto(); else if (swipe > 50) prevPhoto() }} />
                 </AnimatePresence>
-
                 {(selectedProject.images?.length || 1) > 1 && (
                   <button onClick={(e) => { e.stopPropagation(); prevPhoto() }} className="hidden sm:flex absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 items-center justify-center size-11 sm:size-14 rounded-full bg-black/60 backdrop-blur-sm border border-[#10B77F]/50 hover:border-[#10B77F] hover:bg-[#10B77F]/30 text-white transition-all duration-300 group z-10" aria-label={ca ? 'Foto anterior' : 'Foto anterior'}>
                     <ChevronLeft className="size-6 sm:size-7 transition-transform duration-300 group-hover:-translate-x-0.5" />
@@ -268,7 +226,6 @@ export default function ProyectosPage() {
           </motion.div>
         )}
       </AnimatePresence>
-
     </main>
   )
 }
