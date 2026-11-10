@@ -28,7 +28,8 @@ export default function ContactPage() {
   async function loadData() {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content?section=eq.contact&select=*`, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
+        cache: 'no-store'
       })
       if (!res.ok) throw new Error('Error al cargar')
       const result = await res.json()
@@ -47,6 +48,13 @@ export default function ContactPage() {
     finally { setLoading(false) }
   }
 
+  function updateField(field: string, value: string) {
+    setData((prev: any) => ({
+      ...prev,
+      content: { ...prev.content, [field]: value }
+    }))
+  }
+
   async function translateField(esValue: string | undefined): Promise<string> {
     if (!esValue || !esValue.trim()) return ''
     try { return await translate(esValue, 'ca') } catch { return '' }
@@ -55,15 +63,24 @@ export default function ContactPage() {
   async function saveData() {
     setSaving(true); setError(''); setNotice('🌐 Traduciendo y guardando...')
     try {
-      const contentToSave = { ...data.content }
+      // 1. Preparamos el objeto con TODOS los campos
+      const contentToSave = { 
+        ...data.content,
+        // Nos aseguramos de que estos campos viajen siempre, aunque estén vacíos
+        email: data.content.email || '',
+        phone: data.content.phone || '',
+        address: data.content.address || '',
+        schedule: data.content.schedule || ''
+      }
 
-      // 🔥 Traducir SIEMPRE desde ES
+      // 2. Traducimos los textos (la IA no traduce direcciones ni teléfonos)
       contentToSave.translations = {
         title: await translateField(data.content.title),
         subtitle: await translateField(data.content.subtitle),
         buttonText: await translateField(data.content.buttonText),
       }
 
+      // 3. Guardamos en Supabase
       if (!data.id) {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content`, {
           method: 'POST',
@@ -83,23 +100,25 @@ export default function ContactPage() {
         setData({ ...data, content: contentToSave })
       }
 
+      // 4. Avisamos a la web pública para que se actualice
       try { await fetch('/api/revalidate', { method: 'POST' }) } catch {}
-      setNotice('✅ Contacto guardado y traducido')
-      setTimeout(() => setNotice(''), 3000)
-    } catch (err) { setError('❌ ' + (err as Error).message) }
-    finally { setSaving(false) }
+
+      setNotice('✅ Guardado y traducido correctamente')
+      setTimeout(() => setNotice(''), 4000)
+
+    } catch (err) {
+      setError('❌ ' + (err as Error).message)
+    } finally {
+      setSaving(false)
+    }
   }
 
-  function updateField(key: string, value: string) {
-    setData({ ...data, content: { ...data.content, [key]: value } })
-  }
-
-  if (loading) return <div className="min-h-screen bg-[#11110f] flex items-center justify-center text-white/50">Cargando...</div>
+  if (loading) return <div className="p-8 text-white/50">Cargando...</div>
 
   return (
     <AdminSection
       title="Contacto"
-      description="Edita la sección de contacto. El catalán se genera automáticamente al guardar."
+      description="Edita los datos de contacto que aparecen en la web y el footer."
       onSave={saveData}
       saving={saving}
       error={error}
@@ -131,7 +150,7 @@ export default function ContactPage() {
         </div>
 
         <div className="border-t border-white/10 pt-6">
-          <h3 className="text-white/60 text-sm font-semibold mb-4">Información de contacto</h3>
+          <h3 className="text-white/60 text-sm font-semibold mb-4">Datos de contacto</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-white/50 text-sm mb-1">Email</label>
@@ -143,12 +162,12 @@ export default function ContactPage() {
               <input type="text" value={data.content.phone || ''} onChange={(e) => updateField('phone', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="+34 600 000 000" />
             </div>
-            <div className="sm:col-span-2">
+            <div>
               <label className="block text-white/50 text-sm mb-1">Dirección</label>
               <input type="text" value={data.content.address || ''} onChange={(e) => updateField('address', e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="Carrer Exemple 123, 08001 Barcelona" />
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="Carrer del Padró, 34, 08291 Ripollet Barcelona" />
             </div>
-            <div className="sm:col-span-2">
+            <div>
               <label className="block text-white/50 text-sm mb-1">Horario</label>
               <input type="text" value={data.content.schedule || ''} onChange={(e) => updateField('schedule', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="Lun - Vie: 9:00 - 18:00" />
