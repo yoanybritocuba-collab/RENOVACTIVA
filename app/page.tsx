@@ -1,328 +1,137 @@
 'use client'
 
+import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
-import { ArrowUpRight, Play, X, Shield, ChevronLeft, ChevronRight, Camera, Star, Plus, Minus, Briefcase, Award, Users, Home as HomeIcon, KeyRound, TrendingUp, Heart, Target, Zap, Loader2, PartyPopper, Phone, Mail } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLanguage } from '@/components/language-provider'
 import { TopNav } from '@/components/TopNav'
 import { ContactModal } from '@/components/ContactModal'
 import { WhatsAppModal } from '@/components/WhatsAppModal'
-import { ServiceRow } from '@/components/ServiceRow'
+import { ArrowUpRight, Play, Camera, X, ChevronLeft, ChevronRight, Star, PartyPopper, KeyRound, Loader2, Minus, Plus, Phone, Mail, Shield } from 'lucide-react'
 
 const SUPABASE_URL = 'https://izvllvunpjryeowponti.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'
 
-const ICON_MAP: Record<string, any> = {
-  briefcase: Briefcase, award: Award, users: Users, home: HomeIcon,
-  trending: TrendingUp, star: Star, heart: Heart, target: Target, zap: Zap,
-}
-
-const FALLBACK_METHOD_STEPS = [
-  { id: 'step-01', slug: 'escuchamos', number: '01', title: { es: 'Escuchamos', ca: 'Escoltem' }, shortDescription: { es: 'Entendemos tu visión, tus necesidades y la forma en que quieres vivir.', ca: 'Entenem la teva visió, les teves necessitats i la forma en què vols viure.' } },
-  { id: 'step-02', slug: 'disenamos', number: '02', title: { es: 'Diseñamos', ca: 'Dissenyem' }, shortDescription: { es: 'Convertimos las ideas en un proyecto claro, bello y posible.', ca: 'Convertim les idees en un projecte clar, bonic i possible.' } },
-  { id: 'step-03', slug: 'construimos', number: '03', title: { es: 'Construimos', ca: 'Construïm' }, shortDescription: { es: 'Coordinamos cada gremio y cuidamos cada acabado.', ca: 'Coordinem cada gremi i cuidem cada acabat.' } },
-  { id: 'step-04', slug: 'entregamos', number: '04', title: { es: 'Entregamos', ca: 'Lliurem' }, shortDescription: { es: 'Te entregamos un espacio listo para empezar una nueva etapa.', ca: 'Et lliurem un espai a punt per començar una nova etapa.' } },
-]
-
-function truncate(text: string, max = 120) {
-  if (!text) return ''
-  if (text.length <= max) return text
-  return text.slice(0, max).trimEnd() + '...'
-}
-
-function pickText(field: any, lang: 'es' | 'ca', fallback = ''): string {
-  if (!field) return fallback
-  if (typeof field === 'string') return field
-  return field[lang] || field.es || field.ca || fallback
-}
-
 export default function Home() {
-  const [loading, setLoading] = useState(true)
-  const [heroData, setHeroData] = useState<any>(null)
-  const [servicesData, setServicesData] = useState<any[]>([])
-  const [servicesSection, setServicesSection] = useState<any>(null)
-  const [projectsData, setProjectsData] = useState<any[]>([])
-  const [projectsSection, setProjectsSection] = useState<any>(null)
-  const [contactData, setContactData] = useState<any>(null)
-  const [footerData, setFooterData] = useState<any>(null)
-  const [testimonialsData, setTestimonialsData] = useState<any>(null)
-  const [statsData, setStatsData] = useState<any>(null)
-  const [methodData, setMethodData] = useState<any>(null)
-  const [activeHero, setActiveHero] = useState(0)
-
-  const [contactModalOpen, setContactModalOpen] = useState(false)
-  const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false)
-  const [selectedProject, setSelectedProject] = useState<any>(null)
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
-  const [openFaq, setOpenFaq] = useState<number | null>(0)
-  const [testimonialPage, setTestimonialPage] = useState(0)
-  const [mobileTestimonialIndex, setMobileTestimonialIndex] = useState(0)
-  
-  // 🔥 NUEVO ESTADO PARA EL BOTÓN DE ADMIN
-  const [adminTaps, setAdminTaps] = useState(0)
-  const adminTapTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  const testimonialGridRef = useRef<HTMLDivElement>(null)
-  const mobileCarouselRef = useRef<HTMLDivElement>(null)
-  const wheelLockRef = useRef(false)
-  const isHoveringRef = useRef(false)
-  const touchStartRef = useRef<{ x: number; y: number; active: boolean } | null>(null)
-
-  const [reviewCode, setReviewCode] = useState('')
-  const [reviewMessage, setReviewMessage] = useState('')
-  const [reviewError, setReviewError] = useState('')
-  const [reviewVerified, setReviewVerified] = useState(false)
-  const [reviewClientName, setReviewClientName] = useState('')
-  const [reviewRating, setReviewRating] = useState(5)
-  const [reviewText, setReviewText] = useState('')
-  const [reviewRole, setReviewRole] = useState('')
-  const [verifying, setVerifying] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
-  const [reviewSuccess, setReviewSuccess] = useState(false)
-
   const { language } = useLanguage()
   const ca = language === 'ca'
+  
+  const [heroData, setHeroData] = useState<any>(null)
+  const [servicesData, setServicesData] = useState<any[]>([])
+  const [projectsData, setProjectsData] = useState<any[]>([])
+  const [testimonialsData, setTestimonialsData] = useState<any>(null)
+  const [footerData, setFooterData] = useState<any>(null)
+  
+  const [heroImages, setHeroImages] = useState<string[]>([])
+  const [activeHero, setActiveHero] = useState(0)
+  const [selectedProject, setSelectedProject] = useState<any>(null)
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
+  
+  const [contactModalOpen, setContactModalOpen] = useState(false)
+  const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false)
+  
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [adminTaps, setAdminTaps] = useState(0)
 
-  function scrollToSection(id: string) {
-    if (typeof window === 'undefined') return
-    const el = document.getElementById(id)
-    if (el) {
-      const headerHeight = 80
-      const top = el.getBoundingClientRect().top + window.scrollY - headerHeight
-      window.scrollTo({ top, behavior: 'instant' as ScrollBehavior })
-      el.style.opacity = '0'
-      el.style.transform = 'translateY(30px) scale(0.98)'
-      el.style.transition = 'opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)'
-      void el.offsetHeight
-      requestAnimationFrame(() => {
-        el.style.opacity = '1'
-        el.style.transform = 'translateY(0) scale(1)'
-      })
-      setTimeout(() => {
-        el.style.opacity = ''
-        el.style.transform = ''
-        el.style.transition = ''
-      }, 900)
-    }
-  }
-
-  // 🔥 FUNCIÓN PARA DETECTAR 3 TOQUES
-  const handleAdminTap = () => {
-    setAdminTaps((prev) => {
-      const next = prev + 1
-      if (next >= 3) {
-        // Al llegar a 3, reseteamos y dejamos que el enlace funcione
-        return 3
-      }
-      return next
-    })
-
-    if (adminTapTimeoutRef.current) {
-      clearTimeout(adminTapTimeoutRef.current)
-    }
-
-    // Si en 1 segundo no llega a 3 toques, reseteamos el contador
-    adminTapTimeoutRef.current = setTimeout(() => {
-      setAdminTaps(0)
-    }, 1000)
-  }
+  // Estados para reseñas
+  const [reviewCode, setReviewCode] = useState('')
+  const [reviewText, setReviewText] = useState('')
+  const [reviewRole, setReviewRole] = useState('')
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewClientName, setReviewClientName] = useState('')
+  const [reviewVerified, setReviewVerified] = useState(false)
+  const [reviewSuccess, setReviewSuccess] = useState(false)
+  const [reviewError, setReviewError] = useState('')
+  const [verifying, setVerifying] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    async function loadData() {
+    async function loadAllData() {
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/site_content?select=section,content`, {
-          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
-          cache: 'no-store'
-        })
-        if (!res.ok) throw new Error('Error al cargar')
-        const data = await res.json()
+        // Cargamos todo en paralelo para que sea rápido
+        const [heroRes, servicesRes, projectsRes, testimonialsRes, footerRes] = await Promise.all([
+          fetch(`${SUPABASE_URL}/rest/v1/site_content?section=eq.hero&select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }, cache: 'no-store' }),
+          fetch(`${SUPABASE_URL}/rest/v1/site_content?section=eq.services&select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }, cache: 'no-store' }),
+          fetch(`${SUPABASE_URL}/rest/v1/trabajos?select=*&order=orden.asc`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }, cache: 'no-store' }),
+          fetch(`${SUPABASE_URL}/rest/v1/site_content?section=eq.testimonials&select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }, cache: 'no-store' }),
+          fetch(`${SUPABASE_URL}/rest/v1/site_content?section=eq.footer&select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }, cache: 'no-store' })
+        ])
 
-        const hero = data.find((d: any) => d.section === 'hero')
-        const services = data.find((d: any) => d.section === 'services')
-        const projects = data.find((d: any) => d.section === 'projects')
-        const contact = data.find((d: any) => d.section === 'contact')
-        const footer = data.find((d: any) => d.section === 'footer')
-        const testimonials = data.find((d: any) => d.section === 'testimonials')
-        const stats = data.find((d: any) => d.section === 'stats')
-        const metodo = data.find((d: any) => d.section === 'metodo')
-
-        if (hero) setHeroData(hero.content)
-        if (services) { setServicesData(services.content?.items || []); setServicesSection(services.content) }
-        if (projects) setProjectsSection(projects.content)
-        if (contact) setContactData(contact.content)
-        if (footer) setFooterData(footer.content)
-        if (testimonials) setTestimonialsData(testimonials.content)
-        if (stats) setStatsData(stats.content)
-        if (metodo) setMethodData(metodo.content)
-
-        try {
-          const trabajosRes = await fetch(`${SUPABASE_URL}/rest/v1/trabajos?select=*&order=orden.asc`, {
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
-            cache: 'no-store'
-          })
-          if (trabajosRes.ok) {
-            const trabajosData = await trabajosRes.json()
-            setProjectsData(trabajosData.map((t: any) => ({
-              title: t.titulo, type: t.tipo, image: t.imagenes?.[0] || '',
-              images: t.imagenes || [], description: t.descripcion, categoria: t.categoria
-            })))
+        if (heroRes.ok) {
+          const d = await heroRes.json()
+          if (d[0]?.content) {
+            setHeroData(d[0].content)
+            if (d[0].content.images) setHeroImages(d[0].content.images)
           }
-        } catch (err) { console.error('Error al cargar trabajos:', err) }
-      } catch (err) { console.error('Error al cargar datos:', err) }
-      finally { setLoading(false) }
+        }
+        
+        if (servicesRes.ok) {
+          const d = await servicesRes.json()
+          if (d[0]?.content?.items) setServicesData(d[0].content.items)
+        }
+        
+        // AQUÍ LEEMOS LA TRADUCCIÓN DE LOS PROYECTOS
+        if (projectsRes.ok) {
+          const data = await projectsRes.json()
+          setProjectsData(data.map((t: any) => {
+            const caData = t.traducciones?.ca || {}
+            return {
+              title: t.titulo,
+              title_ca: caData.titulo || null, 
+              type: t.tipo,
+              type_ca: caData.tipo || null,
+              image: t.imagenes?.[0] || '',
+              images: t.imagenes || [],
+            }
+          }))
+        }
+        
+        if (testimonialsRes.ok) {
+          const d = await testimonialsRes.json()
+          if (d[0]?.content) setTestimonialsData(d[0].content)
+        }
+        
+        if (footerRes.ok) {
+          const d = await footerRes.json()
+          if (d[0]?.content) setFooterData(d[0].content)
+        }
+      } catch (err) {
+        console.error('Error cargando datos de la home:', err)
+      }
     }
-    loadData()
-    const timer = setInterval(() => setActiveHero((v) => (v + 1) % 3), 6000)
-    return () => clearInterval(timer)
+    loadAllData()
   }, [])
 
+  // Rotador del Hero
   useEffect(() => {
-    const totalItems = testimonialsData?.items?.length || 0
-    if (totalItems === 0) return
+    if (heroImages.length <= 1) return
+    const interval = setInterval(() => {
+      setActiveHero((prev) => (prev + 1) % heroImages.length)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [heroImages])
 
-    const onMouseMove = (e: MouseEvent) => {
-      const grid = testimonialGridRef.current
-      if (!grid) { isHoveringRef.current = false; return }
-      const rect = grid.getBoundingClientRect()
-      isHoveringRef.current = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom
-    }
-    const onWheel = (e: WheelEvent) => {
-      if (!isHoveringRef.current) return
-      const totalPages = Math.max(1, Math.ceil(totalItems / 3))
-      if (totalPages <= 1) return
-      e.preventDefault(); e.stopPropagation()
-      if (wheelLockRef.current) return
-      if (Math.abs(e.deltaY) < 10) return
-      wheelLockRef.current = true
-      setTestimonialPage((prev) => { if (e.deltaY > 0) return (prev + 1) % totalPages; return (prev - 1 + totalPages) % totalPages })
-      setTimeout(() => { wheelLockRef.current = false }, 450)
-    }
-    const onTouchStart = (e: TouchEvent) => {
-      const carousel = mobileCarouselRef.current
-      if (!carousel) return
-      const rect = carousel.getBoundingClientRect()
-      const touch = e.touches[0]
-      const isInside = touch.clientX >= rect.left && touch.clientX <= rect.right && touch.clientY >= rect.top && touch.clientY <= rect.bottom
-      if (isInside) { touchStartRef.current = { x: touch.clientX, y: touch.clientY, active: true } }
-      else { touchStartRef.current = null }
-    }
-    const onTouchEnd = (e: TouchEvent) => {
-      if (!touchStartRef.current || !touchStartRef.current.active) { touchStartRef.current = null; return }
-      const touch = e.changedTouches[0]
-      const dx = touch.clientX - touchStartRef.current.x
-      const dy = touch.clientY - touchStartRef.current.y
-      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-        if (dx > 0) { setMobileTestimonialIndex((prev) => (prev - 1 + totalItems) % totalItems) }
-        else { setMobileTestimonialIndex((prev) => (prev + 1) % totalItems) }
-      }
-      touchStartRef.current = null
-    }
-    document.addEventListener('mousemove', onMouseMove, { passive: true })
-    document.addEventListener('wheel', onWheel, { passive: false })
-    document.addEventListener('touchstart', onTouchStart, { passive: true })
-    document.addEventListener('touchend', onTouchEnd, { passive: true })
-    return () => {
-      document.removeEventListener('mousemove', onMouseMove)
-      document.removeEventListener('wheel', onWheel)
-      document.removeEventListener('touchstart', onTouchStart)
-      document.removeEventListener('touchend', onTouchEnd)
-    }
-  }, [testimonialsData])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const isMobile = window.matchMedia('(max-width: 1023px)').matches
-    if (!isMobile) return
-    const timeoutId = setTimeout(() => {
-      const rows = document.querySelectorAll('.method-row')
-      if (rows.length === 0) return
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) entry.target.classList.add('is-active')
-            else entry.target.classList.remove('is-active')
-          })
-        },
-        { rootMargin: '-35% 0px -35% 0px', threshold: 0 }
-      )
-      rows.forEach((row) => observer.observe(row))
-      ;(window as any).__methodObserver = observer
-    }, 300)
-    return () => {
-      clearTimeout(timeoutId)
-      const observer = (window as any).__methodObserver
-      if (observer) { observer.disconnect(); (window as any).__methodObserver = null }
-    }
-  }, [loading, methodData])
-
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (!selectedProject) return
-      if (e.key === 'Escape') { setSelectedProject(null) }
-      else if (e.key === 'ArrowLeft') { setCurrentPhotoIndex(prev => prev > 0 ? prev - 1 : (selectedProject.images?.length || 1) - 1) }
-      else if (e.key === 'ArrowRight') { setCurrentPhotoIndex(prev => prev < (selectedProject.images?.length || 1) - 1 ? prev + 1 : 0) }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedProject])
-
-  useEffect(() => {
-    if (selectedProject) { document.body.style.overflow = 'hidden' }
-    else { document.body.style.overflow = '' }
-    return () => { document.body.style.overflow = '' }
-  }, [selectedProject])
-
-  if (loading) {
-    return <div className="min-h-screen bg-[#080808] flex items-center justify-center text-white/50">Cargando...</div>
+  function nextPhoto() {
+    if (!selectedProject) return
+    const total = selectedProject.images?.length || 1
+    setCurrentPhotoIndex((prev) => (prev < total - 1 ? prev + 1 : 0))
   }
 
-  const heroImages = heroData?.images || ['', '', '']
-  const heroTrans = heroData?.translations || {}
-  const footerTrans = footerData?.translations || {}
-  const testimonialsTrans = testimonialsData?.translations || {}
-  const testimonialsItems = testimonialsData?.items || []
+  function prevPhoto() {
+    if (!selectedProject) return
+    const total = selectedProject.images?.length || 1
+    setCurrentPhotoIndex((prev) => (prev > 0 ? prev - 1 : total - 1))
+  }
 
-  const totalTestimonialPages = Math.max(1, Math.ceil(testimonialsItems.length / 3))
-  const visibleTestimonials = testimonialsItems.slice(testimonialPage * 3, testimonialPage * 3 + 3)
-  const currentMobileTestimonial = testimonialsItems[mobileTestimonialIndex] || null
-
-  const titleText = ca ? (heroTrans.title || heroData?.title || 'Espais que trascendeixen.') : (heroData?.title || 'Espacios que trascienden.')
-  const titleWords = titleText.split(' ')
-
-  const nextPhoto = () => { if (!selectedProject) return; const total = selectedProject.images?.length || 1; setCurrentPhotoIndex(prev => prev < total - 1 ? prev + 1 : 0) }
-  const prevPhoto = () => { if (!selectedProject) return; const total = selectedProject.images?.length || 1; setCurrentPhotoIndex(prev => prev > 0 ? prev - 1 : total - 1) }
-
-  const statsItems = statsData?.items || []
-  const dynamicStatsData = statsItems.length > 0
-    ? statsItems.map((item: any) => ({
-        icon: ICON_MAP[item.icon] || Star, number: item.number, suffix: item.suffix || '',
-        labelEs: item.label?.es || '', labelCa: item.label?.ca || item.label?.es || '',
-      }))
-    : [
-        { icon: Briefcase, number: 150, suffix: '+', labelEs: 'Proyectos realizados', labelCa: 'Projectes realitzats' },
-        { icon: Award, number: 15, suffix: '', labelEs: 'Años de experiencia', labelCa: 'Anys d\'experiència' },
-        { icon: Users, number: 98, suffix: '%', labelEs: 'Clientes satisfechos', labelCa: 'Clients satisfets' },
-        { icon: HomeIcon, number: 250, suffix: 'K', labelEs: 'm² reformados', labelCa: 'm² reformats' },
-      ]
-
-  const methodSteps = methodData?.steps?.length > 0 ? methodData.steps : FALLBACK_METHOD_STEPS
-  const methodEyebrow = ca ? (methodData?.eyebrow?.ca || methodData?.eyebrow?.es || 'El nostre mètode') : (methodData?.eyebrow?.es || 'Nuestro método')
-  const methodTitle = ca ? (methodData?.title?.ca || methodData?.title?.es || "L'excel·lència") : (methodData?.title?.es || 'La excelencia')
-  const methodTitleItalic = ca ? (methodData?.titleItalic?.ca || methodData?.titleItalic?.es || 'és un procés.') : (methodData?.titleItalic?.es || 'es un proceso.')
-
-  const faqs = [
-    { qEs: '¿Cuánto tarda una reforma integral?', qCa: 'Quant triga una reforma integral?', aEs: 'Depende del tamaño y la complejidad, pero una reforma integral de un piso medio suele tardar entre 2 y 4 meses. En la primera visita te damos un plazo estimado.', aCa: 'Depèn de la mida i la complexitat, però una reforma integral d\'un pis mitjà sol trigar entre 2 i 4 mesos. A la primera visita et donem un termini estimat.' },
-    { qEs: '¿Hacéis presupuestos gratis?', qCa: 'Feu pressupostos gratuïts?', aEs: 'Sí, todos nuestros presupuestos son completamente gratis y sin ningún tipo de compromiso. Nos desplazamos a tu vivienda para valorar el proyecto.', aCa: 'Sí, tots els nostres pressupostos són completament gratuïts i sense cap mena de compromís. Ens desplacem al teu habitatge per valorar el projecte.' },
-    { qEs: '¿Trabajáis en toda Cataluña?', qCa: 'Treballeu a tot Catalunya?', aEs: 'Trabajamos principalmente en Barcelona y su área metropolitana, aunque también realizamos proyectos en otras zonas de Cataluña. Consúltanos tu caso.', aCa: 'Treballem principalment a Barcelona i la seva àrea metropolitana, tot i que també realitzem projectes en altres zones de Catalunya. Consulta\'ns el teu cas.' },
-    { qEs: '¿Qué garantía ofrecéis?', qCa: 'Quina garantia oferiu?', aEs: 'Ofrecemos 2 años de garantía en todos nuestros trabajos, tal como exige la ley. Además, disponemos de seguro de responsabilidad civil que cubre cualquier imprevisto.', aCa: 'Oferim 2 anys de garantia en tots els nostres treballs, tal com exigeix la llei. A més, disposem d\'assegurança de responsabilitat civil que cobreix qualsevol imprevist.' },
-    { qEs: '¿Puedo pedir solo una parte de la reforma?', qCa: 'Puc demanar només una part de la reforma?', aEs: 'Por supuesto. Nos adaptamos a lo que necesites: desde una reforma completa hasta una actualización parcial (cocina, baño, pintura, etc.).', aCa: 'Per descomptat. Ens adaptem al que necessitis: des d\'una reforma completa fins a una actualització parcial (cuina, bany, pintura, etc.).' },
-  ]
+  const handleAdminTap = () => {
+    setAdminTaps((prev) => prev + 1)
+    setTimeout(() => setAdminTaps(0), 2000)
+  }
 
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!reviewCode.trim()) return
-    setVerifying(true); setReviewError(''); setReviewMessage('')
+    setVerifying(true); setReviewError(''); 
     try {
       const res = await fetch('/api/reviews/verify-code', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -348,25 +157,51 @@ export default function Home() {
       })
       const data = await res.json()
       if (!res.ok) { setReviewError(data.error || (ca ? 'Error al enviar' : 'Error al enviar')); return }
-      if (data.allItems && Array.isArray(data.allItems)) {
-        setTestimonialsData((prev: any) => ({ ...(prev || {}), items: data.allItems }))
-      }
       setReviewSuccess(true); setReviewVerified(false)
-      try {
-        const testRes = await fetch(`${SUPABASE_URL}/rest/v1/site_content?section=eq.testimonials&select=content`, {
-          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }, cache: 'no-store'
-        })
-        if (testRes.ok) {
-          const testData = await testRes.json()
-          if (testData[0]?.content) { setTestimonialsData(testData[0].content) }
-        }
-      } catch (e) { console.warn('Refresco secundario falló:', e) }
       setTimeout(() => {
         setReviewCode(''); setReviewText(''); setReviewRole(''); setReviewRating(5); setReviewClientName(''); setReviewSuccess(false)
       }, 6000)
     } catch (err) { setReviewError(ca ? 'Error de connexió' : 'Error de conexión') }
     finally { setSubmitting(false) }
   }
+
+  const titleWords = ca ? ['Arquitectura', 'que', 'parla', 'per', 'si', 'sola.'] : ['Arquitectura', 'que', 'habla', 'por', 'sí', 'sola.']
+  const methodEyebrow = ca ? 'Com ho fem' : 'Cómo lo hacemos'
+  const methodTitle = ca ? 'Un mètode' : 'Un método'
+  const methodTitleItalic = ca ? 'sense fissures.' : 'sin fisuras.'
+  const methodSteps = [
+    { id: 1, number: '01', title: { es: 'Escolta i anàlisi', ca: 'Escucha y análisis' }, shortDescription: { es: 'Entenem les teves necessitats i mesurem el potencial de l\'espai.', ca: 'Entendemos tus necesidades y medimos el potencial del espacio.' } },
+    { id: 2, number: '02', title: { es: 'Disseny a mida', ca: 'Diseño a medida' }, shortDescription: { es: 'Creem una proposta visual i tècnica adaptada a tu.', ca: 'Creamos una propuesta visual y técnica adaptada a ti.' } },
+    { id: 3, number: '03', title: { es: 'Execució impecable', ca: 'Ejecución impecable' }, shortDescription: { es: 'Coordinem els gremis i controlem cada detall de l\'obra.', ca: 'Coordinamos los gremios y controlamos cada detalle de la obra.' } },
+    { id: 4, number: '04', title: { es: 'Lliurament i garantia', ca: 'Entrega y garantía' }, shortDescription: { es: 'Revisem junts el resultat i t\'oferim suport post-venda.', ca: 'Revisamos juntos el resultado y te ofrecemos soporte post-venta.' } },
+  ]
+
+  const faqs = [
+    { qEs: '¿Cuánto cuesta una reforma integral?', aEs: 'Depende del tamaño y los acabados. Tras una visita técnica te damos un presupuesto detallado sin compromiso.', qCa: 'Quant costa una reforma integral?', aCa: 'Depèn de la mida i els acabats. Després d\'una visita tècnica et donem un pressupost detallat sense compromís.' },
+    { qEs: '¿Cuánto tiempo tardaréis?', aEs: 'Una reforma media suele durar entre 6 y 10 semanas. Te damos un calendario cerrado antes de empezar.', qCa: 'Quant temps tardareu?', aCa: 'Una reforma mitjana sol durar entre 6 i 10 setmanes. Et donem un calendari tancat abans de començar.' },
+    { qEs: '¿Os encargáis de los permisos?', aEs: 'Sí, gestionamos todos los trámites municipales y licencias necesarias.', qCa: 'Us encarregueu dels permisos?', aCa: 'Sí, gestionem tots els tràmits municipals i llicències necessàries.' },
+  ]
+
+  const projectsSection = { sectionTitle: { eyebrow: 'Una selección', title: 'El resultado', titleItalic: 'habla por sí solo.' }, translations: { sectionTitle: { eyebrow: 'Una selecció', title: 'El resultat', titleItalic: 'parla per si sol.' } } }
+  const testimonialsTrans = { eyebrow: { ca: 'El que diuen els nostres clients' }, title: { ca: 'Opinions reals' }, titleItalic: { ca: 'que parlen per nosaltres.' } }
+  const footerTrans = { description: 'Dissenyem i construïm espais amb intenció.', address: { street: 'Carrer del Padró, 34', city: 'Ripollet Barcelona' }, schedule: 'De Lunes a Viernes 8:00 - 13:00 y 15:00 - 18:00', copyright: '© 2025 Renovactiva SL. Tots els drets reservats.' }
+  const servicesSection = { eyebrow: { ca: 'El que fem', es: 'Lo que hacemos' }, title: { ca: 'Una visió', es: 'Una visión' }, titleItalic: { ca: 'sense límits.', es: 'sin límites.' } }
+
+  const pickText = (obj: any, lang: string, fallback: string) => obj?.[lang] || fallback
+  const truncate = (str: string, n: number) => str?.length > n ? str.slice(0, n) + '...' : str
+
+  const testimonialsItems = testimonialsData?.items || []
+  const visibleTestimonials = testimonialsItems.slice(0, 3)
+  const totalTestimonialPages = 1
+  const testimonialPage = 0
+  const setTestimonialPage = (p: any) => {}
+  const currentMobileTestimonial = testimonialsItems[0]
+  const mobileTestimonialIndex = 0
+  const testimonialGridRef = useRef(null)
+  const mobileCarouselRef = useRef(null)
+  const dynamicStatsData: any[] = []
+  const scrollToSection = (id: string) => { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }) }
+  const heroTrans = { eyebrow: '', description: '', cta: '' }
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#080808] text-[#f3f0e9]">
@@ -438,7 +273,19 @@ export default function Home() {
 
           <div className="space-y-0">
             {servicesData.slice(0, 4).map((service: any, index: number) => (
-              <ServiceRow key={index} service={service} index={index} ca={ca} />
+              <div key={index} className="method-row group relative py-10 px-2 border-t border-white/10">
+                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-4 lg:gap-10 items-center">
+                  <h3 className="method-title font-serif text-3xl lg:text-4xl text-white transition-colors duration-500 group-hover:text-[#d7bd77] flex items-center gap-3">
+                    {ca ? (service.title?.ca || service.title?.es) : service.title?.es}
+                    <ArrowUpRight className="size-6 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 text-[#d7bd77]" />
+                  </h3>
+                  <div className="method-desc-wrap relative">
+                    <p className="method-desc text-sm lg:text-base leading-relaxed text-white/65 group-hover:text-white/85 transition-colors duration-500">
+                      {ca ? (service.description?.ca || service.description?.es) : service.description?.es}
+                    </p>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
 
@@ -468,23 +315,21 @@ export default function Home() {
               const rawDesc = ca ? (step.shortDescription?.ca || step.shortDescription?.es) : step.shortDescription?.es
               const stepDesc = truncate(rawDesc, 120)
               const stepNumber = step.number || String(index + 1).padStart(2, '0')
-              const href = step.slug ? `/metodo/${step.slug}` : '#metodo'
               return (
                 <motion.div key={step.id || index} className="method-row group relative py-10 px-2" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}>
-                  <Link href={href} className="block">
+                  <div className="block">
                     <span className="method-divider" aria-hidden="true" />
                     <span className="method-bg-number" aria-hidden="true">{stepNumber}</span>
                     <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-4 lg:gap-10 items-center">
                       <h3 className="method-title font-serif text-3xl lg:text-4xl text-white transition-colors duration-500 group-hover:text-[#d7bd77] flex items-center gap-3">
                         {stepTitle}
-                        <ArrowUpRight className="size-6 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 text-[#d7bd77]" />
                       </h3>
                       <div className="method-desc-wrap relative">
                         <span className="method-desc-bar" aria-hidden="true" />
                         <p className="method-desc text-sm lg:text-base leading-relaxed text-white/65 group-hover:text-white/85 transition-colors duration-500">{stepDesc}</p>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 </motion.div>
               )
             })}
@@ -518,6 +363,11 @@ export default function Home() {
           ]).map((project: any, index: number) => {
             const isWide = index === 0 || index === 3
             const photoCount = project.images?.length || 1
+            
+            // AQUÍ APLICAMOS LA TRADUCCIÓN AL TÍTULO Y TIPO
+            const displayTitle = ca ? (project.title_ca || project.title) : project.title
+            const displayType = ca ? (project.type_ca || project.type) : project.type
+
             return (
               <motion.div key={index} onClick={() => { setSelectedProject(project); setCurrentPhotoIndex(0) }} className={`project-card group relative overflow-hidden rounded-lg min-h-[400px] border border-[#10B77F]/30 transition-all duration-500 hover:border-[#10B77F] hover:shadow-[0_0_60px_10px_rgba(16,183,127,0.55)] cursor-pointer ${isWide ? 'lg:col-span-2' : 'lg:col-span-1'}`} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}>
                 <div className="project-image absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${project.image})` }} />
@@ -529,9 +379,9 @@ export default function Home() {
                 <div className="relative flex h-full min-h-[400px] flex-col justify-end p-7">
                   <div className="flex items-center gap-3 mb-3">
                     <span className="block w-8 h-px bg-[#10B77F] transition-colors duration-500 group-hover:bg-[#d7bd77]" />
-                    <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-medium transition-colors duration-500 group-hover:text-[#d7bd77]">{project.type}</p>
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-medium transition-colors duration-500 group-hover:text-[#d7bd77]">{displayType}</p>
                   </div>
-                  <h3 className="project-title font-serif text-3xl">{project.title}</h3>
+                  <h3 className="project-title font-serif text-3xl">{displayTitle}</h3>
                   <div className="mt-4 h-px w-0 bg-[#D7BD77] transition-all duration-700 group-hover:w-24" />
                 </div>
               </motion.div>
@@ -544,8 +394,8 @@ export default function Home() {
       <section className="relative border-y border-white/10 bg-[#0D0D0D] px-6 py-20 lg:px-10 lg:py-28">
         <div className="relative mx-auto max-w-[1380px]">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-            {dynamicStatsData.map((stat: any, index: number) => {
-              const IconComponent = stat.icon
+            {dynamicStatsData.length > 0 ? dynamicStatsData.map((stat: any, index: number) => {
+              const IconComponent = stat.icon || Play
               return (
                 <motion.div key={index} className="stat-block group text-center cursor-default" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}>
                   <IconComponent className="stat-icon size-8 lg:size-10 mx-auto text-[#10B77F] mb-4" />
@@ -555,7 +405,26 @@ export default function Home() {
                   <p className="mt-3 text-[11px] lg:text-xs uppercase tracking-[0.2em] text-white/60 transition-colors duration-500 group-hover:text-white/90">{ca ? stat.labelCa : stat.labelEs}</p>
                 </motion.div>
               )
-            })}
+            }) : (
+              // Valores estáticos por defecto si la base de datos falla
+              [
+                { number: '15', suffix: '+', labelCa: 'Anys d\'experiència', labelEs: 'Años de experiencia', icon: Play },
+                { number: '200', suffix: '+', labelCa: 'Projectes acabats', labelEs: 'Proyectos acabados', icon: Play },
+                { number: '100', suffix: '%', labelCa: 'Clients satisfets', labelEs: 'Clientes satisfechos', icon: Play },
+                { number: '24', suffix: 'h', labelCa: 'Suport tècnic', labelEs: 'Soporte técnico', icon: Play },
+              ].map((stat: any, index: number) => {
+                const IconComponent = stat.icon
+                return (
+                  <motion.div key={index} className="stat-block group text-center cursor-default" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}>
+                    <IconComponent className="stat-icon size-8 lg:size-10 mx-auto text-[#10B77F] mb-4" />
+                    <div className="stat-number font-serif text-5xl lg:text-7xl leading-none text-[#10B77F]">
+                      {stat.number}<span className="text-3xl lg:text-5xl">{stat.suffix}</span>
+                    </div>
+                    <p className="mt-3 text-[11px] lg:text-xs uppercase tracking-[0.2em] text-white/60 transition-colors duration-500 group-hover:text-white/90">{ca ? stat.labelCa : stat.labelEs}</p>
+                  </motion.div>
+                )
+              })
+            )}
           </div>
         </div>
       </section>
@@ -864,7 +733,7 @@ export default function Home() {
             </div>
           </motion.div>
           
-          {/* ✅ ADMIN SUPER OCULTO - APARECE CON 3 TOQUES EN MÓVIL O HOVER EN PC */}
+          {/* ADMIN SUPER OCULTO - APARECE CON 3 TOQUES EN MÓVIL O HOVER EN PC */}
           <div className="flex justify-center pt-6">
             <div 
               onClick={handleAdminTap}
@@ -875,7 +744,6 @@ export default function Home() {
                 aria-label="Admin" 
                 className={`inline-flex items-center justify-center size-8 transition-opacity duration-300 ${adminTaps >= 3 ? 'opacity-100' : 'opacity-0 sm:group-hover:opacity-100'}`}
                 onClick={(e) => {
-                  // Si en móvil no ha llegado a 3 toques, bloqueamos la navegación
                   if (adminTaps < 3 && window.innerWidth < 640) {
                     e.preventDefault()
                   }
@@ -895,8 +763,12 @@ export default function Home() {
             <motion.div className="relative w-full h-full sm:max-w-6xl sm:max-h-[90vh] sm:rounded-2xl overflow-hidden bg-[#0A0A0A] border border-[#10B77F]/30 shadow-[0_0_80px_20px_rgba(16,183,127,0.3)] flex flex-col" initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} onClick={(e) => e.stopPropagation()}>
               <div className="relative flex items-center justify-between gap-4 border-b border-white/10 px-4 sm:px-6 py-3 sm:py-4 bg-black/50 backdrop-blur-sm z-20">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-medium truncate">{selectedProject.type}</p>
-                  <h3 className="font-serif text-lg sm:text-2xl text-white truncate">{selectedProject.title}</h3>
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-medium truncate">
+                    {ca ? (selectedProject.type_ca || selectedProject.type) : selectedProject.type}
+                  </p>
+                  <h3 className="font-serif text-lg sm:text-2xl text-white truncate">
+                    {ca ? (selectedProject.title_ca || selectedProject.title) : selectedProject.title}
+                  </h3>
                 </div>
                 <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
                   <div className="hidden sm:flex items-center gap-2 text-[#d7bd77]">
