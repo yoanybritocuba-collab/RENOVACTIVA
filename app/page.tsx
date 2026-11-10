@@ -59,7 +59,6 @@ export default function Home() {
   const [testimonialPage, setTestimonialPage] = useState(0)
   const [mobileTestimonialIndex, setMobileTestimonialIndex] = useState(0)
   
-  // 🔥 NUEVO ESTADO PARA EL BOTÓN DE ADMIN
   const [adminTaps, setAdminTaps] = useState(0)
   const adminTapTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -107,12 +106,10 @@ export default function Home() {
     }
   }
 
-  // 🔥 FUNCIÓN PARA DETECTAR 3 TOQUES
   const handleAdminTap = () => {
     setAdminTaps((prev) => {
       const next = prev + 1
       if (next >= 3) {
-        // Al llegar a 3, reseteamos y dejamos que el enlace funcione
         return 3
       }
       return next
@@ -122,7 +119,6 @@ export default function Home() {
       clearTimeout(adminTapTimeoutRef.current)
     }
 
-    // Si en 1 segundo no llega a 3 toques, reseteamos el contador
     adminTapTimeoutRef.current = setTimeout(() => {
       setAdminTaps(0)
     }, 1000)
@@ -163,9 +159,16 @@ export default function Home() {
           })
           if (trabajosRes.ok) {
             const trabajosData = await trabajosRes.json()
+            // CAMBIO 1: Leemos la traducción del JSON que guarda el sistema de Google
             setProjectsData(trabajosData.map((t: any) => ({
-              title: t.titulo, type: t.tipo, image: t.imagenes?.[0] || '',
-              images: t.imagenes || [], description: t.descripcion, categoria: t.categoria
+              title: t.titulo, 
+              title_ca: t.traducciones?.ca?.titulo || null,
+              type: t.tipo, 
+              type_ca: t.traducciones?.ca?.tipo || null,
+              image: t.imagenes?.[0] || '',
+              images: t.imagenes || [], 
+              description: t.descripcion, 
+              categoria: t.categoria
             })))
           }
         } catch (err) { console.error('Error al cargar trabajos:', err) }
@@ -529,9 +532,11 @@ export default function Home() {
                 <div className="relative flex h-full min-h-[400px] flex-col justify-end p-7">
                   <div className="flex items-center gap-3 mb-3">
                     <span className="block w-8 h-px bg-[#10B77F] transition-colors duration-500 group-hover:bg-[#d7bd77]" />
-                    <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-medium transition-colors duration-500 group-hover:text-[#d7bd77]">{project.type}</p>
+                    {/* CAMBIO 2: Traducir el tipo de proyecto */}
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-[#10B77F] font-medium transition-colors duration-500 group-hover:text-[#d7bd77]">{ca ? (project.type_ca || project.type) : project.type}</p>
                   </div>
-                  <h3 className="project-title font-serif text-3xl">{project.title}</h3>
+                  {/* CAMBIO 3: Traducir el título del proyecto */}
+                  <h3 className="project-title font-serif text-3xl">{ca ? (project.title_ca || project.title) : project.title}</h3>
                   <div className="mt-4 h-px w-0 bg-[#D7BD77] transition-all duration-700 group-hover:w-24" />
                 </div>
               </motion.div>
@@ -864,7 +869,6 @@ export default function Home() {
             </div>
           </motion.div>
           
-          {/* ✅ ADMIN SUPER OCULTO - APARECE CON 3 TOQUES EN MÓVIL O HOVER EN PC */}
           <div className="flex justify-center pt-6">
             <div 
               onClick={handleAdminTap}
@@ -875,7 +879,6 @@ export default function Home() {
                 aria-label="Admin" 
                 className={`inline-flex items-center justify-center size-8 transition-opacity duration-300 ${adminTaps >= 3 ? 'opacity-100' : 'opacity-0 sm:group-hover:opacity-100'}`}
                 onClick={(e) => {
-                  // Si en móvil no ha llegado a 3 toques, bloqueamos la navegación
                   if (adminTaps < 3 && window.innerWidth < 640) {
                     e.preventDefault()
                   }
