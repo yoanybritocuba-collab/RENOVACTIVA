@@ -7,12 +7,8 @@ import { Send, X, RotateCcw, Phone, MessageCircle, Mail } from 'lucide-react'
 
 type MascotLang = 'es' | 'ca'
 
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '34722454020'
 const EMAIL = 'info@renovactiva.com'
 
-// ============================================================
-// PLANTILLAS (con datos del cliente)
-// ============================================================
 const WA_TEMPLATE_ES = `Hola, soy {{nombre}}.
 
 Quiero reformar: {{proyecto}}.
@@ -55,9 +51,6 @@ M'agradaria agendar una visita tècnica per valorar l'espai i rebre un pressupos
 
 Gràcies.`
 
-// ============================================================
-// PARSER DEL BLOQUE <<<DATA...>>>
-// ============================================================
 type SavedData = {
   nombre: string
   proyecto: string
@@ -98,9 +91,6 @@ function parseDataBlock(text: string): { cleanText: string; data: Partial<SavedD
   return { cleanText, data }
 }
 
-// ============================================================
-// FALLBACK regex
-// ============================================================
 function extractFallback(messages: any[]): Partial<SavedData> {
   const recentMessages = messages.slice(-20)
   const userText = recentMessages
@@ -143,9 +133,10 @@ function getMailHref(email: string, subject: string, body: string): string {
   return `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subjectEnc}&body=${bodyEnc}`
 }
 
-function renderMessageWithLinks(text: string) {
-  const telHref = `tel:+${WHATSAPP_NUMBER}`
-  const genericWaHref = `https://wa.me/${WHATSAPP_NUMBER}`
+// 🔥 MODIFICADO: Ahora recibe el número como parámetro
+function renderMessageWithLinks(text: string, whatsappNumber: string) {
+  const telHref = `tel:+${whatsappNumber}`
+  const genericWaHref = `https://wa.me/${whatsappNumber}`
   const genericMailHref = `mailto:${EMAIL}`
 
   const parts: React.ReactNode[] = []
@@ -190,9 +181,6 @@ function getGreetingText(lang: MascotLang): string {
   return isCa ? 'Bona nit' : 'Buenas noches'
 }
 
-// ============================================================
-// COMPONENTE
-// ============================================================
 export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
   const [open, setOpen] = useState(false)
   const [input, setInput] = useState('')
@@ -211,6 +199,30 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
   const [showHoverCartel, setShowHoverCartel] = useState(false)
 
   const [savedData, setSavedData] = useState<SavedData>(EMPTY_DATA)
+  
+  // 🔥 NUEVO: Estado para el número de WhatsApp dinámico
+  const [whatsappNumber, setWhatsappNumber] = useState('34676783708')
+
+  // 🔥 NUEVO: Cargar el número desde Supabase
+  useEffect(() => {
+    async function fetchContact() {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://izvllvunpjryeowponti.supabase.co'}/rest/v1/site_content?section=eq.contact&select=content`, {
+          headers: {
+            'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM',
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'}`
+          },
+          cache: 'no-store'
+        })
+        if (res.ok) {
+          const data = await res.json()
+          const num = data[0]?.content?.whatsapp
+          if (num) setWhatsappNumber(num.replace(/[^0-9]/g, ''))
+        }
+      } catch (e) {}
+    }
+    fetchContact()
+  }, [])
 
   const [pos, setPos] = useState<{ x: number; y: number }>({ x: -1, y: -1 })
   const [isDragging, setIsDragging] = useState(false)
@@ -582,8 +594,9 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
   const emailBody = fillTemplate(isCa ? EMAIL_BODY_TEMPLATE_CA : EMAIL_BODY_TEMPLATE_ES, savedData)
   const emailSubject = isCa ? EMAIL_SUBJECT_CA : EMAIL_SUBJECT_ES
 
-  const waHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waBody)}`
-  const telHref = `tel:+${WHATSAPP_NUMBER}`
+  // 🔥 USAMOS EL NÚMERO DINÁMICO
+  const waHref = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waBody)}`
+  const telHref = `tel:+${whatsappNumber}`
   const mailHref = getMailHref(EMAIL, emailSubject, emailBody)
 
   const containerStyle: React.CSSProperties =
@@ -643,7 +656,8 @@ export function MascotAssistant({ lang = 'es' }: { lang?: MascotLang }) {
                   {isUser ? (
                     <span>{fullText}</span>
                   ) : (
-                    <span>{renderMessageWithLinks(fullText)}</span>
+                    // 🔥 PASAMOS EL NÚMERO DINÁMICO
+                    <span>{renderMessageWithLinks(fullText, whatsappNumber)}</span>
                   )}
                 </div>
               )

@@ -1,11 +1,7 @@
 'use client'
 
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '34722454020'
+import { useEffect, useState } from 'react'
 
-// ============================================================
-// MENSAJE PREDEFINIDO (mismo formato que Nova, sin datos)
-// El cliente solo tiene que escribir su nombre al principio
-// ============================================================
 const WHATSAPP_MESSAGE = `Hola, soy 
 
 Quiero reformar:
@@ -16,7 +12,30 @@ Me gustaría agendar una visita técnica para que valoren el espacio y me prepar
 Gracias.`
 
 export function WhatsAppButton() {
-  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`
+  const [whatsappNumber, setWhatsappNumber] = useState('34676783708')
+
+  useEffect(() => {
+    // Leemos el número de WhatsApp desde Supabase
+    async function fetchContact() {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://izvllvunpjryeowponti.supabase.co'}/rest/v1/site_content?section=eq.contact&select=content`, {
+          headers: {
+            'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM',
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'}`
+          },
+          cache: 'no-store'
+        })
+        if (res.ok) {
+          const data = await res.json()
+          const num = data[0]?.content?.whatsapp
+          if (num) setWhatsappNumber(num.replace(/[^0-9]/g, ''))
+        }
+      } catch (e) {}
+    }
+    fetchContact()
+  }, [])
+
+  const href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`
 
   return (
     <a
@@ -27,12 +46,10 @@ export function WhatsAppButton() {
       title="¿Hablamos por WhatsApp?"
       className="whatsapp-button group relative flex items-center justify-center size-10 rounded-full bg-[#25D366] text-white shadow-lg transition-transform duration-300 hover:scale-110"
     >
-      {/* Ondas expansivas (efecto radar) */}
       <span className="whatsapp-pulse whatsapp-pulse-1" aria-hidden="true" />
       <span className="whatsapp-pulse whatsapp-pulse-2" aria-hidden="true" />
       <span className="whatsapp-pulse whatsapp-pulse-3" aria-hidden="true" />
 
-      {/* Logo oficial de WhatsApp */}
       <svg
         viewBox="0 0 24 24"
         className="relative z-10 size-5 fill-current"

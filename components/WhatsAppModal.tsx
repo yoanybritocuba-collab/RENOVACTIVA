@@ -6,8 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Turnstile } from '@marsidev/react-turnstile'
 import type { TurnstileInstance } from '@marsidev/react-turnstile'
 
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '34722454020'
-
 type WhatsAppLang = 'es' | 'ca'
 
 type WhatsAppModalProps = {
@@ -26,8 +24,32 @@ export function WhatsAppModal({ open, onClose, lang = 'es' }: WhatsAppModalProps
   const [abierto, setAbierto] = useState(false)
   const [privacidadOpen, setPrivacidadOpen] = useState(false)
   const [verificado, setVerificado] = useState(false)
+  
+  // 🔥 NUEVO: Estado para el número de WhatsApp dinámico
+  const [whatsappNumber, setWhatsappNumber] = useState('34676783708')
 
   const turnstileRef = useRef<TurnstileInstance | null>(null)
+
+  // 🔥 NUEVO: Cargar el número desde Supabase
+  useEffect(() => {
+    async function fetchContact() {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://izvllvunpjryeowponti.supabase.co'}/rest/v1/site_content?section=eq.contact&select=content`, {
+          headers: {
+            'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM',
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmxsdnVucGpyeWVvd3BvbnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MDgwODAsImV4cCI6MjEwNDI4NDA4MH0.T39sL0ZfR8yyP6oMl6POpXWM6067hr7jIk5oaOBBQEM'}`
+          },
+          cache: 'no-store'
+        })
+        if (res.ok) {
+          const data = await res.json()
+          const num = data[0]?.content?.whatsapp
+          if (num) setWhatsappNumber(num.replace(/[^0-9]/g, ''))
+        }
+      } catch (e) {}
+    }
+    fetchContact()
+  }, [])
 
   useEffect(() => {
     if (open) {
@@ -132,7 +154,8 @@ Me gustaría recibir información y concertar una visita técnica sin compromiso
 Gracias.`
     }
 
-    const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`
+    // 🔥 USAMOS EL NÚMERO DINÁMICO
+    const href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensaje)}`
 
     window.open(href, '_blank', 'noopener,noreferrer')
     setAbierto(true)
@@ -298,7 +321,6 @@ Gracias.`
                       </span>
                     </label>
 
-                    {/* ✅ TURNSTILE CORREGIDO (VISIBLE Y ADAPTADO A MÓVIL) */}
                     <div className="mb-3 sm:mb-4 flex justify-center">
                       <Turnstile
                         key={open ? 'open' : 'closed'}
@@ -351,7 +373,6 @@ Gracias.`
         )}
       </AnimatePresence>
 
-      {/* SUB-MODAL PRIVACIDAD */}
       <AnimatePresence>
         {open && privacidadOpen && (
           <motion.div
@@ -397,7 +418,7 @@ Gracias.`
                     <h3 className="font-bold text-[#0a1a3a] mb-2 text-sm sm:text-base">1. {isCa ? 'Responsable del tractament' : 'Responsable del tratamiento'}</h3>
                     <p className="mb-1"><strong>Renovactiva SL</strong></p>
                     <p className="mb-1">Email: <a href="mailto:info@renovactiva.com" className="text-[#d7bd77] hover:underline">info@renovactiva.com</a></p>
-                    <p>{isCa ? 'Telèfon' : 'Teléfono'}: <a href="tel:+34722454020" className="text-[#d7bd77] hover:underline">+34 722 454 020</a></p>
+                    <p>{isCa ? 'Telèfon' : 'Teléfono'}: <a href={`tel:+${whatsappNumber}`} className="text-[#d7bd77] hover:underline">+{whatsappNumber}</a></p>
                   </section>
                   <section>
                     <h3 className="font-bold text-[#0a1a3a] mb-2 text-sm sm:text-base">2. {isCa ? 'Finalitat del tractament' : 'Finalidad del tratamiento'}</h3>
