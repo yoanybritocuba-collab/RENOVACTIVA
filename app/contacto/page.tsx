@@ -22,7 +22,8 @@ export default function ContactoPage() {
   // Estado para los datos de la base de datos
   const [dbData, setDbData] = useState<any>({
     email: 'info@renovactiva.com',
-    phone: '+34 722 454 020',
+    phone: '+34 934 546 937',
+    whatsapp: '+34 676 783 708',
     address: 'Carrer del Padró, 34\n08291 Ripollet Barcelona',
     schedule: 'Lunes a Viernes\n8:00 - 13:00 y 15:00 - 18:00'
   })
@@ -47,7 +48,8 @@ export default function ContactoPage() {
     loadContactData()
   }, [])
 
-  const phoneStr = dbData.phone || '+34 722 454 020'
+  const phoneStr = dbData.phone || '+34 934 546 937'
+  const whatsappStr = dbData.whatsapp || '+34 676 783 708'
   const emailStr = dbData.email || 'info@renovactiva.com'
   const addressStr = dbData.address || 'Carrer del Padró, 34\n08291 Ripollet Barcelona'
   const scheduleStr = dbData.schedule || 'Lunes a Viernes\n8:00 - 13:00 y 15:00 - 18:00'
@@ -102,7 +104,7 @@ export default function ContactoPage() {
               </div>
               <div className="text-center">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-[#d7bd77] mb-2">WhatsApp</p>
-                <p className="font-serif text-lg text-white group-hover:text-[#25D366] transition-colors">{phoneStr}</p>
+                <p className="font-serif text-lg text-white group-hover:text-[#25D366] transition-colors">{whatsappStr}</p>
               </div>
               <span className="absolute top-4 right-4 text-[10px] uppercase tracking-[0.2em] text-white/20 group-hover:text-[#25D366]/60 transition-colors">02</span>
             </button>

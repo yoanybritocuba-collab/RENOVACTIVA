@@ -270,10 +270,10 @@ export default function AdminDashboard() {
   // ============================================================
   return (
     <main className="min-h-screen bg-[#11110f] text-[#f3f0e9]">
-      {/* RELOJ ARRIBA A LA DERECHA */}
+      {/* RELOJ CENTRADO ABAJO Y MÁS PEQUEÑO */}
       {timeLeft > 0 && (
-        <div className="fixed top-4 right-4 z-[90] flex items-center gap-2 bg-[#0A0A0A]/90 backdrop-blur-md border border-[#d7bd77]/40 px-4 py-2 rounded-xl shadow-lg">
-          <span className={`font-mono text-lg font-bold ${timeLeft <= 10 ? 'text-red-500' : 'text-[#d7bd77]'}`}>
+        <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-[90] flex items-center gap-1.5 bg-[#0A0A0A]/90 backdrop-blur-md border border-[#d7bd77]/30 px-2.5 py-1 rounded-lg shadow-md select-none pointer-events-none opacity-80">
+          <span className={`font-mono text-xs font-bold tracking-wider ${timeLeft <= 10 ? 'text-red-500 animate-pulse' : 'text-[#d7bd77]'}`}>
             {Math.floor(timeLeft / 60).toString().padStart(2, '0')}:{(timeLeft % 60).toString().padStart(2, '0')}
           </span>
         </div>

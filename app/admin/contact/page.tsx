@@ -18,7 +18,7 @@ export default function ContactPage() {
     id: '',
     content: {
       title: '', subtitle: '', buttonText: '',
-      email: '', phone: '', address: '', schedule: '',
+      email: '', phone: '', whatsapp: '', address: '', schedule: '',
       translations: { title: '', subtitle: '', buttonText: '' }
     }
   })
@@ -69,6 +69,7 @@ export default function ContactPage() {
         // Nos aseguramos de que estos campos viajen siempre, aunque estén vacíos
         email: data.content.email || '',
         phone: data.content.phone || '',
+        whatsapp: data.content.whatsapp || '',
         address: data.content.address || '',
         schedule: data.content.schedule || ''
       }
@@ -160,6 +161,11 @@ export default function ContactPage() {
             <div>
               <label className="block text-white/50 text-sm mb-1">Teléfono</label>
               <input type="text" value={data.content.phone || ''} onChange={(e) => updateField('phone', e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="+34 600 000 000" />
+            </div>
+            <div>
+              <label className="block text-white/50 text-sm mb-1">WhatsApp</label>
+              <input type="text" value={data.content.whatsapp || ''} onChange={(e) => updateField('whatsapp', e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#d7bd77] outline-none text-sm" placeholder="+34 600 000 000" />
             </div>
             <div>
