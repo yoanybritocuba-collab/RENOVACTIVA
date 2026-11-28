@@ -141,7 +141,8 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
           </nav>
 
           <div className="flex items-center gap-2 lg:gap-4 flex-shrink-0">
-            <LanguageSwitcher variant="light" />
+            {/* CORRECCIÓN AQUÍ: Cambiado variant="light" por variant="dark" para que las letras sean blancas */}
+            <LanguageSwitcher variant="dark" />
             <button
               aria-label="Abrir menú"
               onClick={() => setMenuOpen(true)}

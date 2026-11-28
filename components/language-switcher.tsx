@@ -3,8 +3,6 @@
 import { useLanguage } from '@/components/language-provider'
 
 type LanguageSwitcherProps = {
-  // 'dark'  = para fondos oscuros (letras blancas) — es el comportamiento de siempre
-  // 'light' = para fondos blancos (letras oscuras) — lo usa la cabecera blanca
   variant?: 'dark' | 'light'
 }
 
@@ -12,10 +10,10 @@ export function LanguageSwitcher({ variant = 'dark' }: LanguageSwitcherProps) {
   const { language, setLanguage } = useLanguage()
   const light = variant === 'light'
 
-  const borderClass = light ? 'border-black/20' : 'border-white/15'
+  const borderClass = light ? 'border-black/20' : 'border-white/20'
   const inactiveClass = light
     ? 'text-[#141310]/60 hover:text-[#141310]'
-    : 'text-white/55 hover:text-white'
+    : 'text-white hover:text-[#F5B041]' // <-- CAMBIO: Blanco puro para que se vea bien
 
   return (
     <div
@@ -27,7 +25,7 @@ export function LanguageSwitcher({ variant = 'dark' }: LanguageSwitcherProps) {
         onClick={() => setLanguage('es')}
         className={`px-2 py-1 transition-colors rounded ${
           language === 'es'
-            ? 'bg-[#d7bd77] text-[#141310]'
+            ? 'bg-[#F5B041] text-[#07132A]' // <-- CAMBIO: Usamos el nuevo amarillo y texto oscuro
             : inactiveClass
         }`}
       >
@@ -38,7 +36,7 @@ export function LanguageSwitcher({ variant = 'dark' }: LanguageSwitcherProps) {
         onClick={() => setLanguage('ca')}
         className={`px-2 py-1 transition-colors rounded ${
           language === 'ca'
-            ? 'bg-[#d7bd77] text-[#141310]'
+            ? 'bg-[#F5B041] text-[#07132A]' // <-- CAMBIO: Usamos el nuevo amarillo y texto oscuro
             : inactiveClass
         }`}
       >
