@@ -380,8 +380,9 @@ export default function Home() {
         {heroImages.map((image: string, index: number) => (
           <div key={index} className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${index === activeHero ? 'opacity-100' : 'opacity-0'}`} style={{ backgroundImage: `url(${image})`, backgroundPosition: 'center', backgroundSize: 'cover' }} />
         ))}
-        <motion.div className="absolute inset-0 bg-gradient-to-r from-[#01235A]/95 via-[#01235A]/65 to-transparent md:from-[#01235A]/95 md:via-[#01235A]/55 md:to-transparent z-[11]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2, delay: 0.3 }} />
-        <motion.div className="absolute inset-0 bg-gradient-to-t from-[#01235A]/25 via-transparent to-transparent md:from-[#01235A]/25 md:via-transparent md:to-transparent z-[12]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2, delay: 0.3 }} />
+        {/* CAMBIO AQUÍ: Se ha suavizado el degradado azul de la izquierda y se ha quitado la sombra inferior */}
+        <motion.div className="absolute inset-0 bg-gradient-to-r from-[#01235A]/40 via-transparent to-transparent z-[11]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2, delay: 0.3 }} />
+        <motion.div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-transparent z-[12]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2, delay: 0.3 }} />
         <div className="relative z-20 mx-auto w-full max-w-[1380px] px-6 pb-12 pt-24 lg:px-10 lg:pb-28 lg:pt-40">
           <div className="max-w-3xl">
             <motion.div className="mb-7 flex items-center gap-4" initial={{ opacity: 0, x: -600 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}>
