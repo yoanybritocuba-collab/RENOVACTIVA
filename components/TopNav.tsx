@@ -21,7 +21,7 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [navVisible, setNavVisible] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
-  
+
   // Estado local para el modal (para que funcione en todas las páginas)
   const [localModalOpen, setLocalModalOpen] = useState(false)
 
@@ -97,10 +97,10 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
     }
   }
 
-  const navLinkClass = 'relative inline-flex items-center px-3 py-2 text-[#141310]/75 hover:text-[#ad742a] transition-colors'
-  const menuBtnClass = 'text-[#141310]/80 hover:text-[#141310]'
+  const navLinkClass = 'relative inline-flex items-center px-3 py-2 text-white/75 hover:text-[#F7B300] transition-colors'
+  const menuBtnClass = 'text-white/80 hover:text-white'
   const panelBg = 'bg-white border-black/10'
-  const panelLinkClass = 'block w-full text-left px-6 py-4 text-[#141310]/80 hover:bg-[#d7bd77]/10 hover:text-[#ad742a] transition-colors text-sm uppercase tracking-[0.18em] border-b border-black/5'
+  const panelLinkClass = 'block w-full text-left px-6 py-4 text-[#01235A]/80 hover:bg-[#F7B300]/10 hover:text-[#F7B300] transition-colors text-sm uppercase tracking-[0.18em] border-b border-black/5'
 
   return (
     <>
@@ -108,13 +108,13 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
         className={`fixed inset-x-0 top-0 z-50 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           navVisible ? 'translate-y-0' : '-translate-y-full'
         }`}
-        style={{ background: '#FFFFFF' }}
+        style={{ background: '#01235A', boxShadow: '0 2px 10px rgba(1, 35, 90, 0.12)' }}
       >
         <div className="mx-auto flex max-w-[1380px] items-center justify-between px-4 py-3 lg:px-10 lg:py-4">
           <Link href="/" className="ml-2 lg:-ml-28 flex items-center gap-3 flex-shrink-0">
             <img src="/logo.png" alt="Renovactiva" className="h-10 w-auto lg:h-14" />
-            <span className="font-serif text-sm uppercase tracking-[0.18em] text-[#ad742a] sm:text-base lg:text-xl lg:tracking-[0.28em] whitespace-nowrap">
-              RENOVACTIVA<span className="text-[#042133]"> SL</span>
+            <span className="font-serif text-sm uppercase tracking-[0.18em] text-[#F7B300] sm:text-base lg:text-xl lg:tracking-[0.28em] whitespace-nowrap">
+              RENOVACTIVA<span className="text-white"> SL</span>
             </span>
           </Link>
 
@@ -134,7 +134,7 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
             <button
               type="button"
               onClick={handleContactModal}
-              className="ml-2 inline-flex items-center gap-2 rounded-lg bg-[#d7bd77] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white transition-all duration-300 hover:bg-[#042133] hover:scale-105 cursor-pointer"
+              className="ml-2 inline-flex items-center gap-2 rounded-lg bg-[#F7B300] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white transition-all duration-300 hover:bg-[#F7B300] hover:scale-105 cursor-pointer"
             >
               {ca ? 'SOL·LICITAR PRESSUPOST' : 'SOLICITAR PRESUPUESTO'}
             </button>
@@ -164,11 +164,11 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
             className={`fixed top-0 right-0 z-[101] h-full w-[280px] ${panelBg} border-l shadow-2xl lg:hidden flex flex-col animate-in slide-in-from-right duration-300`}
           >
             <div className="flex items-center justify-between px-6 py-5 border-b border-black/10">
-              <span className="font-serif text-lg tracking-[0.2em] text-[#ad742a]">MENÚ</span>
+              <span className="font-serif text-lg tracking-[0.2em] text-[#F7B300]">MENÚ</span>
               <button
                 aria-label="Cerrar menú"
                 onClick={() => setMenuOpen(false)}
-                className={`p-2 ${menuBtnClass}`}
+                className={`p-2 text-[#01235A]/80 hover:text-[#01235A]`}
               >
                 <X className="h-6 w-6" />
               </button>
@@ -192,7 +192,7 @@ export function TopNav({ variant = 'dark', onOpenContactModal }: TopNavProps) {
                 <button
                   type="button"
                   onClick={handleContactModal}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[#d7bd77] px-4 py-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-white transition-all duration-300 hover:bg-[#042133] cursor-pointer"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[#F7B300] px-4 py-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-white transition-all duration-300 hover:bg-[#F7B300] cursor-pointer"
                 >
                   {ca ? 'SOL·LICITAR PRESSUPOST' : 'SOLICITAR PRESUPUESTO'}
                 </button>

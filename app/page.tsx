@@ -380,13 +380,13 @@ export default function Home() {
         {heroImages.map((image: string, index: number) => (
           <div key={index} className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${index === activeHero ? 'opacity-100' : 'opacity-0'}`} style={{ backgroundImage: `url(${image})`, backgroundPosition: 'center', backgroundSize: 'cover' }} />
         ))}
-        <motion.div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/10 to-transparent md:from-black/40 md:via-black/15 md:to-transparent z-[11]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2, delay: 0.3 }} />
-        <motion.div className="absolute inset-0 bg-gradient-to-t from-[#080808]/35 via-transparent to-transparent md:from-[#080808]/50 md:via-transparent md:to-black/5 z-[12]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2, delay: 0.3 }} />
+        <motion.div className="absolute inset-0 bg-gradient-to-r from-[#01235A]/95 via-[#01235A]/65 to-transparent md:from-[#01235A]/95 md:via-[#01235A]/55 md:to-transparent z-[11]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2, delay: 0.3 }} />
+        <motion.div className="absolute inset-0 bg-gradient-to-t from-[#01235A]/25 via-transparent to-transparent md:from-[#01235A]/25 md:via-transparent md:to-transparent z-[12]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2, delay: 0.3 }} />
         <div className="relative z-20 mx-auto w-full max-w-[1380px] px-6 pb-12 pt-24 lg:px-10 lg:pb-28 lg:pt-40">
           <div className="max-w-3xl">
             <motion.div className="mb-7 flex items-center gap-4" initial={{ opacity: 0, x: -600 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}>
-              <motion.span className="block h-px bg-[#10B77F]" initial={{ width: 0 }} animate={{ width: 40 }} transition={{ duration: 1.2, delay: 1.6, ease: [0.22, 1, 0.36, 1] }} />
-              <p className="text-[11px] uppercase tracking-[0.42em] text-[#d7bd77] text-hero-eyebrow" style={{ textTransform: 'uppercase' }}>
+              <motion.span className="block h-px bg-[#F7B300]" initial={{ width: 0 }} animate={{ width: 40 }} transition={{ duration: 1.2, delay: 1.6, ease: [0.22, 1, 0.36, 1] }} />
+              <p className="text-[11px] uppercase tracking-[0.42em] text-[#F7B300] text-hero-eyebrow" style={{ textTransform: 'uppercase' }}>
                 {ca ? (heroTrans.eyebrow || heroData?.eyebrow || 'Arquitectura · Interiorisme · Construcció') : (heroData?.eyebrow || 'Arquitectura · Interiorismo · Construcción')}
               </p>
             </motion.div>
@@ -399,18 +399,18 @@ export default function Home() {
                 </span>
               ))}
             </h1>
-            <motion.p className="mt-8 max-w-md text-base leading-relaxed text-[#d7bd77] text-hero-description" initial={{ opacity: 0, x: 600 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.6, delay: 2.2, ease: [0.16, 1, 0.3, 1] }}>
+            <motion.p className="mt-8 max-w-md text-base leading-relaxed text-white text-hero-description" initial={{ opacity: 0, x: 600 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.6, delay: 2.2, ease: [0.16, 1, 0.3, 1] }}>
               {ca ? (heroTrans.description || heroData?.description || "Reformes d'alt nivell per a habitatges, locals i oficines.") : (heroData?.description || 'Reformas de alto nivel para viviendas, locales y oficinas.')}
             </motion.p>
             <div className="mt-10 flex flex-wrap items-center gap-5">
               <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 3.2, ease: [0.22, 1, 0.36, 1] }}>
-                <motion.button type="button" onClick={() => scrollToSection('contacto')} className="group relative inline-flex items-center gap-5 bg-[#d7bd77] px-6 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-[#141310] overflow-hidden cursor-pointer" whileHover={{ scale: 1.03 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}>
-                  <span className="absolute inset-0 bg-[#10B77F] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]" />
+                <motion.button type="button" onClick={() => scrollToSection('contacto')} className="group relative inline-flex items-center gap-5 bg-[#F7B300] px-6 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-[#01235A] overflow-hidden cursor-pointer" whileHover={{ scale: 1.03 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}>
+                  <span className="absolute inset-0 bg-[#F7B300] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]" />
                   <span className="relative z-10">{ca ? (heroTrans.cta || heroData?.cta || 'Parlem del teu projecte') : (heroData?.cta || 'Hablemos de tu proyecto')}</span>
                   <ArrowUpRight className="relative z-10 size-4 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1" />
                 </motion.button>
               </motion.div>
-              <motion.button type="button" onClick={() => scrollToSection('proyectos')} className="group inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/95 hover:text-[#10B77F] transition-colors text-hero-eyebrow cursor-pointer" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 3.5, ease: [0.22, 1, 0.36, 1] }}>
+              <motion.button type="button" onClick={() => scrollToSection('proyectos')} className="group inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/95 hover:text-[#F7B300] transition-colors text-hero-eyebrow cursor-pointer" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 3.5, ease: [0.22, 1, 0.36, 1] }}>
                 <Play className="size-4 fill-current transition-transform duration-300 group-hover:scale-110" /> 
                 {ca ? 'Veure projectes' : 'Ver proyectos'}
               </motion.button>
@@ -418,7 +418,7 @@ export default function Home() {
             <motion.div className="mt-16 hidden lg:flex flex-col items-start gap-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 4.0 }}>
               <span className="text-[10px] uppercase tracking-[0.3em] text-white/70 text-hero-eyebrow">{ca ? 'Descobreix' : 'Descubre'}</span>
               <div className="relative h-12 w-px bg-white/20 overflow-hidden">
-                <motion.div className="absolute top-0 left-0 w-full h-1/2 bg-[#10B77F]" animate={{ y: ['-100%', '200%'] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }} />
+                <motion.div className="absolute top-0 left-0 w-full h-1/2 bg-[#F7B300]" animate={{ y: ['-100%', '200%'] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }} />
               </div>
             </motion.div>
           </div>
@@ -813,47 +813,47 @@ export default function Home() {
       </section>
 
       {/* 10. FOOTER */}
-      <footer className="relative bg-white px-6 py-14 lg:px-10">
-        <motion.div className="absolute top-0 left-0 h-px bg-gradient-to-r from-[#10B77F] via-[#10B77F]/40 to-transparent" initial={{ width: 0 }} whileInView={{ width: '100%' }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }} />
+      <footer className="relative bg-[#01235A] px-6 py-14 lg:px-10">
+        <motion.div className="absolute top-0 left-0 h-px bg-gradient-to-r from-[#F7B300] via-[#F7B300]/40 to-transparent" initial={{ width: 0 }} whileInView={{ width: '100%' }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }} />
         <div className="mx-auto max-w-[1380px]">
-          <div className="flex flex-col justify-between gap-10 border-b border-black/10 pb-12 md:flex-row">
+          <div className="flex flex-col justify-between gap-10 border-b border-white/20 pb-12 md:flex-row">
             <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}>
               <Link href="/" className="flex items-center gap-3 group">
                 <img src="/logo.png" alt="Renovactiva" className="h-12 w-auto transition-transform duration-500 group-hover:scale-105" />
-                <span className="font-serif text-xl uppercase tracking-[0.28em] text-[#ad742a] transition-colors duration-500 group-hover:text-[#10B77F]" style={{ textTransform: 'uppercase' }}>
-                  RENOVACTIVA<span className="text-[#042133]"> SL</span>
+                <span className="font-serif text-xl uppercase tracking-[0.28em] text-[#F7B300] transition-colors duration-500 group-hover:text-[#F7B300]" style={{ textTransform: 'uppercase' }}>
+                  RENOVACTIVA<span className="text-[#FFFFFF]"> SL</span>
                 </span>
               </Link>
-              <p className="mt-5 max-w-xs text-sm leading-relaxed text-black/60">
+              <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/75">
                 {ca ? (footerTrans.description || footerData?.description || 'Dissenyem i construïm espais amb intenció.') : (footerData?.description || 'Diseñamos y construimos espacios con intención.')}
               </p>
             </motion.div>
             <motion.div className="grid grid-cols-2 gap-x-8 gap-y-8 text-sm" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}>
               <div className="min-w-0">
-                <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-[#ad742a] font-semibold">{ca ? 'Contacte' : 'Contacto'}</p>
+                <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-[#F7B300] font-semibold">{ca ? 'Contacte' : 'Contacto'}</p>
                 {/* CORREGIDO: Ahora lee del contactData en lugar del footerData */}
-                <a href={`tel:${(contactData?.phone || '+34934546937').replace(/\s/g, '')}`} className="group flex items-center gap-2 mb-3 text-black/70 hover:text-[#ad742a] transition-colors break-words">
-                  <Phone className="size-4 flex-shrink-0 text-[#ad742a] group-hover:text-[#10B77F] transition-colors" />
+                <a href={`tel:${(contactData?.phone || '+34934546937').replace(/\s/g, '')}`} className="group flex items-center gap-2 mb-3 text-white/85 hover:text-[#F7B300] transition-colors break-words">
+                  <Phone className="size-4 flex-shrink-0 text-[#F7B300] group-hover:text-[#F7B300] transition-colors" />
                   <span className="text-sm break-all">{contactData?.phone || '+34 934 546 937'}</span>
                 </a>
-                <button type="button" onClick={() => setContactModalOpen(true)} className="group flex items-center gap-2 mb-3 text-black/70 hover:text-[#ad742a] transition-colors w-full text-left cursor-pointer break-words">
-                  <Mail className="size-4 flex-shrink-0 text-[#ad742a] group-hover:text-[#10B77F] transition-colors" />
+                <button type="button" onClick={() => setContactModalOpen(true)} className="group flex items-center gap-2 mb-3 text-white/85 hover:text-[#F7B300] transition-colors w-full text-left cursor-pointer break-words">
+                  <Mail className="size-4 flex-shrink-0 text-[#F7B300] group-hover:text-[#F7B300] transition-colors" />
                   <span className="text-sm break-all">{contactData?.email || 'info@renovactiva.com'}</span>
                 </button>
                 {/* CORREGIDO: Ahora lee del contactData en lugar del footerData */}
-                <button type="button" onClick={() => setWhatsAppModalOpen(true)} className="group flex items-center gap-2 text-black/70 hover:text-[#ad742a] transition-colors w-full text-left cursor-pointer break-words">
-                  <svg viewBox="0 0 24 24" className="size-4 flex-shrink-0 fill-[#ad742a] group-hover:fill-[#10B77F] transition-colors">
+                <button type="button" onClick={() => setWhatsAppModalOpen(true)} className="group flex items-center gap-2 text-white/85 hover:text-[#F7B300] transition-colors w-full text-left cursor-pointer break-words">
+                  <svg viewBox="0 0 24 24" className="size-4 flex-shrink-0 fill-[#F7B300] group-hover:fill-[#F7B300] transition-colors">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
                   </svg>
                   <span className="text-sm break-all">{contactData?.whatsapp || '+34 676 783 708'}</span>
                 </button>
               </div>
               <div className="min-w-0">
-                <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-[#ad742a] font-semibold">{ca ? "Visita'ns" : 'Visítanos'}</p>
-                <p className="text-black/70 text-sm">{ca ? (footerTrans.address?.street || footerData?.address?.street || 'Carrer Exemple 123') : (footerData?.address?.street || 'Carrer Exemple 123')}</p>
-                <p className="text-black/70 text-sm">{footerData?.address?.postal || '08001'}{' '}{ca ? (footerTrans.address?.city || footerData?.address?.city || 'Barcelona') : (footerData?.address?.city || 'Barcelona')}</p>
+                <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-[#F7B300] font-semibold">{ca ? "Visita'ns" : 'Visítanos'}</p>
+                <p className="text-white/85 text-sm">{ca ? (footerTrans.address?.street || footerData?.address?.street || 'Carrer Exemple 123') : (footerData?.address?.street || 'Carrer Exemple 123')}</p>
+                <p className="text-white/85 text-sm">{footerData?.address?.postal || '08001'}{' '}{ca ? (footerTrans.address?.city || footerData?.address?.city || 'Barcelona') : (footerData?.address?.city || 'Barcelona')}</p>
                 {footerData?.schedule && (
-                  <p className="mt-3 flex items-start gap-2 text-black/70 text-sm">
+                  <p className="mt-3 flex items-start gap-2 text-white/85 text-sm">
                     <span className="flex-shrink-0">🕒</span>
                     <span>{ca ? (footerTrans.schedule || footerData.schedule) : footerData.schedule}</span>
                   </p>
@@ -861,13 +861,13 @@ export default function Home() {
               </div>
             </motion.div>
           </div>
-          <motion.div className="hidden sm:flex flex-row justify-between gap-5 pt-7 text-[10px] uppercase tracking-[0.18em] text-black/50" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
+          <motion.div className="hidden sm:flex flex-row justify-between gap-5 pt-7 text-[10px] uppercase tracking-[0.18em] text-white/60" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
             <p>{ca ? (footerTrans.copyright || footerData?.copyright || '© 2025 Renovactiva SL. Tots els drets reservats.') : (footerData?.copyright || '© 2025 Renovactiva SL. Todos los derechos reservados.')}</p>
             <div className="flex gap-5">
-              {footerData?.social?.instagram && (<a href={footerData.social.instagram} target="_blank" rel="noopener noreferrer" className="text-black/50 hover:text-[#ad742a] transition-colors">Instagram</a>)}
-              {footerData?.social?.linkedin && (<a href={footerData.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-black/50 hover:text-[#ad742a] transition-colors">LinkedIn</a>)}
-              {footerData?.social?.youtube && (<a href={footerData.social.youtube} target="_blank" rel="noopener noreferrer" className="text-black/50 hover:text-[#ad742a] transition-colors">YouTube</a>)}
-              {footerData?.social?.facebook && (<a href={footerData.social.facebook} target="_blank" rel="noopener noreferrer" className="text-black/50 hover:text-[#ad742a] transition-colors">Facebook</a>)}
+              {footerData?.social?.instagram && (<a href={footerData.social.instagram} target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-[#F7B300] transition-colors">Instagram</a>)}
+              {footerData?.social?.linkedin && (<a href={footerData.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-[#F7B300] transition-colors">LinkedIn</a>)}
+              {footerData?.social?.youtube && (<a href={footerData.social.youtube} target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-[#F7B300] transition-colors">YouTube</a>)}
+              {footerData?.social?.facebook && (<a href={footerData.social.facebook} target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-[#F7B300] transition-colors">Facebook</a>)}
             </div>
           </motion.div>
           
@@ -886,7 +886,7 @@ export default function Home() {
                   }
                 }}
               >
-                <Shield className={`size-4 transition-colors duration-300 ${adminTaps >= 3 ? 'text-[#ad742a]' : 'text-black/20 group-hover:text-[#ad742a]'}`} />
+                <Shield className={`size-4 transition-colors duration-300 ${adminTaps >= 3 ? 'text-[#F7B300]' : 'text-white/35 group-hover:text-[#F7B300]'}`} />
               </Link>
             </div>
           </div>
